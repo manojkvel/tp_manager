@@ -1,0 +1,52 @@
+{
+  "pipeline": "architect/design-to-plan",
+  "input": ".sdlc/product-owner/feature-intake/spec.md (v1.5, APPROVED)",
+  "started_at": "2026-04-17T22:00:00Z",
+  "updated_at": "2026-04-17T22:30:00Z",
+  "gate_profile": "standard",
+  "status": "completed",
+  "total_steps": 4,
+  "completed_steps": 4,
+  "next_pipeline": "developer/feature-build",
+  "steps": {
+    "review-design": {
+      "status": "completed",
+      "skill": "design-review",
+      "started_at": "2026-04-17T22:00:00Z",
+      "completed_at": "2026-04-17T22:10:00Z",
+      "output": ".sdlc/architect/design-to-plan/design-review.md",
+      "findings": { "high": 2, "medium": 5, "low": 3 }
+    },
+    "generate-plan": {
+      "status": "completed",
+      "skill": "plan-gen",
+      "started_at": "2026-04-17T22:10:00Z",
+      "completed_at": "2026-04-17T22:20:00Z",
+      "output": ".sdlc/architect/design-to-plan/plan.md",
+      "phases": 7,
+      "waves": 10,
+      "estimated_weeks": "15 critical + 3 buffer = 18"
+    },
+    "validate-plan": {
+      "status": "completed",
+      "skill": "quality-gate",
+      "started_at": "2026-04-17T22:20:00Z",
+      "completed_at": "2026-04-17T22:22:00Z",
+      "output": ".sdlc/architect/design-to-plan/gate-plan-to-tasks.md",
+      "gate_result": "pass",
+      "criteria_passed": 3,
+      "criteria_failed": 0,
+      "advisory_count": 5
+    },
+    "log-decisions": {
+      "status": "completed",
+      "skill": "decision-log",
+      "started_at": "2026-04-17T22:22:00Z",
+      "completed_at": "2026-04-17T22:30:00Z",
+      "output": ".sdlc/architect/design-to-plan/decision-log.md",
+      "decisions": 15,
+      "deviations": { "minor": 5, "notable": 2, "significant": 0 },
+      "fragile_assumptions": 3
+    }
+  }
+}
