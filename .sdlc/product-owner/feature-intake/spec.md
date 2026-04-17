@@ -1,8 +1,9 @@
 # Spec — Restaurant Operations Platform ("TP Manager")
 
-**Status:** **APPROVED v1.5** (all open questions resolved; HITL gate closed 2026-04-17; ready for `/plan-gen`)
+**Status:** **APPROVED v1.6** (scope trimmed: EN-only; deployment unit = Docker container; HITL gate reopened + reclosed 2026-04-17)
 **Date:** 2026-04-17
 **Change log:**
+- **v1.6** — Owner trimmed scope at architect pipeline. **(a)** Bilingual EN/ES **removed** — English only for MVP. Deletes module #14; §6.3 AC-3, §6.3a and §6.3b ES references, §7 i18n NFR, §8 `_es` fields and `User.language`, §11 bilingual row, §13 drift risk, §15 DoD item #3 all simplified. **(b)** Deployment unit formalized as **Docker containers** — every service ships a `Dockerfile`, local dev uses `docker-compose`, production is Container Apps (or equivalent Docker-image runtime). Module count 22 → 21. Effort reduction: ~1 eng-week saved (removed ES translation ops + bilingual drift tests + `_es` schema column maintenance).
 - **v1.5** — Owner APPROVED at HITL gate. OQ-5 resolved (HACCP deferred to Phase 2 — restaurant is in Pennsylvania, no state mandate). All 7 open questions now resolved. Spec frozen for handoff to `architect/design-to-plan`.
 - **v1.4** — Owner supplied a sample Aloha PMIX (Product Mix) report (`myReport (10).xlsx`) — 7-day per-day per-item qty/sales with modifier + 86 (out-of-stock) rows. §6.12a Aloha AC updated with concrete column schema. Modifier handling and 86-count added to the data model. OQ-1 resolved (single restaurant — Turning Point of Collegeville, Aloha store ID 1002). OQ-6 resolved (on-demand PDF for flash cards). OQ-7 resolved (full automated import with a human review step). §6.14 added (migration tool).
 - **v1.3** — Ingested 5 additional source files: `Lunch Station Cheat Sheet`, `Expo Station Cheat Sheet`, `Slicing & Portioning Chart`, `Portion Control Utensils`, `Egg Amount Cheat Sheet`. Introduces **utensil-based portioning** (scoops/ladles/portion bags as named UoMs), **station cheat-sheet views** (station-grouped plating presentation), and **pre-portioning** (raw → portion bag) as first-class concepts. Data model and recipe ACs updated.
@@ -12,7 +13,7 @@
 **Owner:** Product (pending approval)
 **Reference prototype:** https://recipe-radar-assist.lovable.app ("Inventory Guardian")
 **Source materials ingested:**
-- `TP Recipe Book.xlsx` — 80+ bilingual (EN/ES) prep recipes with shelf life, equipment, procedures
+- `TP Recipe Book.xlsx` — 80+ prep recipes with shelf life, equipment, procedures (source is bilingual EN/ES; only the English body is ingested in v1.6)
 - `Prep and Ingredients Shelf Life.xlsx` — Canonical shelf-life matrix (~90 items across meats, vegetables, cheeses, dressings/sauces/mixes, batters, misc)
 - `Menu Flash Cards (1).pptx` — 99 menu-item plating/build cards
 - `Beverage Recipes.docx` — 200+ hot/cold/blender beverage recipes
@@ -48,7 +49,7 @@ A single-unit cafe/restaurant owner today coordinates operations across six disc
 |---|---|---|---|
 | **Owner / GM** | The person paying for the product | Phone + desktop | Cost visibility, ordering, supplier mgmt, decisions |
 | **Kitchen Lead / Sous** | Runs prep list each AM | Tablet on the line | Generate daily prep sheet, mark complete, log waste |
-| **Line / Prep Cook** | Executes recipes | Phone (shared tablet) | View recipe (EN or ES), check shelf-life, log waste |
+| **Line / Prep Cook** | Executes recipes | Phone (shared tablet) | View recipe, check shelf-life, log waste |
 | **Barista** | Runs bar station | Phone (shared tablet) | Par list, stocking list, beverage recipes |
 | **Receiving** | Checks in deliveries | Phone at loading dock | Log delivery vs PO, flag variances |
 
@@ -64,7 +65,7 @@ The MVP is scoped to match — and unify — what the Lovable prototype outlines
 2. **Suppliers** (`/suppliers`, `/suppliers/:id`) — supplier directory with which ingredients each supplies, contact info, lead time, order cadence.
 3. **Supplier → Ingredient mapping** — many-to-many: an ingredient can have multiple suppliers with ranked preference; a supplier carries many ingredients.
 4. **Recipes — two types**:
-   - **Prep recipes** (`/prep/items`) — intermediate items that are themselves "ingredients" for menu recipes (e.g., Salsa, Cranberry Chicken Salad, Caramelized Onions). Each has yield, shelf life, equipment, procedure, **bilingual EN/ES**.
+   - **Prep recipes** (`/prep/items`) — intermediate items that are themselves "ingredients" for menu recipes (e.g., Salsa, Cranberry Chicken Salad, Caramelized Onions). Each has yield, shelf life, equipment, procedure.
    - **Menu recipes** — items served to the guest (Avocado Toast, Tropical Bliss Smoothie, Salted Caramel Mocha-chino). Reference ingredients **and** prep recipes (nested bill-of-materials).
 5. **Daily Prep Sheet** (`/prep/sheet`) — generated each morning based on par levels + on-hand; each prep item has status `pending | in progress | complete | skipped` with timestamp and initials.
 6. **Inventory Count** (`/inventory`) — periodic (weekly) count screen by location; computes on-hand value.
@@ -73,17 +74,16 @@ The MVP is scoped to match — and unify — what the Lovable prototype outlines
 9. **Waste Log** (`/prep/waste`, `/reports/waste`) — log reason, quantity, ingredient/prep item, $ value. Reasons standardised (expired, spoilage, overprep, burn/error, customer return).
 10. **Reports** — AvT Variance (`/reports/variance`), Price Creep (`/reports/price-creep`), Waste trend (`/reports/waste`).
 11. **Dashboard** (`/`) — total inventory value, items tracked, variance alerts, today's prep progress, this-week waste trend.
-12. **Settings** (`/settings`) — locations, units, taxonomies, users, language default.
+12. **Settings** (`/settings`) — locations, units, taxonomies, users.
 13. **Auth + RBAC** — owner, manager, staff roles. Email+password, password reset.
-14. **Bilingual UI (EN + ES)** — the existing TP Recipe Book is already bilingual; recipe bodies must render in the user's chosen language, falling back to EN.
-15. **Data migration from the 6 source files** — one-time import tool for recipes, ingredients, shelf life, prep items. Explicit deliverable, not a support-ticket afterthought.
-16. **PWA** — installable to home screen on iOS/Android, offline-capable for read paths (view a recipe, view shelf life, view prep sheet).
-17. **Aloha POS integration (one-way read)** — scheduled nightly import of daily item-level sales from NCR Aloha into the system; maps Aloha menu items to TP Manager menu recipes so theoretical ingredient usage and AvT variance are computable from real sales (not manual entry).
-18. **ML baseline forecasting** — waste forecast per prep item and ingredient demand forecast per supplier lead-time window, trained off the owner's 1 year of historical POS + (as it accumulates) waste data. MVP model is intentionally simple (seasonal-naïve + exponential smoothing baseline); more sophisticated models are Phase 2. Recommendations are **advisory and dismissable** — they must not block operational workflows.
-19. **Data transform layer (one-time + ongoing)** — deterministic, idempotent ETL that normalises (a) the 11 operational source files and (b) the Aloha daily exports into the canonical entities in §8. Explicit module, not a support activity.
-20. **Portion utensils** — first-class catalogue of named portioning utensils (colour-coded scoops, baseball-cap scoops, ladles, portion bags) with physical equivalents (e.g., "Blue Scoop" = 2 oz volume). Recipe lines reference ingredients *via* a utensil when the kitchen does ("2 Blue Scoops Avocado Chunk" is the canonical instruction — the system converts this to oz/g for cost and inventory arithmetic).
-21. **Pre-portioning (portion bags)** — raw-ingredient pre-portioning step: e.g., "Pork Roll → 3×1oz slices per portion bag". A pre-portioning operation consumes a raw ingredient (lbs of pork roll) and yields N countable portion units (bags), each with a fixed content. Modelled as a prep recipe with yield = N portion bags. Line cooks pick portion bags, not raw lbs.
-22. **Station cheat-sheet views** — printable / screen views of menu recipes grouped by kitchen station (Lunch, Egg, Expo, Barista) with utensil-specific plating steps. This is a view, not a new data model — the underlying data is menu-recipe line items plus station tag + utensil reference.
+14. **Data migration from the 11 source files** — one-time import tool for recipes, ingredients, shelf life, prep items, station sheets, portion utensils. Explicit deliverable, not a support-ticket afterthought.
+15. **PWA** — installable to home screen on iOS/Android, offline-capable for read paths (view a recipe, view shelf life, view prep sheet).
+16. **Aloha POS integration (one-way read)** — scheduled nightly import of daily item-level sales from NCR Aloha into the system; maps Aloha menu items to TP Manager menu recipes so theoretical ingredient usage and AvT variance are computable from real sales (not manual entry).
+17. **ML baseline forecasting** — waste forecast per prep item and ingredient demand forecast per supplier lead-time window, trained off the owner's 1 year of historical POS + (as it accumulates) waste data. MVP model is intentionally simple (seasonal-naïve + exponential smoothing baseline); more sophisticated models are Phase 2. Recommendations are **advisory and dismissable** — they must not block operational workflows.
+18. **Data transform layer (one-time + ongoing)** — deterministic, idempotent ETL that normalises (a) the 11 operational source files and (b) the Aloha daily exports into the canonical entities in §8. Explicit module, not a support activity.
+19. **Portion utensils** — first-class catalogue of named portioning utensils (colour-coded scoops, baseball-cap scoops, ladles, portion bags) with physical equivalents (e.g., "Blue Scoop" = 2 oz volume). Recipe lines reference ingredients *via* a utensil when the kitchen does ("2 Blue Scoops Avocado Chunk" is the canonical instruction — the system converts this to oz/g for cost and inventory arithmetic).
+20. **Pre-portioning (portion bags)** — raw-ingredient pre-portioning step: e.g., "Pork Roll → 3×1oz slices per portion bag". A pre-portioning operation consumes a raw ingredient (lbs of pork roll) and yields N countable portion units (bags), each with a fixed content. Modelled as a prep recipe with yield = N portion bags. Line cooks pick portion bags, not raw lbs.
+21. **Station cheat-sheet views** — printable / screen views of menu recipes grouped by kitchen station (Lunch, Egg, Expo, Barista) with utensil-specific plating steps. This is a view, not a new data model — the underlying data is menu-recipe line items plus station tag + utensil reference.
 
 ### 4.2 Out of scope (MVP) — deferred to later phases
 
@@ -114,8 +114,8 @@ The MVP is scoped to match — and unify — what the Lovable prototype outlines
 - As receiving, I want to search ingredients quickly so I can verify a delivery line.
 
 **Acceptance criteria**
-1. List view supports search by name (EN or ES), filter by storage location, filter by supplier.
-2. Create/edit ingredient with: name (EN), name (ES, optional), UOM (weight / volume / each), pack size, current unit cost, storage location, default supplier, shelf-life (days), allergen flags.
+1. List view supports search by name, filter by storage location, filter by supplier.
+2. Create/edit ingredient with: name, UOM (weight / volume / each), pack size, current unit cost, storage location, default supplier, shelf-life (days), allergen flags.
 3. Cost history preserved — each cost change stamps `effective_from` so Price Creep report can be computed.
 4. Ingredients cannot be hard-deleted if referenced by a recipe; must be soft-archived with migration of references.
 5. CSV import/export (matches prototype "Export ingredients CSV").
@@ -145,14 +145,14 @@ The MVP is scoped to match — and unify — what the Lovable prototype outlines
 ### 6.3 Recipes (Prep + Menu)
 
 **User stories**
-- As a cook, I want to open a prep recipe on a tablet and see ingredients, shelf life, equipment, and procedure in my language.
+- As a cook, I want to open a prep recipe on a tablet and see ingredients, shelf life, equipment, and procedure.
 - As a GM, I want to change the mayo brand once and have every recipe's cost update.
 - As an owner, I want to see the plated cost of every menu item updated as ingredient costs change.
 
 **Acceptance criteria**
 1. Two recipe subtypes with shared schema: **Prep** (yields an internal "prep item") and **Menu** (yields a dish served).
 2. Each recipe references line items; a line item is either (a) an ingredient or (b) another prep recipe — nested BOM supported to arbitrary depth but with cycle detection.
-3. Recipe fields: name (EN), name (ES), yield (qty + UOM), shelf-life days, equipment list (EN + ES), procedure (EN + ES rich-text), photo (optional).
+3. Recipe fields: name, yield (qty + UOM), shelf-life days, equipment list, procedure (rich-text), photo (optional).
 4. Plated cost computed live from the nested BOM and current ingredient costs; shows per-serving cost and per-batch cost.
 5. Version history preserved — editing a recipe creates a new version; past cost computations pin to the version that was active at the time.
 6. Flash-card view — printable / slide-style layout that matches the current PPT flash cards (description, components, plating, vessel/container).
@@ -289,7 +289,6 @@ All reports exportable as CSV; default window 4 weeks, user-adjustable.
 - Kitchen stations list (lunch, breakfast, expo, egg, bar, bakery — editable).
 - Waste reasons list.
 - Users + roles (owner, manager, staff).
-- Default UI language (EN / ES).
 - Par levels by day of week (per prep item).
 - Shelf-life default days (per ingredient category).
 
@@ -366,7 +365,7 @@ All reports exportable as CSV; default window 4 weeks, user-adjustable.
 1. **Staging schema.** Imports land in a `staging.*` schema (mirrors §8 entities with `staging_` prefix) — never directly into canonical tables. Staging rows carry `source_file`, `source_row_ref`, and `batch_id`.
 2. **Deterministic + idempotent.** Re-running the import on the same source file with the same `batch_id` produces the same staging rows; previous staging rows for that batch are archived, not merged.
 3. **Per-file parsers** (extensible, one parser per source type):
-   - `recipe_book_parser` — `TP Recipe Book.xlsx` → staging recipes + lines + EN/ES bodies.
+   - `recipe_book_parser` — `TP Recipe Book.xlsx` → staging recipes + lines (English body only; ES column ignored in v1.6).
    - `shelf_life_parser` — `Prep and Ingredients Shelf Life.xlsx` → staging ingredients + shelf-life days.
    - `flash_card_parser` — `Menu Flash Cards.pptx` + `Beverage Flash Cards.pptx` → staging menu recipes + plating text.
    - `beverage_recipes_parser` — `Beverage Recipes.docx` → staging beverage recipes.
@@ -403,7 +402,6 @@ All reports exportable as CSV; default window 4 weeks, user-adjustable.
 | Data durability | Daily backup; point-in-time recovery ≤ 24 h loss |
 | Browser support | Latest-2 Chrome, Safari, Firefox, Edge. iOS Safari 16+, Android Chrome 110+ |
 | Accessibility | WCAG 2.1 AA for the MVP screens |
-| Internationalisation | i18n library from day 1, EN + ES; structure supports adding FR (Canadian market) in Phase 2 |
 | Security | OWASP Top 10 addressed; parameterised queries enforced; secrets via env only; HTTPS-only |
 | API | RESTful, versioned (`/api/v1`), OpenAPI spec generated; designed so native iOS/Android can consume without change |
 | Observability | Structured JSON logs; error tracker (Sentry or equiv); uptime check |
@@ -411,7 +409,7 @@ All reports exportable as CSV; default window 4 weeks, user-adjustable.
 ## 8. Domain Model (key entities)
 
 ```
-Ingredient (id, name_en, name_es, uom, pack_size, storage_location_id,
+Ingredient (id, name, uom, pack_size, storage_location_id,
             default_supplier_id, allergen_flags, is_archived)
 IngredientCost (id, ingredient_id, unit_cost, effective_from, source: delivery|manual)
 UnitConversion (ingredient_id?, from_uom, to_uom, factor)
@@ -425,9 +423,9 @@ Supplier (id, name, contact, email, phone, lead_time_days, min_order_cents,
           order_cadence, is_active)
 SupplierIngredient (supplier_id, ingredient_id, supplier_pack_size,
                     unit_cost, rank, effective_from, effective_until)
-Recipe (id, type: prep|menu, name_en, name_es, yield_qty, yield_uom,
-        shelf_life_days, equipment_en, equipment_es, procedure_en,
-        procedure_es, photo_url, version, is_current,
+Recipe (id, type: prep|menu, name, yield_qty, yield_uom,
+        shelf_life_days, equipment, procedure, photo_url,
+        version, is_current,
         is_portion_bag_prep: bool,
         portion_bag_content_json?)
         -- is_portion_bag_prep=true means yield is countable portion units
@@ -456,7 +454,7 @@ OrderLine (order_id, ingredient_id, qty, pack_size, unit_cost)
 WasteEntry (id, ref_type: ingredient|prep, ref_id, qty, uom, reason,
             note, photo_url, unit_cost_pinned, $_value, user_id, at)
 Location (id, name, kind: dry|cold|freezer|bar|prep)
-User (id, email, role: owner|manager|staff, language, active)
+User (id, email, role: owner|manager|staff, active)
 AuditLog (id, user_id, entity, entity_id, field, before, after, at)
 Session / RefreshToken (standard)
 
@@ -532,7 +530,7 @@ The owner has ~1 year of Aloha POS history, which means we can train real models
 ## 10. Architecture Summary (for the architect pipeline)
 
 **Stack decision (OQ-3, resolved):** TypeScript for the web stack, Python for ML. Two services, one shared PostgreSQL.
-**Hosting decision (OQ-4, resolved):** Azure VM + managed Azure Database for PostgreSQL + Azure Blob Storage.
+**Hosting decision (OQ-4, resolved v1.6):** **Docker-first.** Every service (API, ML, Aloha worker) ships a `Dockerfile` as its deployment unit. Local dev runs `docker-compose up` at the repo root to bring up the full stack + Postgres + a local blob store. Production runs the same Docker images on **Azure Container Apps** with managed Azure Database for PostgreSQL + Azure Blob Storage. Container Apps is the chosen runtime because it gives managed TLS, auto-scale, and rolling deploys without the team operating a raw VM; any Docker-image runtime (AKS, ACI, k3s, ECS) can host the same images if a future migration is needed.
 
 ### Components
 
@@ -598,7 +596,6 @@ The owner has ~1 year of Aloha POS history, which means we can train real models
 | Unit conversion complexity (weight↔volume + utensil↔physical) | Medium | Medium | Per-ingredient density table; per-ingredient utensil override table (§6.3a AC-4); fallback to free-text qty with "~" cost indicator |
 | Utensil catalogue drift (new scoops added, names change) | Low | Low | Utensils are soft-archived, referenced by ID; editable from Settings without code change |
 | Portion-bag inventory mismatch (partial use) | Medium | Low | Waste log supports partial-use entries (§6.3a edge case) |
-| Bilingual content drift (EN updated, ES stale) | Medium | Low | UI badge "ES outdated" when `updated_at` on EN body > ES body |
 | PWA offline writes — conflicts on sync | Medium | Medium | Last-write-wins for counts/waste (small conflict surface); prep-sheet status append-only log |
 | Owner changes mind on scope mid-build | High | High | Lock MVP list at HITL gate; scope changes go through `/scope-tracker` with cost estimate |
 | Native iOS/Android pressure before API is proven | Medium | High | Explicit Phase 3; communicate that PWA ships first |
@@ -617,16 +614,16 @@ The owner has ~1 year of Aloha POS history, which means we can train real models
 
 ## 15. Definition of Done (MVP)
 
-1. All 22 in-scope modules (§4.1) shipped with acceptance criteria met.
+1. All 21 in-scope modules (§4.1) shipped with acceptance criteria met.
 2. All 11 source files fully migrated through the staging → review → canonical path (§6.14); ~1 year of Aloha PMIX history backfilled; nightly Aloha import running for ≥ 7 consecutive days at pilot with the review-step auto-promote working cleanly.
-3. EN + ES rendering verified on each recipe screen.
-4. PWA install verified on iOS Safari and Android Chrome.
-5. WCAG AA audit clean for the 5 most-used screens (dashboard, inventory count, waste log, prep sheet, recipe view).
-6. Security review clean (no critical, no high OWASP findings).
-7. Data dictionary + OpenAPI spec published.
-8. Owner sign-off on dashboard KPIs.
-9. Forecasting baseline trained and serving predictions for ≥ 80% of active ingredients and prep items; accuracy dashboard populated with ≥ 4 weeks of measured MAPE.
-10. Aloha menu mapping: ≥ 95% of last-90-day Aloha items mapped to TP Manager menu recipes (remainder surfaced in reconciliation queue).
+3. PWA install verified on iOS Safari and Android Chrome.
+4. WCAG AA audit clean for the 5 most-used screens (dashboard, inventory count, waste log, prep sheet, recipe view).
+5. Security review clean (no critical, no high OWASP findings).
+6. Data dictionary + OpenAPI spec published.
+7. Owner sign-off on dashboard KPIs.
+8. Forecasting baseline trained and serving predictions for ≥ 80% of active ingredients and prep items; accuracy dashboard populated with ≥ 4 weeks of measured MAPE.
+9. Aloha menu mapping: ≥ 95% of last-90-day Aloha items mapped to TP Manager menu recipes (remainder surfaced in reconciliation queue).
+10. **Every service ships with a `Dockerfile`; `docker-compose.yml` at repo root brings up the full stack (API, ML, Aloha worker, Postgres, MinIO-for-Blob) for local dev in one command; production runs the same Docker images on Azure Container Apps (or an equivalent Docker-image runtime).**
 
 ---
 

@@ -28,7 +28,7 @@ These go beyond the `standard` profile thresholds but inform downstream stages:
 |---|---|---|
 | **AC traceability — every AC from spec → ≥ 1 phase** | PASS | Plan §3 maps all §6.1–§6.14 sections + §7 NFRs + §15 DoD to phases/waves. No orphan ACs. |
 | **Architectural decisions explicit** | PASS | 9 ADRs listed in §2 with rationale + alternatives; 7 of them trace directly to design-review findings. |
-| **Design-review handoff items addressed** | PASS | 7/7 design-review recommendations folded in: AD-1 (VM→Container Apps), AD-4 (conversions module), AD-5 (DB triggers), AD-6 (JWT-only), AD-7 (transactional ingest), AD-8 (artefact cache), DoD #11 (restore drill). Remaining LOW #6 (bilingual enforcement) and LOW #9 (heartbeat) appear as tasks in Phase 3/Phase 5. |
+| **Design-review handoff items addressed** | PASS | 7/7 design-review recommendations folded in: AD-1 (VM→Container Apps), AD-4 (conversions module), AD-5 (DB triggers), AD-6 (JWT-only), AD-7 (transactional ingest), AD-8 (artefact cache), DoD #11 (restore drill). MEDIUM #6 (bilingual enforcement) **OBSOLETE v1.6** — bilingual removed from scope. LOW #9 (heartbeat) appears as a task in Phase 5. AD-10 added v1.6 for Docker deployment unit. |
 | **Test-first discipline** | PASS | Every phase opens with a "Tests first" table naming test file paths and what they validate. |
 | **File-change estimate present** | PASS | §5 totals ~380 new / ~100 modified / ~24k lines. |
 | **Wave schedule realistic vs spec estimate (17–23 wk)** | PASS | ~15 wk critical path + 3 wk buffer = 18 wk. Fits within spec estimate. |

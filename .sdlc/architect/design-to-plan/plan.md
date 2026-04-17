@@ -1,18 +1,21 @@
 # Implementation Plan — TP Manager
 
-> **Spec:** [.sdlc/product-owner/feature-intake/spec.md](../../product-owner/feature-intake/spec.md) v1.5 (APPROVED)
+> **Spec:** [.sdlc/product-owner/feature-intake/spec.md](../../product-owner/feature-intake/spec.md) **v1.6** (APPROVED — Docker-first, EN-only)
 > **Design review:** [design-review.md](./design-review.md)
 > **Status:** DRAFT (pending plan-to-tasks quality gate + HITL)
 > **Created:** 2026-04-17
-> **Estimated effort:** XL — 17–23 engineering-weeks, 2–3 person team (1 TS full-stack, 1 Python/data, 0.5 designer/QA)
+> **Revised:** 2026-04-17 (v1.6 scope trim — Docker deployment unit formalized; bilingual EN/ES removed)
+> **Estimated effort:** XL — 16–22 engineering-weeks (v1.6: ~1 wk shaved by dropping bilingual), 2–3 person team (1 TS full-stack, 1 Python/data, 0.5 designer/QA)
 
 ---
 
 ## 1. Summary
 
-Build the 22-module MVP in **seven phases over 10 waves**, starting with infrastructure + data layer and ending with the forecast UI + cutover. The critical path is: infra → schema + conversions → auth + RBAC → ingredients/recipes + migration → inventory/prep/waste → Aloha import → ML baseline → reports/dashboard → PWA polish → cutover. ML is a separable work stream that runs in parallel from Wave 5 onward — operational modules never block on ML.
+Build the **21-module MVP (spec v1.6)** in **seven phases over 10 waves**, starting with infrastructure + data layer and ending with the forecast UI + cutover. The critical path is: infra → schema + conversions → auth + RBAC → ingredients/recipes + migration → inventory/prep/waste → Aloha import → ML baseline → reports/dashboard → PWA polish → cutover. ML is a separable work stream that runs in parallel from Wave 5 onward — operational modules never block on ML.
 
-The plan is explicit about seven architectural decisions the design review flagged. Each ships as an ADR in `docs/adr/` at the phase it first bites.
+Deployment unit is **Docker**: every service ships a `Dockerfile`, local dev runs `docker-compose up`, production runs the same images on Azure Container Apps.
+
+The plan is explicit about ten architectural decisions the design review flagged. Each ships as an ADR in `docs/adr/` at the phase it first bites.
 
 ---
 
@@ -20,7 +23,7 @@ The plan is explicit about seven architectural decisions the design review flagg
 
 | # | Decision | Rationale | Alternatives Considered | ADR file |
 |---|----------|-----------|------------------------|----------|
-| AD-1 | **Azure Container Apps** (not raw VM) for the three services | Meets 99.5% availability NFR without a hot-standby VM; Azure handles patches/restarts; cost ≈ one E2s_v5 VM. | (a) Single Azure VM (rejected — availability risk per design-review HIGH #1); (b) Dual-VM with Front Door (rejected — operational overhead for MVP scale). | `docs/adr/0001-container-apps-over-vm.md` |
+| AD-1 | **Azure Container Apps** (not raw VM) running Docker images for the three services | Meets 99.5% availability NFR without a hot-standby VM; Azure handles patches/restarts; cost ≈ one E2s_v5 VM. Runtime takes whatever Docker images CI produces, so switching away from Container Apps is a deploy-pipeline change, not a rewrite (v1.6). | (a) Single Azure VM (rejected — availability risk per design-review HIGH #1); (b) Dual-VM with Front Door (rejected — operational overhead for MVP scale). | `docs/adr/0001-container-apps-over-vm.md` |
 | AD-2 | **NestJS** for API service | Opinionated structure, built-in OpenAPI generation, DI fits the layered services described in spec §10, LTS support. | Fastify (rejected — faster but less structure; team would re-invent layering). | `docs/adr/0002-api-framework-nestjs.md` |
 | AD-3 | **Scheduled PMIX file-drop** (path a) for Aloha | Owner already produces this exact report; zero Aloha-side development; parser already validated against sample. | (b) SFTP DBF pickup (rejected — DBF encoding + schema volatility); (c) Aloha Cloud REST (rejected — owner is on classic on-prem); (d) Middleware (rejected — monthly subscription cost). Transport isolated behind interface so reversible. | `docs/adr/0003-aloha-transport-pmix-filedrop.md` |
 | AD-4 | **Dedicated `conversions` module** with property-based tests | Three conversion layers stacked (weight↔volume, utensil→physical, per-ingredient override). Scattering this across call sites is a silent wrong-cost farm (design-review MEDIUM #3). | In-line conversion at cost-compute sites (rejected — prevents centralized property tests). | `docs/adr/0004-conversions-module.md` |
@@ -29,6 +32,7 @@ The plan is explicit about seven architectural decisions the design review flagg
 | AD-7 | **Transactional Aloha batches** — full parse then single transaction per business_date | Eliminates "last import wins" partial-failure ambiguity (design-review MEDIUM #4). | Streaming insert (rejected — partial-failure leaves ambiguous state). | `docs/adr/0007-aloha-transactional-ingest.md` |
 | AD-8 | **ML artefact hot-cached on service start + DB NOTIFY on model_version change** | Avoids cold-load blob fetch per request; staleness bounded by NOTIFY propagation (design-review MEDIUM #5). | Cache on first request (rejected — slow first hit); no cache (rejected — blob latency per call). | `docs/adr/0008-ml-artefact-caching.md` |
 | AD-9 | **Monorepo (pnpm workspaces)** with `apps/web`, `apps/api`, `apps/aloha-worker`, `services/ml` (Python), `packages/types`, `packages/conversions` | Shared TypeScript types across web + API + worker; Python ML is a separate workspace-peer with its own lockfile. | Polyrepo (rejected — type sync friction); single TS monorepo without Python-peer (rejected — Python must live somewhere). | `docs/adr/0009-monorepo-layout.md` |
+| AD-10 | **Docker is the unit of deployment and local dev** — one multi-stage `Dockerfile` per app/service (`apps/api`, `apps/web`, `apps/aloha-worker`, `services/ml`); root `docker-compose.yml` brings up API + ML + Aloha worker + Postgres 16 + MinIO (local Blob) + nginx in one command; CI builds the same images that ship to prod | Single artefact across dev and prod removes "works on my laptop"; local stack matches prod topology; production hosting runtime is swappable (v1.6 owner requirement). | (a) systemd on a VM with tarballs (rejected — env drift, availability gap); (b) PaaS buildpacks (rejected — loses Python ML + TS monorepo flexibility). | `docs/adr/0010-docker-deployment-unit.md` |
 
 ---
 
@@ -68,23 +72,28 @@ Waves are the task-gen scheduling unit. Multiple phases can overlap waves becaus
 
 ### Phase 1 — Infrastructure & Repo Scaffold (Wave 1; ~1 week)
 
-**Goal:** The repo + cloud skeleton is ready to deploy "hello world" to Azure Container Apps. Every subsequent phase deploys into this chassis.
-**Traces to:** §7 NFR infra/security/observability, §10 architecture, AD-1, AD-2, AD-9
+**Goal:** The repo + cloud skeleton is ready to deploy "hello world" Docker images to Azure Container Apps, and `docker-compose up` brings up the full stack locally. Every subsequent phase deploys into this chassis.
+**Traces to:** §7 NFR infra/security/observability, §10 architecture, AD-1, AD-2, AD-9, **AD-10**
 
 #### Tests first
 | Test | Type | File | Validates |
 |---|---|---|---|
 | `infra_deploys_ok` | smoke | `ops/smoke/health.http` | Each service `/healthz` returns 200 from Front Door |
 | `secret_rotates_without_redeploy` | manual-runbook | `ops/runbooks/secret-rotation.md` | Key Vault → Container App env ref refresh |
+| `docker_compose_up_ok` | smoke | `ops/smoke/compose-up.sh` | `docker-compose up -d` → all containers healthy within 60 s; `/healthz` reachable on every service (AD-10) |
+| `docker_image_reproducible` | CI | `.github/workflows/ci.yml` | CI rebuild produces identical SHA for unchanged source (digest pinning) |
 
 #### Changes
 | Action | File | Description |
 |---|---|---|
 | CREATE | `pnpm-workspace.yaml`, `package.json`, `turbo.json` | Monorepo chassis (AD-9) |
 | CREATE | `apps/web/`, `apps/api/`, `apps/aloha-worker/`, `services/ml/`, `packages/types/`, `packages/conversions/` | Workspace skeletons |
-| CREATE | `ops/iac/` (Bicep or Terraform) | Resource group, Container Apps environment, Flexible-server PG (+ read replica), Blob, Key Vault, Front Door, managed identities |
-| CREATE | `ops/ci/.github/workflows/` | PR CI (lint + typecheck + test), deploy workflows (main → staging, tag → prod) |
-| CREATE | `docs/adr/0001..0009.md` | The 9 ADRs above |
+| CREATE | `apps/web/Dockerfile`, `apps/api/Dockerfile`, `apps/aloha-worker/Dockerfile`, `services/ml/Dockerfile` | One multi-stage Dockerfile per service (AD-10) — non-root user, distroless / slim base, healthcheck |
+| CREATE | `docker-compose.yml`, `docker-compose.override.yml` | Root compose file: API + ML + worker + Postgres 16 + MinIO + nginx; override for dev-only bind mounts (AD-10) |
+| CREATE | `.dockerignore` | Exclude node_modules, .git, fixtures from build context |
+| CREATE | `ops/iac/` (Bicep or Terraform) | Resource group, Container Apps environment, Flexible-server PG (+ read replica), Blob, Key Vault, Front Door, managed identities; Container Apps pull from ACR-hosted images |
+| CREATE | `ops/ci/.github/workflows/` | PR CI (lint + typecheck + test + docker-build matrix), deploy workflows (main → staging ACR+Container Apps, tag → prod) |
+| CREATE | `docs/adr/0001..0010.md` | The 10 ADRs above |
 | CREATE | `.env.example`, `CLAUDE.md` enrichment | Env contract and coding standards — project CLAUDE.md already exists |
 | CREATE | `ops/observability/app-insights.json` | Log schema: service, level, correlation_id, user_id, entity_id |
 
@@ -161,7 +170,7 @@ None yet (empty schema).
 | CREATE | `apps/api/src/ingredients/` | Module — controller, service, repo, DTOs |
 | CREATE | `apps/api/src/suppliers/` | Module |
 | CREATE | `apps/api/src/settings/` | Locations, UoMs, utensils, stations, waste reasons, par levels |
-| CREATE | `apps/web/src/pages/ingredients/`, `/suppliers/`, `/settings/` | PWA screens; EN/ES via i18next |
+| CREATE | `apps/web/src/pages/ingredients/`, `/suppliers/`, `/settings/` | PWA screens (English-only per spec v1.6) |
 
 #### Wave 5 — Recipes (prep + menu), Station views, Migration parsers (~1.5 weeks)
 **Tests first (sample)**
@@ -401,18 +410,18 @@ Solid = hard dependency; dashed = soft (data availability, not code).
 
 ---
 
-## 10. Definition of Done (plan-level; DoD reproduces spec §15)
+## 10. Definition of Done (plan-level; DoD reproduces spec §15 v1.6)
 
-1. All 22 in-scope modules shipped with AC met.
+1. All **21** in-scope modules shipped with AC met.
 2. All 11 source files migrated through staging → review → canonical; ≥ 1 yr Aloha PMIX backfilled; ≥ 7 consecutive nightly imports working.
-3. EN + ES render verified on every recipe screen.
-4. PWA install verified on iOS Safari + Android Chrome.
-5. WCAG AA audit clean on top 5 screens.
-6. Security review clean — zero critical, zero high.
-7. Data dictionary + OpenAPI spec published.
-8. Owner sign-off on dashboard KPIs.
-9. Forecast baseline serving ≥ 80% of active ingredients + prep items; accuracy dashboard populated with ≥ 4 weeks of measured MAPE.
-10. Aloha menu mapping ≥ 95% of last-90-day items.
+3. PWA install verified on iOS Safari + Android Chrome.
+4. WCAG AA audit clean on top 5 screens.
+5. Security review clean — zero critical, zero high.
+6. Data dictionary + OpenAPI spec published.
+7. Owner sign-off on dashboard KPIs.
+8. Forecast baseline serving ≥ 80% of active ingredients + prep items; accuracy dashboard populated with ≥ 4 weeks of measured MAPE.
+9. Aloha menu mapping ≥ 95% of last-90-day items.
+10. **Every service ships a `Dockerfile`; `docker-compose up` at repo root brings the full stack up locally; production runs the same Docker images on Azure Container Apps (AD-10).**
 11. *(added from design-review HIGH #2)* One full PG restore drill completed from PITR into a staging DB; timing measured; integrity check run.
 12. *(added from design-review LOW #9)* Aloha worker heartbeat alerting configured in Application Insights.
 

@@ -1,18 +1,20 @@
 ---
 date: 2026-04-17
-scope: full (architecture of proposed TP Manager per spec v1.5)
+scope: full (architecture of proposed TP Manager per spec v1.5, re-scoped against v1.6)
 tech_debt_rating: N/A (greenfield)
 issues_count:
   high: 2
-  medium: 5
+  medium: 4   # was 5 in v1.5; MEDIUM #6 (bilingual drift) retired by v1.6 scope cut
   low: 3
+  obsolete: 1
 ---
 
 # Design Review — TP Manager (greenfield)
 
-**Spec:** `.sdlc/product-owner/feature-intake/spec.md` v1.5 (APPROVED)
+**Spec:** `.sdlc/product-owner/feature-intake/spec.md` **v1.6** (APPROVED — Docker-first, EN-only)
 **Scope:** §10 Architecture Summary + cross-check against §7 NFRs, §8 Domain Model, §11 Security, §6.12a/b integrations.
 **Mode:** Pre-implementation review — no code exists. Evaluates the *proposed* architecture before plan-gen locks it in.
+**v1.6 note:** MEDIUM #6 (bilingual content drift) is **OBSOLETE** — bilingual was removed from scope. HIGH #1 recommendation (c) was adopted and expanded in v1.6 to a Docker-first deployment unit.
 
 ---
 
@@ -93,12 +95,12 @@ All three processes share one PostgreSQL primary; the ML service reads from a re
 **Recommendation:** Load on worker startup + refresh on `model_version` change signal (polled from DB or pushed via DB NOTIFY). Keep last N versions warm. Plan-gen must name this explicitly.
 **Effort:** small
 
-### [MEDIUM] Bilingual content drift is only an NFR risk — not a system invariant
-**Location:** §13 risk row + §6.3 AC-3
-**Issue:** "UI badge 'ES outdated' when `updated_at` on EN body > ES body" is a UI patch, not a data-layer guarantee. A recipe can be saved with a valid EN body and an empty ES body; nothing blocks it. Line cooks are the Spanish-primary users — a silently-empty ES field *is* the failure mode the spec's bilingual story was supposed to prevent.
-**Impact:** ES-primary cooks see English fallback when they should have Spanish; no alerting.
-**Recommendation:** Either (a) make ES optional explicitly in the API schema and track coverage % on the dashboard, or (b) require ES on publish of any menu-facing recipe. The spec should state which — plan-gen picks the enforcement point.
-**Effort:** small
+### ~~[MEDIUM] Bilingual content drift is only an NFR risk — not a system invariant~~ — **OBSOLETE v1.6**
+**Retired:** 2026-04-17 with spec v1.6. Owner removed bilingual EN/ES from scope ("we will have only english"). There is no ES surface to drift, so this finding no longer applies. Retained below for historical traceability; DEC-015 in the decision log is likewise retired.
+
+~~**Location:** §13 risk row + §6.3 AC-3~~
+~~**Issue:** "UI badge 'ES outdated' when `updated_at` on EN body > ES body" is a UI patch, not a data-layer guarantee. A recipe can be saved with a valid EN body and an empty ES body; nothing blocks it. Line cooks are the Spanish-primary users — a silently-empty ES field *is* the failure mode the spec's bilingual story was supposed to prevent.~~
+~~**Recommendation:** Either (a) make ES optional explicitly in the API schema and track coverage % on the dashboard, or (b) require ES on publish of any menu-facing recipe.~~
 
 ### [MEDIUM] Audit log at the DB layer means DB-bypass = no audit
 **Location:** §8 `AuditLog (entity, entity_id, field, before, after)` + §11 "Audit log retained 12 months"
@@ -132,14 +134,14 @@ All three processes share one PostgreSQL primary; the ML service reads from a re
 
 ## Recommendations (prioritized by impact-to-effort ratio)
 
-1. **Pick deploy topology explicitly** (HIGH #1) — decision-only; biggest NFR risk, smallest effort.
+1. **Pick deploy topology explicitly** (HIGH #1) — **RESOLVED v1.6**: adopted recommendation (c) and expanded to Docker-first (`Dockerfile` per service + `docker-compose` for local dev + Container Apps for prod). See DEC-001 + DEC-016.
 2. **Lock the conversion module as a dedicated service with property tests** (MEDIUM #3) — small-to-medium effort, prevents silent wrong-cost bugs in the entire reporting stack.
 3. **Make Aloha imports transactional** (MEDIUM #4) — small fix, eliminates an entire class of data-drift bug.
 4. **DB-trigger-based audit log** (MEDIUM #7) — one-time template, covers ops edits automatically.
 5. **Split API auth cleanly: JWT only for `/api/v1`** (LOW #8) — small simplification, material security clarity.
 6. **DR restore drill in DoD** (HIGH #2) — small effort, catches a backup-that-never-restores disaster.
 7. **ML artefact loading strategy** (MEDIUM #5) — small, affects forecast latency.
-8. **Bilingual enforcement point** (MEDIUM #6) — small, protects the core ES-primary user journey.
+8. ~~**Bilingual enforcement point** (MEDIUM #6)~~ — **OBSOLETE v1.6** (bilingual removed from scope).
 9. **Aloha worker heartbeat** (LOW #9) — small.
 10. **Crisp "mobile first" criteria** (LOW #10) — tiny.
 
@@ -149,13 +151,13 @@ All three processes share one PostgreSQL primary; the ML service reads from a re
 
 **Rating:** N/A (greenfield — no debt yet).
 
-However, three architectural choices in the spec are **pre-committed to tech debt** if plan-gen doesn't address them:
+However, three architectural choices in the spec were **pre-committed to tech debt** if plan-gen didn't address them:
 
-- **Single-VM deploy** will become a debt item the first time Azure patches the VM during service hours.
-- **Unit conversion scattered across call sites** (if not centralized) becomes a classic "works 95% of the time" bug farm.
-- **App-layer audit log** will silently drift from schema changes.
+- ~~**Single-VM deploy** will become a debt item the first time Azure patches the VM during service hours.~~ — **RESOLVED v1.6** via Docker + Container Apps (DEC-001, DEC-016).
+- **Unit conversion scattered across call sites** (if not centralized) becomes a classic "works 95% of the time" bug farm. — addressed by plan DEC-004.
+- **App-layer audit log** will silently drift from schema changes. — addressed by plan DEC-005.
 
-Plan-gen should address #1 and #2 now (design choice), not later.
+All three are now folded into plan ADRs; none remain open as of v1.6.
 
 ---
 
@@ -166,11 +168,11 @@ Plan-gen should address #1 and #2 now (design choice), not later.
 | Mobile first (360×640) | Yes — PWA design + responsive-first | Tighten LOW #10 criteria |
 | PWA installable, offline reads | Yes — Workbox SW | No issue |
 | FCP < 2s on 4G | Likely — Vite build + Tailwind JIT | Verify with perf budget in plan |
-| Availability 99.5% | **No — single VM is too fragile** | HIGH #1 must resolve |
+| Availability 99.5% | **Yes — Container Apps + Docker (v1.6)** | HIGH #1 resolved via DEC-001 + DEC-016 |
 | Data durability ≤ 24h PITR | Yes (managed PG PITR) | HIGH #2 adds restore drill |
 | Browser support latest-2 | Yes | No issue |
 | WCAG 2.1 AA | Plan must add a11y tests per screen | Track in DoD |
-| i18n EN/ES | Weak — see MEDIUM #6 | |
+| ~~i18n EN/ES~~ | **N/A — removed from scope in v1.6** | See DEC-015 retirement |
 | Security OWASP Top 10 | Addressed in §11 | LOW #8 tightens auth boundary |
 | API versioned + OpenAPI | Yes | No issue |
 | Observability | Partial — see LOW #9 | Worker heartbeat missing |
@@ -188,4 +190,4 @@ The plan must:
 6. Include a restore-drill task in Phase 5 (HIGH #2).
 7. Include an artefact-loading decision for the ML service (MEDIUM #5).
 
-These are the seven items that design review ties to plan-gen. Lower-priority items (#6 bilingual enforcement, #9 heartbeat, #10 mobile-first criteria) are captured as smaller tasks inside the normal phase structure.
+These are the seven items that design review ties to plan-gen. Lower-priority items (~~#6 bilingual enforcement — obsolete v1.6~~, #9 heartbeat, #10 mobile-first criteria) are captured as smaller tasks inside the normal phase structure.

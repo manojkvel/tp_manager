@@ -1,9 +1,10 @@
 # Decision & Deviation Log — TP Manager
 
 **Feature:** Restaurant Operations Platform ("TP Manager")
-**Spec version:** v1.5 (APPROVED)
-**Plan:** `.sdlc/architect/design-to-plan/plan.md` (DRAFT)
+**Spec version:** **v1.6** (APPROVED — Docker-first, EN-only)
+**Plan:** `.sdlc/architect/design-to-plan/plan.md` (DRAFT, revised for v1.6)
 **Generated:** 2026-04-17
+**Revised:** 2026-04-17 (v1.6 — DEC-015 retired; DEC-016 added for Docker; DEC-001 expanded)
 **Source:** `/decision-log capture` invoked after `/plan-gen`
 
 ---
@@ -12,7 +13,7 @@
 
 | ID | Decision | Status | Deviation | Impact |
 |----|----------|--------|-----------|--------|
-| DEC-001 | Hosting: Azure Container Apps (not raw VM) | ACTIVE | MINOR | plan, impl, ops |
+| DEC-001 | Hosting: Azure Container Apps running Docker images (not raw VM) | ACTIVE | MINOR | plan, impl, ops |
 | DEC-002 | API framework: NestJS | ACTIVE | NONE | plan, impl |
 | DEC-003 | Aloha transport: scheduled PMIX file-drop | ACTIVE | NONE | plan, impl, data |
 | DEC-004 | Conversions as a dedicated module with property tests | ACTIVE | MINOR | plan, impl, test |
@@ -26,21 +27,22 @@
 | DEC-012 | Single-tenant schema with `restaurant_id` from day 1 | ACTIVE | NONE | plan, impl, data |
 | DEC-013 | Test-first (TDD) for every phase | ACTIVE | NONE | plan, impl, test |
 | DEC-014 | Recipe versioning: historical cost pins to active version | ACTIVE | NONE | plan, impl |
-| DEC-015 | Bilingual EN/ES: ES optional + coverage tracked on dashboard | ACTIVE | MINOR | plan, impl |
+| ~~DEC-015~~ | ~~Bilingual EN/ES: ES optional + coverage tracked on dashboard~~ | **RETIRED v1.6** (bilingual removed from scope; EN-only MVP) | — | — |
+| DEC-016 | **Docker is the unit of deployment and local dev** (Dockerfile per service + root `docker-compose.yml`) | ACTIVE | MINOR | plan, impl, ops, CI |
 
-**Total decisions:** 15
+**Total decisions:** 15 active (1 retired in v1.6)
 **Deviations from standard:** 7 (MINOR: 5; NOTABLE: 2; SIGNIFICANT: 0)
-**Key assumptions:** 8 (fragile: 3)
+**Key assumptions:** 12 (fragile: 3)
 
 ---
 
 ## Decisions
 
-### DEC-001: Hosting — Azure Container Apps (not raw VM)
+### DEC-001: Hosting — Azure Container Apps running Docker images (not raw VM)
 
-**Context:** Spec §7 sets availability NFR at 99.5% monthly. Spec §10 initially proposed a single Azure VM running three processes under systemd. Design-review HIGH #1 flagged that as insufficient — one unplanned Azure VM patch window can consume most of the monthly availability budget.
+**Context:** Spec §7 sets availability NFR at 99.5% monthly. Spec v1.5 §10 initially proposed a single Azure VM running three processes under systemd. Design-review HIGH #1 flagged that as insufficient — one unplanned Azure VM patch window can consume most of the monthly availability budget. Owner explicitly pivoted to Docker at the architect-pipeline HITL turn (v1.6).
 
-**Decision:** Deploy the three services (API, ML, Aloha worker) as three Azure Container Apps within one Container Apps Environment. API runs with `minReplicas=1`; ML and Aloha worker scale-to-zero acceptable.
+**Decision:** Deploy the three services (API, ML, Aloha worker) as three Azure Container Apps within one Container Apps Environment, each running the project's own Docker images (pulled from ACR). API runs with `minReplicas=1`; ML and Aloha worker scale-to-zero acceptable. The Docker image is the shared artefact between local dev and prod (see DEC-016).
 
 **Status:** ACTIVE
 
@@ -372,11 +374,21 @@
 
 ---
 
-### DEC-015: Bilingual EN/ES — ES optional + coverage tracked
+### ~~DEC-015: Bilingual EN/ES — ES optional + coverage tracked~~ — **RETIRED v1.6**
 
-**Context:** Design-review MEDIUM #6 flagged that a recipe can be saved with empty ES body and nothing blocks it. Line cooks are the ES-primary users.
+**Retired:** 2026-04-17 (spec v1.6). Owner trimmed bilingual scope entirely — MVP ships English-only. The underlying design-review MEDIUM #6 ("silent ES drift") no longer applies because there is no ES surface to drift. If/when bilingual returns as a scope item, this decision reopens in a new version with the coverage-tracking approach intact.
 
-**Decision:** ES is optional in schema, but every recipe-facing screen + the dashboard surfaces an **ES-coverage percentage** ("ES coverage: 87 of 94 menu recipes"). A drift-detection badge fires when EN `updated_at` > ES `updated_at`.
+**Original context (retained for history):** Design-review MEDIUM #6 flagged that a recipe can be saved with empty ES body and nothing blocks it. Line cooks were assumed to be ES-primary users.
+**Original decision (retained for history):** ES optional in schema; coverage % badge on dashboard + drift-detection badge when EN `updated_at` > ES `updated_at`.
+**Reason for retirement:** Owner explicit scope trim at HITL turn: "no need for Bilingual - we will have only english."
+
+---
+
+### DEC-016: Docker is the unit of deployment and local dev
+
+**Context:** Spec v1.6 §10 (owner-directed). Owner wants a deployment model where the same image runs on a developer laptop and in production — no VM-specific systemd scripts, no "works on my machine" drift. Design-review HIGH #1 (availability) is already addressed by DEC-001 (Container Apps), but the *portability* and *reproducibility* benefits of Docker were also called out. v1.6 formalizes Docker as the artefact that flows from dev → CI → prod.
+
+**Decision:** Every app/service ships a **multi-stage `Dockerfile`** under its own directory (`apps/api/Dockerfile`, `apps/web/Dockerfile`, `apps/aloha-worker/Dockerfile`, `services/ml/Dockerfile`). A root **`docker-compose.yml`** brings up the full local stack (API + ML + worker + Postgres 16 + MinIO + nginx) with one command. CI builds the same images (matrix per service) and pushes to Azure Container Registry; Container Apps pulls those images for staging and prod. Images run as a non-root user; each has a `HEALTHCHECK`.
 
 **Status:** ACTIVE
 
@@ -384,13 +396,22 @@
 
 | # | Alternative | Pros | Cons | Rejection reason |
 |---|---|---|---|---|
-| 1 | Optional + coverage tracking (chosen) | Owner has visibility; staged rollout of ES content | Doesn't hard-block; owner must watch the number | Acceptable for bilingual team that already maintains ES content |
-| 2 | Mandatory ES on menu-facing recipe publish | Guarantees ES present at publish | Blocks iteration; owner will work around it | Friction without clear payoff |
-| 3 | No bilingual enforcement (spec v1.5 default) | Simpler | Silent degradation is the exact risk flagged | Unacceptable |
+| 1 | Docker images + compose (chosen) | Single artefact across dev/CI/prod; local stack matches prod topology; portable across any Docker runtime | Build-time cost; CI matrix complexity | Matches owner directive and addresses availability via DEC-001 |
+| 2 | systemd on VM + tarballs (v1.5 original) | Simplest for a lone dev | Env drift; availability gap; hard to reproduce locally | Availability + reproducibility unacceptable |
+| 3 | PaaS buildpacks (e.g., Heroku-style) | Zero infra code | Loses Python-ML + TS monorepo flexibility; opaque build | Doesn't fit the two-language monorepo |
+| 4 | Nix / reproducible-build toolchain | Truly hermetic | Team learning curve; overkill for MVP | Docker gets 80% of the benefit at 10% of the cost |
 
-**Deviation from standard** — MINOR. Most apps either enforce or ignore; coverage tracking is in-between.
+**Trade-offs accepted**
+- Longer CI build (multi-stage Docker build per service); mitigated by layer caching and matrix builds.
+- Developer must have Docker installed; acceptable in 2026 for the target team.
 
-**Downstream impact:** Phase 3 recipe module + dashboard KPI.
+**Assumptions**
+- Team is comfortable with Docker multi-stage builds. **[A-013]**
+- Container Apps + ACR pricing fits the MVP budget envelope. **[A-014]**
+
+**Deviation from standard** — MINOR. Docker-first is industry standard in 2026; it would be more deviant *not* to do this. Logged here because v1.5 had the older systemd-on-VM plan and the switch is a documented pivot.
+
+**Downstream impact:** Phase 1 Wave 1 (scaffolds Dockerfiles + compose + ACR CI); Phase 7 Wave 10 (cutover runbook uses docker pull, not scp+systemctl); every local-dev onboarding step starts with `docker-compose up`; §15 DoD #10 added.
 
 ---
 
@@ -410,6 +431,8 @@
 | A-010 | Future multi-location uses row-level multi-tenancy | DEC-012 | MEDIUM | Re-confirm at Phase 3 (multi-location) entry |
 | A-011 | PMIX report schema stable across Aloha updates | DEC-003, DEC-007 | **HIGH** | Parser versioned; schema-mismatch fails loudly |
 | A-012 | 1 year PMIX backfill covers enough seasonality for Holt-Winters | DEC-011 | MEDIUM | Forecast-accuracy dashboard validates retroactively |
+| A-013 | Team is comfortable with Docker multi-stage builds | DEC-016 | LOW | Confirmed at staffing time; template Dockerfile in Phase 1 |
+| A-014 | Container Apps + ACR pricing fits MVP budget | DEC-001, DEC-016 | LOW | Cost model checked in Phase 1 Wave 1 |
 
 Three FRAGILE assumptions — A-005 (network), A-006 (density data), A-011 (PMIX schema stability) — are the top assumption-risks for the build. Plan already accounts for all three (transport fallback runbook; missing-density report; versioned parser with loud failure).
 
@@ -419,13 +442,14 @@ Three FRAGILE assumptions — A-005 (network), A-006 (density data), A-011 (PMIX
 
 | ID | Standard approach | Our approach | Severity | Rationale |
 |---|---|---|---|---|
-| DEC-001 | Raw VM for single-tenant MVP | Managed container runtime | MINOR | Availability NFR + patch-free ops |
+| DEC-001 | Raw VM for single-tenant MVP | Managed container runtime (Container Apps + Docker) | MINOR | Availability NFR + patch-free ops |
 | DEC-004 | Inline conversion per call site | Dedicated module + property tests | MINOR | Silent wrong-cost risk |
 | DEC-005 | App-layer audit hook | DB triggers | **NOTABLE** | Ops-bypass risk unacceptable for 12-mo retention |
 | DEC-006 | Hybrid session+JWT | JWT-only on API | MINOR | Middleware clarity + native-ready |
 | DEC-009 | Polyrepo or single-language monorepo | TS monorepo + Python peer | MINOR | Cleanest fit for the two-language split |
 | DEC-011 | ML on critical path | ML as separable stream | **NOTABLE** | Protects MVP ship date |
-| DEC-015 | Enforce or ignore bilingual | Optional with coverage tracking | MINOR | Pragmatic given bilingual team |
+| DEC-016 | systemd-on-VM deploy (spec v1.5) | Dockerfile per service + compose + ACR | MINOR | Owner directive v1.6; reproducible dev/prod artefact |
+| ~~DEC-015~~ | ~~Enforce or ignore bilingual~~ | ~~Optional with coverage tracking~~ | ~~MINOR~~ | **RETIRED v1.6 — bilingual removed from scope** |
 
 ---
 

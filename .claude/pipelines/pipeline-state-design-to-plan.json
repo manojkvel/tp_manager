@@ -1,8 +1,16 @@
 {
   "pipeline": "architect/design-to-plan",
-  "input": ".sdlc/product-owner/feature-intake/spec.md (v1.5, APPROVED)",
+  "input": ".sdlc/product-owner/feature-intake/spec.md (v1.6, APPROVED — Docker-first, EN-only)",
   "started_at": "2026-04-17T22:00:00Z",
-  "updated_at": "2026-04-17T22:30:00Z",
+  "updated_at": "2026-04-17T23:10:00Z",
+  "spec_version_at_completion": "v1.6",
+  "revised_for_v16_at": "2026-04-17T23:10:00Z",
+  "v16_changes": [
+    "spec.md: bilingual EN/ES removed (module #14 deleted, 22 → 21 modules); Docker deployment unit formalized in §10; DoD item #10 added.",
+    "plan.md: AD-10 added (Docker unit); AD-1 expanded; Phase 1 scaffolds Dockerfiles + docker-compose; DoD updated.",
+    "decision-log.md: DEC-015 (bilingual) retired; DEC-016 (Docker) added; A-013 and A-014 registered.",
+    "design-review.md: MEDIUM #6 marked OBSOLETE; HIGH #1 recommendation (c) marked RESOLVED."
+  ],
   "gate_profile": "standard",
   "status": "completed",
   "total_steps": 4,
