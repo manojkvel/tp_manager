@@ -1,0 +1,21 @@
+{
+  "pipeline": "product-owner/feature-intake",
+  "input": "Restaurant operations web app — inventory, supplier→ingredient mapping, recipe management (prep vs menu), ingredients management, waste log, ML for stock/waste. Mobile-responsive now, ready for iOS/Android later. Reference prototype: https://recipe-radar-assist.lovable.app. Supporting docs: TP Recipe Book, Prep and Ingredients Shelf Life, Menu Flash Cards, Beverage Recipes, Beverage Flash Cards, Barista Prep (in /Users/kvel/Downloads/Restaurant operations 2/).",
+  "started_at": "2026-04-17T00:00:00Z",
+  "updated_at": "2026-04-17T00:00:00Z",
+  "gate_profile": "standard",
+  "status": "completed",
+  "total_steps": 5,
+  "completed_steps": 5,
+  "spec_version": "v1.5",
+  "hitl_decision": "APPROVE",
+  "hitl_notes": "OQ-5 (HACCP) deferred to Phase 2 — restaurant is in Pennsylvania, no state mandate. All 7 open questions resolved. 22-module MVP locked.",
+  "next_pipeline": "architect/design-to-plan",
+  "steps": {
+    "quick-assess": { "status": "completed", "skill": "feature-balance-sheet", "output": ".sdlc/product-owner/feature-intake/feature-balance-sheet-quick.md", "gate_result": "pass", "score": 3.83, "recommendation": "PROCEED" },
+    "write-spec": { "status": "completed", "skill": "spec-gen", "output": ".sdlc/product-owner/feature-intake/spec.md" },
+    "validate-spec": { "status": "completed", "skill": "quality-gate", "output": ".sdlc/product-owner/feature-intake/gate-spec-to-plan.md", "gate_result": "pass" },
+    "deep-assess": { "status": "completed", "skill": "feature-balance-sheet", "output": ".sdlc/product-owner/feature-intake/feature-balance-sheet-deep.md", "score": 3.82, "recommendation": "BUILD" },
+    "briefing": { "status": "completed", "skill": "gate-briefing", "output": ".sdlc/product-owner/feature-intake/gate-briefing.md", "gate_result": "hitl_approved" }
+  }
+}
