@@ -1,0 +1,21 @@
+pipeline:
+  name: "Stakeholder Update"
+  description: "Generate a non-technical status update — progress summary followed by plain-English changelog for stakeholder meetings"
+  role: product-owner
+  trigger: "Before a stakeholder meeting, status email, or sprint check-in"
+
+steps:
+  - id: summarize-progress
+    skill: progress-summary
+    args: "$INPUT"
+    description: "Gather git activity and generate a plain-English progress report"
+
+  - id: translate-changelog
+    skill: changelog-plain
+    args: "$INPUT"
+    depends_on: [summarize-progress]
+    description: "Translate recent changes into jargon-free language for stakeholders"
+
+output:
+  summary: "Stakeholder-ready progress report with plain-English changelog"
+  artifacts: [progress-summary.md, changelog-plain.md]

@@ -1,0 +1,27 @@
+pipeline:
+  name: "Maintenance"
+  description: "Codebase upkeep — dependency updates, tech debt audit, regression check"
+  role: developer
+  trigger: "Periodic codebase maintenance or before major development"
+
+steps:
+  - id: deps
+    skill: dependency-update
+    args: "--fix"
+    description: "Check and update outdated dependencies"
+
+  - id: debt
+    skill: tech-debt-audit
+    args: "full"
+    depends_on: [deps]
+    description: "Full codebase health check"
+
+  - id: regression
+    skill: regression-check
+    args: ""
+    depends_on: [debt]
+    description: "Predict what might break from recent changes"
+
+output:
+  summary: "Maintenance complete — dependencies updated, debt assessed, regressions checked"
+  artifacts: [dependency-report.md, tech-debt-report.md, regression-report.md]

@@ -1,0 +1,21 @@
+pipeline:
+  name: "Design Validation"
+  description: "Validate design implementation — architecture review and API contract check"
+  role: designer
+  trigger: "When validating that implementation matches design intent"
+
+steps:
+  - id: review-design
+    skill: design-review
+    args: "$INPUT"
+    description: "Review architecture and design patterns against design intent"
+
+  - id: api-check
+    skill: api-contract-analyzer
+    args: "main"
+    depends_on: [review-design]
+    description: "Verify API contracts match design specifications"
+
+output:
+  summary: "Design validation complete — architecture and API contracts reviewed"
+  artifacts: [design-review.md, api-report.md]

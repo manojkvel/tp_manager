@@ -1,0 +1,38 @@
+pipeline:
+  name: "Design Handoff"
+  description: "Prepare a design for engineering handoff — extract context, generate spec, review for completeness, and get designer approval"
+  role: designer
+  trigger: "When a design is ready to hand off to engineering"
+
+steps:
+  - id: extract-context
+    skill: design-to-code
+    args: "$INPUT"
+    description: "Extract design context, structure, and component details from Figma"
+
+  - id: generate-spec
+    skill: spec-gen
+    args: "$extract-context.output"
+    depends_on: [extract-context]
+    description: "Generate a structured technical specification from the design context"
+
+  - id: review-spec
+    skill: spec-review
+    args: "$generate-spec.output"
+    depends_on: [generate-spec]
+    description: "Validate spec captures all design intent and acceptance criteria"
+
+  - id: approve-handoff
+    skill: doc-gen
+    args: "$generate-spec.output"
+    depends_on: [review-spec]
+    description: "Generate handoff documentation for engineering team"
+    gate:
+      type: quality
+      on_fail:
+        fallback: hitl
+
+output:
+  summary: "Design handoff package ready — spec generated and reviewed"
+  artifacts: [spec.md, spec-review.md, handoff-doc.md]
+  next_pipeline: "architect/design-to-plan"

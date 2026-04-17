@@ -1,0 +1,30 @@
+pipeline:
+  name: "Incident Response"
+  description: "Incident detection through remediation — detect, triage, assess rollback"
+  role: devops-sre
+  trigger: "When an incident is detected or reported"
+
+steps:
+  - id: detect
+    skill: incident-detector
+    args: "$INPUT"
+    description: "Correlate signals to confirm and classify the incident"
+
+  - id: triage
+    skill: incident-triager
+    args: "$INPUT"
+    depends_on: [detect]
+    description: "Gather context, identify root cause candidates, recommend remediation"
+
+  - id: rollback-check
+    skill: rollback-assessor
+    args: "HEAD~1"
+    depends_on: [triage]
+    description: "Evaluate whether rollback is safe"
+    gate:
+      type: hitl
+      description: "SRE reviews triage report and rollback assessment before taking action"
+
+output:
+  summary: "Incident triaged with rollback assessment — ready for remediation decision"
+  artifacts: [incident-report.md, triage-report.md, rollback-assessment.md]

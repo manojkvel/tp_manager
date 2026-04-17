@@ -1,0 +1,27 @@
+pipeline:
+  name: "Platform Health"
+  description: "Platform governance audit — SLOs, approval workflows, repo standards"
+  role: devops-sre
+  trigger: "Periodic platform governance review"
+
+steps:
+  - id: slo-audit
+    skill: slo-sla-tracker
+    args: "full"
+    description: "Track SLOs, DORA metrics, and error budgets"
+
+  - id: approval-audit
+    skill: approval-workflow-auditor
+    args: "full"
+    depends_on: [slo-audit]
+    description: "Audit branch policies, pipeline gates, and environment controls"
+
+  - id: standards-audit
+    skill: cross-repo-standards-enforcer
+    args: "full"
+    depends_on: [approval-audit]
+    description: "Audit repository against organizational standards"
+
+output:
+  summary: "Platform health audit complete — SLOs, approvals, and standards reviewed"
+  artifacts: [slo-report.md, approval-audit.md, standards-audit.md]

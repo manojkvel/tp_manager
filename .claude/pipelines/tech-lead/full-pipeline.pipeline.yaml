@@ -1,0 +1,18 @@
+pipeline:
+  name: "Full Pipeline"
+  description: "End-to-end delivery automation — delegates to pipeline-orchestrator for the full DAG"
+  role: tech-lead
+  trigger: "When starting a new feature from scratch through to release"
+
+steps:
+  - id: orchestrate
+    skill: pipeline-orchestrator
+    args: "run $INPUT"
+    description: "Execute full SDLC pipeline DAG: spec → plan → tasks → impl → review → release"
+    gate:
+      type: hitl
+      description: "Multiple HITL gates within the pipeline-orchestrator (spec approval, plan approval, release approval)"
+
+output:
+  summary: "Full pipeline execution complete — feature delivered"
+  artifacts: [spec.md, plan.md, tasks.md, implementation-report.md, release-notes.md]

@@ -1,0 +1,27 @@
+pipeline:
+  name: "Test Strategy"
+  description: "Create test plan from spec — review spec, generate tests, check regressions"
+  role: qa
+  trigger: "When a new spec needs a test strategy"
+
+steps:
+  - id: review-spec
+    skill: spec-review
+    args: "$INPUT"
+    description: "Review spec for testability and completeness"
+
+  - id: gen-tests
+    skill: test-gen
+    args: "$INPUT"
+    depends_on: [review-spec]
+    description: "Generate comprehensive tests based on spec acceptance criteria"
+
+  - id: check-regression
+    skill: regression-check
+    args: ""
+    depends_on: [gen-tests]
+    description: "Predict what existing tests might break"
+
+output:
+  summary: "Test strategy created with generated tests and regression analysis"
+  artifacts: [spec-review.md, tests/, regression-report.md]

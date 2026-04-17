@@ -1,0 +1,30 @@
+pipeline:
+  name: "Release Validation"
+  description: "Pre-release quality gate — readiness check, spec compliance, quality enforcement"
+  role: qa
+  trigger: "Before release to validate quality"
+
+steps:
+  - id: readiness
+    skill: release-readiness-checker
+    args: "$INPUT"
+    description: "Aggregate release readiness signals"
+
+  - id: spec-compliance
+    skill: spec-review
+    args: "$INPUT"
+    depends_on: [readiness]
+    description: "Validate all specs are fully implemented"
+
+  - id: quality-enforcement
+    skill: quality-gate
+    args: "impl-to-release $INPUT"
+    depends_on: [spec-compliance]
+    description: "Final quality gate before release"
+    gate:
+      type: quality
+      on_fail: hitl
+
+output:
+  summary: "Release validation complete — quality gate passed"
+  artifacts: [release-readiness.md, spec-review.md, quality-gate.md]

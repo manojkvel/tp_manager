@@ -1,0 +1,21 @@
+pipeline:
+  name: "Spec Collaboration"
+  description: "Validate design aligns with specification — generate spec, review for completeness"
+  role: designer
+  trigger: "When validating design against specification"
+
+steps:
+  - id: gen-spec
+    skill: spec-gen
+    args: "$INPUT"
+    description: "Generate or review structured specification from design requirements"
+
+  - id: review-spec
+    skill: spec-review
+    args: "$gen-spec.output"
+    depends_on: [gen-spec]
+    description: "Validate spec captures all design intent and acceptance criteria"
+
+output:
+  summary: "Spec generated and validated against design requirements"
+  artifacts: [spec.md, spec-review.md]

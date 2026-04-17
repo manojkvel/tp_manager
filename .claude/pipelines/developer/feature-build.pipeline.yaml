@@ -1,0 +1,45 @@
+pipeline:
+  name: "Feature Build"
+  description: "Build a feature from plan — task breakdown, wave scheduling, implementation, spec compliance, fix findings"
+  role: developer
+  trigger: "When a plan is approved and ready for implementation"
+
+steps:
+  - id: break-tasks
+    skill: task-gen
+    args: "$INPUT"
+    description: "Break implementation plan into atomic, implementable tasks"
+
+  - id: schedule
+    skill: wave-scheduler
+    args: "$break-tasks.output"
+    depends_on: [break-tasks]
+    description: "Compute execution waves respecting dependency ordering"
+
+  - id: implement
+    skill: task-implementer
+    args: "$break-tasks.output"
+    depends_on: [schedule]
+    description: "Implement tasks with TDD and traceability"
+
+  - id: verify-spec
+    skill: spec-review
+    args: "$INPUT"
+    depends_on: [implement]
+    description: "Validate implementation matches the original spec"
+    gate:
+      type: quality
+      on_fail:
+        auto_recover: review-fix
+        fallback: hitl
+
+  - id: fix-findings
+    skill: review-fix
+    args: "$verify-spec.output"
+    depends_on: [verify-spec]
+    description: "Auto-fix any CRITICAL or HIGH findings from spec review"
+
+output:
+  summary: "Feature implemented with spec compliance verified"
+  artifacts: [tasks.md, implementation-report.md, spec-review.md]
+  next_pipeline: "developer/pr-workflow"

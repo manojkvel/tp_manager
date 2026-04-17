@@ -1,0 +1,33 @@
+pipeline:
+  name: "Idea to Spec"
+  description: "Transform a rough feature idea into a reviewed, ready-to-plan specification — user story refinement, spec generation, and quality review"
+  role: product-owner
+  trigger: "When a product owner or stakeholder has a feature idea"
+
+steps:
+  - id: refine-story
+    skill: user-story-refiner
+    args: "$INPUT"
+    description: "Transform the rough idea into a structured user story with acceptance criteria"
+
+  - id: generate-spec
+    skill: spec-gen
+    args: "$refine-story.output"
+    depends_on: [refine-story]
+    description: "Generate a full technical specification from the refined user story"
+
+  - id: review-spec
+    skill: spec-review
+    args: "$generate-spec.output"
+    depends_on: [generate-spec]
+    description: "Validate the spec for completeness, testability, and design clarity"
+    gate:
+      type: quality
+      on_fail:
+        auto_recover: spec-fix
+        fallback: hitl
+
+output:
+  summary: "Feature idea refined into a reviewed specification ready for planning"
+  artifacts: [user-story.md, spec.md, spec-review.md]
+  next_pipeline: "architect/design-to-plan"

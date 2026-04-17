@@ -1,0 +1,81 @@
+{
+  "version": "1.0.0",
+  "description": "Default scoring weights for feature balance sheet cost-benefit analysis",
+  "scoring": {
+    "benefit_dimensions": {
+      "user_value": {
+        "weight": 0.30,
+        "description": "Direct value to end users — solves a real problem, improves UX, saves time"
+      },
+      "business_value": {
+        "weight": 0.25,
+        "description": "Revenue impact, competitive advantage, regulatory compliance, market positioning"
+      },
+      "strategic_alignment": {
+        "weight": 0.20,
+        "description": "Alignment with product roadmap, org goals, architectural direction"
+      },
+      "platform_leverage": {
+        "weight": 0.15,
+        "description": "Enables future features, reduces future cost, improves developer experience"
+      },
+      "risk_reduction": {
+        "weight": 0.10,
+        "description": "Reduces technical risk, security exposure, or operational burden"
+      }
+    },
+    "cost_dimensions": {
+      "development_effort": {
+        "weight": 0.30,
+        "description": "Engineering time to build — complexity, unknowns, skill gaps"
+      },
+      "maintenance_burden": {
+        "weight": 0.25,
+        "description": "Ongoing cost — monitoring, bug fixes, dependency updates, support"
+      },
+      "technical_debt": {
+        "weight": 0.20,
+        "description": "Debt introduced — shortcuts, workarounds, coupling, missing tests"
+      },
+      "operational_risk": {
+        "weight": 0.15,
+        "description": "Deployment risk, rollback complexity, blast radius"
+      },
+      "opportunity_cost": {
+        "weight": 0.10,
+        "description": "What else could the team build instead"
+      }
+    },
+    "scale": {
+      "min": 1,
+      "max": 5,
+      "labels": {
+        "1": "Negligible",
+        "2": "Low",
+        "3": "Moderate",
+        "4": "High",
+        "5": "Critical"
+      }
+    }
+  },
+  "thresholds": {
+    "quick_assessment": {
+      "proceed": 3.0,
+      "discuss": 2.0,
+      "no_go": 1.5,
+      "description": "Quick (pre-spec) — score >= proceed → PROCEED, >= discuss → NEEDS DISCUSSION, < no_go → NO GO"
+    },
+    "deep_assessment": {
+      "build": 3.5,
+      "conditional": 2.5,
+      "defer": 2.0,
+      "kill": 1.5,
+      "description": "Deep (post-spec) — BUILD / CONDITIONAL / DEFER / KILL based on score"
+    }
+  },
+  "portfolio_limits": {
+    "max_concurrent_features": 5,
+    "max_total_effort_weeks": 12,
+    "description": "Portfolio constraints — prevent overcommitment"
+  }
+}

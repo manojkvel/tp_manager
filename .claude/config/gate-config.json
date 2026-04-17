@@ -1,0 +1,95 @@
+{
+  "version": "1.0.0",
+  "description": "Default quality gate thresholds for pipeline stage transitions",
+  "profiles": {
+    "minimal": {
+      "description": "Relaxed thresholds for prototyping and spikes",
+      "hitl_gates": ["approve-spec", "approve-release"],
+      "thresholds": {
+        "spec-to-plan": {
+          "min_acceptance_criteria": 2,
+          "min_edge_cases": 1,
+          "require_security_constraints": false,
+          "require_non_goals": false
+        },
+        "plan-to-tasks": {
+          "min_phases": 1,
+          "require_risk_assessment": false,
+          "require_rollback_plan": false
+        },
+        "tasks-to-impl": {
+          "min_task_acceptance_criteria": 1,
+          "require_dependency_graph": false
+        },
+        "impl-to-release": {
+          "min_test_coverage_percent": 40,
+          "max_critical_findings": 1,
+          "max_high_findings": 5,
+          "require_spec_compliance": false,
+          "require_security_audit": false
+        }
+      }
+    },
+    "standard": {
+      "description": "Default thresholds for normal development",
+      "hitl_gates": ["approve-spec", "approve-plan", "approve-release"],
+      "thresholds": {
+        "spec-to-plan": {
+          "min_acceptance_criteria": 3,
+          "min_edge_cases": 2,
+          "require_security_constraints": true,
+          "require_non_goals": true
+        },
+        "plan-to-tasks": {
+          "min_phases": 2,
+          "require_risk_assessment": true,
+          "require_rollback_plan": true
+        },
+        "tasks-to-impl": {
+          "min_task_acceptance_criteria": 2,
+          "require_dependency_graph": true
+        },
+        "impl-to-release": {
+          "min_test_coverage_percent": 70,
+          "max_critical_findings": 0,
+          "max_high_findings": 2,
+          "require_spec_compliance": true,
+          "require_security_audit": true
+        }
+      }
+    },
+    "strict": {
+      "description": "Strict thresholds for compliance-critical and security-sensitive work",
+      "hitl_gates": ["approve-spec", "approve-plan", "approve-tasks", "approve-impl", "approve-release"],
+      "thresholds": {
+        "spec-to-plan": {
+          "min_acceptance_criteria": 5,
+          "min_edge_cases": 4,
+          "require_security_constraints": true,
+          "require_non_goals": true,
+          "require_compliance_constraints": true
+        },
+        "plan-to-tasks": {
+          "min_phases": 2,
+          "require_risk_assessment": true,
+          "require_rollback_plan": true,
+          "require_security_review": true
+        },
+        "tasks-to-impl": {
+          "min_task_acceptance_criteria": 3,
+          "require_dependency_graph": true,
+          "require_test_plan": true
+        },
+        "impl-to-release": {
+          "min_test_coverage_percent": 85,
+          "max_critical_findings": 0,
+          "max_high_findings": 0,
+          "require_spec_compliance": true,
+          "require_security_audit": true,
+          "require_license_audit": true,
+          "require_api_contract_check": true
+        }
+      }
+    }
+  }
+}

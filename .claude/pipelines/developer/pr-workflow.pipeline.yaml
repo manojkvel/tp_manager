@@ -1,0 +1,33 @@
+pipeline:
+  name: "PR Workflow"
+  description: "Prepare a PR with automated quality checks — orchestration, review, security, tests"
+  role: developer
+  trigger: "Before submitting a pull request"
+
+steps:
+  - id: orchestrate
+    skill: pr-orchestrator
+    args: "auto"
+    description: "Analyze PR changes and determine which checks to run"
+
+  - id: code-review
+    skill: review
+    args: ""
+    depends_on: [orchestrate]
+    description: "Comprehensive code review for quality, patterns, and correctness"
+
+  - id: security
+    skill: security-audit
+    args: ""
+    depends_on: [orchestrate]
+    description: "Security vulnerability scan of changed code"
+
+  - id: gen-tests
+    skill: test-gen
+    args: "$orchestrate.output"
+    depends_on: [code-review, security]
+    description: "Generate tests for uncovered code paths"
+
+output:
+  summary: "PR checks complete — review, security, and test generation done"
+  artifacts: [pr-report.md, review.md, security-audit.md]

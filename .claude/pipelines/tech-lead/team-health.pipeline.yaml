@@ -1,0 +1,33 @@
+pipeline:
+  name: "Team Health"
+  description: "Team and process health assessment — ownership, skill gaps, trends, pipeline effectiveness"
+  role: tech-lead
+  trigger: "Periodic team health review or before planning cycle"
+
+steps:
+  - id: ownership
+    skill: code-ownership-mapper
+    args: "risks"
+    description: "Map ownership, knowledge silos, and bus factor risks"
+
+  - id: skill-gaps
+    skill: skill-gap-analyzer
+    args: "full"
+    depends_on: [ownership]
+    description: "Identify missing skills and capability gaps"
+
+  - id: trends
+    skill: report-trends
+    args: "dashboard"
+    depends_on: [skill-gaps]
+    description: "Generate cross-metric health dashboard"
+
+  - id: effectiveness
+    skill: feedback-loop
+    args: "analyze --all"
+    depends_on: [trends]
+    description: "Measure pipeline effectiveness and calibrate estimates"
+
+output:
+  summary: "Team health report with ownership, skill gaps, trends, and process effectiveness"
+  artifacts: [ownership-map.md, skill-gaps.md, trends-dashboard.md, feedback-analysis.md]

@@ -1,0 +1,52 @@
+pipeline:
+  name: "Feature Intake"
+  description: "Evaluate a feature request end-to-end — quick filter, spec, quality gate, deep analysis, executive briefing"
+  role: product-owner
+  trigger: "When a new feature request needs evaluation"
+
+steps:
+  - id: quick-assess
+    skill: feature-balance-sheet
+    args: "quick $INPUT"
+    description: "Quick cost-benefit filter before investing in a full spec"
+    gate:
+      type: decision
+      pass_condition: "recommendation != NO_GO"
+      on_fail: stop
+
+  - id: write-spec
+    skill: spec-gen
+    args: "$INPUT"
+    depends_on: [quick-assess]
+    description: "Generate structured technical specification"
+
+  - id: validate-spec
+    skill: quality-gate
+    args: "spec-to-plan $write-spec.output"
+    depends_on: [write-spec]
+    description: "Validate spec meets quality bar"
+    gate:
+      type: quality
+      on_fail:
+        auto_recover: spec-evolve
+        fallback: hitl
+
+  - id: deep-assess
+    skill: feature-balance-sheet
+    args: "deep $write-spec.output"
+    depends_on: [validate-spec]
+    description: "Full portfolio cost-benefit analysis with spec context"
+
+  - id: briefing
+    skill: gate-briefing
+    args: "--audience executive $write-spec.output"
+    depends_on: [deep-assess]
+    description: "Decision-ready briefing for PO review"
+    gate:
+      type: hitl
+      description: "PO reviews spec + balance sheet before proceeding to planning"
+
+output:
+  summary: "Feature evaluated — spec created and ready for review"
+  artifacts: [spec.md, feature-balance-sheet.md, gate-briefing.md]
+  next_pipeline: "architect/design-to-plan"

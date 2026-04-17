@@ -1,0 +1,33 @@
+pipeline:
+  name: "System Health"
+  description: "Comprehensive architectural health assessment — tech debt, ownership, API contracts, trends"
+  role: architect
+  trigger: "Periodic architectural health review"
+
+steps:
+  - id: debt-audit
+    skill: tech-debt-audit
+    args: "full"
+    description: "Full codebase health check — complexity, duplication, outdated patterns"
+
+  - id: ownership
+    skill: code-ownership-mapper
+    args: "risks"
+    depends_on: [debt-audit]
+    description: "Map ownership, knowledge silos, and bus factor risks"
+
+  - id: api-check
+    skill: api-contract-analyzer
+    args: "main"
+    depends_on: [ownership]
+    description: "Detect breaking API changes"
+
+  - id: trends
+    skill: report-trends
+    args: "all"
+    depends_on: [api-check]
+    description: "Analyze trends across all architectural metrics"
+
+output:
+  summary: "Architectural health report with debt, ownership, API, and trend analysis"
+  artifacts: [tech-debt-report.md, ownership-map.md, api-report.md, trends.md]

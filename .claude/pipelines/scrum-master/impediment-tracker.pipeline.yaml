@@ -1,0 +1,27 @@
+pipeline:
+  name: "Impediment Tracker"
+  description: "Resolve blockers — detect stuck tasks, auto-triage failures, track risks"
+  role: scrum-master
+  trigger: "When impediments are reported or detected"
+
+steps:
+  - id: monitor
+    skill: pipeline-monitor
+    args: "scan --all"
+    description: "Detect stuck tasks, fix loops, stale artifacts, and anomalies"
+
+  - id: triage
+    skill: auto-triage
+    args: "$monitor.output"
+    depends_on: [monitor]
+    description: "Classify failures and attempt automated recovery"
+
+  - id: track-risks
+    skill: risk-tracker
+    args: "scan --all --escalate"
+    depends_on: [triage]
+    description: "Update risk register and escalate worsening signals"
+
+output:
+  summary: "Impediments identified, triaged, and tracked in risk register"
+  artifacts: [pipeline-health.md, triage-report.md, risk-register.md]

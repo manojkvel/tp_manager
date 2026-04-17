@@ -1,0 +1,36 @@
+pipeline:
+  name: "Migration Planning"
+  description: "Plan a technical migration — track current state, analyze impact, generate plan, merge with existing plans"
+  role: architect
+  trigger: "When planning a framework upgrade, library replacement, or pattern adoption"
+
+steps:
+  - id: track-migration
+    skill: migration-tracker
+    args: "init $INPUT"
+    description: "Initialize migration tracking and assess current state"
+
+  - id: analyze-impact
+    skill: impact-analysis
+    args: "$INPUT"
+    depends_on: [track-migration]
+    description: "Analyze blast radius of the migration across codebase"
+
+  - id: generate-plan
+    skill: plan-gen
+    args: "$track-migration.output"
+    depends_on: [analyze-impact]
+    description: "Generate phased implementation plan for the migration"
+    gate:
+      type: hitl
+      description: "Architect reviews migration plan before merging with other plans"
+
+  - id: merge-plans
+    skill: plan-merge
+    args: "$generate-plan.output"
+    depends_on: [generate-plan]
+    description: "Merge migration plan with existing plans to resolve conflicts"
+
+output:
+  summary: "Migration plan generated with impact analysis and merged into project timeline"
+  artifacts: [migration-tracker.md, impact-analysis.md, plan.md]

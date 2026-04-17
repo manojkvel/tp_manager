@@ -1,0 +1,27 @@
+pipeline:
+  name: "Governance"
+  description: "Compliance audit — license compliance, repo standards, approval workflows"
+  role: tech-lead
+  trigger: "Periodic compliance review or before audit"
+
+steps:
+  - id: license-check
+    skill: license-compliance-audit
+    args: "full"
+    description: "Scan all dependencies for OSS license conflicts"
+
+  - id: standards-check
+    skill: cross-repo-standards-enforcer
+    args: "full"
+    depends_on: [license-check]
+    description: "Audit repository against organizational standards"
+
+  - id: approval-check
+    skill: approval-workflow-auditor
+    args: "full"
+    depends_on: [standards-check]
+    description: "Audit branch policies, pipeline gates, and environment controls"
+
+output:
+  summary: "Governance audit complete — license, standards, and approval workflows reviewed"
+  artifacts: [license-audit.md, standards-audit.md, approval-audit.md]

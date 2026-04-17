@@ -1,0 +1,27 @@
+pipeline:
+  name: "Sprint Tracking"
+  description: "Sprint progress dashboard — board sync, scope tracking, risk assessment"
+  role: scrum-master
+  trigger: "During sprint standup or progress check"
+
+steps:
+  - id: sync
+    skill: board-sync
+    args: "status $INPUT"
+    description: "Sync latest implementation status with PM tool"
+
+  - id: scope
+    skill: scope-tracker
+    args: "report $INPUT"
+    depends_on: [sync]
+    description: "Track scope changes with effort deltas"
+
+  - id: risks
+    skill: risk-tracker
+    args: "scan --all"
+    depends_on: [scope]
+    description: "Scan risk register for the sprint"
+
+output:
+  summary: "Sprint tracking dashboard with board status, scope changes, and risks"
+  artifacts: [board-status.md, scope-report.md, risk-register.md]

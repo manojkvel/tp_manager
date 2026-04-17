@@ -1,0 +1,44 @@
+pipeline:
+  name: "Design Implementation"
+  description: "Translate a Figma design into code — extract context, resolve component mappings, implement, and verify visual fidelity"
+  role: designer
+  trigger: "When a Figma design is ready for implementation"
+
+steps:
+  - id: extract-design
+    skill: design-to-code
+    args: "$INPUT"
+    description: "Extract design context, screenshot, and component structure from Figma"
+
+  - id: resolve-mappings
+    skill: component-audit
+    args: "$INPUT"
+    depends_on: [extract-design]
+    description: "Check Code Connect mappings to identify reusable vs. new components"
+
+  - id: implement
+    skill: design-to-code
+    args: "$extract-design.output"
+    depends_on: [resolve-mappings]
+    description: "Generate production code adapted to the project stack and conventions"
+
+  - id: visual-verify
+    skill: visual-review
+    args: "$INPUT"
+    depends_on: [implement]
+    description: "Compare implemented UI against original Figma design for fidelity"
+    gate:
+      type: quality
+      on_fail:
+        auto_recover: design-to-code
+        fallback: hitl
+
+  - id: sync-tokens
+    skill: design-token-sync
+    args: "$INPUT"
+    depends_on: [implement]
+    description: "Ensure any new design tokens from the implementation are synced to the codebase"
+
+output:
+  summary: "Design implemented and verified against Figma source"
+  artifacts: [design-to-code-report.md, visual-review-report.md, design-token-sync-report.md]

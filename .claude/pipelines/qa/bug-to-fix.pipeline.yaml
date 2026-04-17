@@ -1,0 +1,21 @@
+pipeline:
+  name: "Bug to Fix"
+  description: "From a plain-English bug description to a structured report with blast radius analysis — ready for a developer to pick up"
+  role: qa
+  trigger: "When a non-technical user reports a bug"
+
+steps:
+  - id: generate-report
+    skill: bug-report
+    args: "$INPUT"
+    description: "Transform the plain-English bug description into a structured, actionable bug report"
+
+  - id: analyze-impact
+    skill: impact-analysis
+    args: "$generate-report.output"
+    depends_on: [generate-report]
+    description: "Analyze the blast radius of the reported bug across the codebase"
+
+output:
+  summary: "Structured bug report with impact analysis ready for developer triage"
+  artifacts: [bug-report.md, impact-analysis.md]

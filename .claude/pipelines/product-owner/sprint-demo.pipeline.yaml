@@ -1,0 +1,27 @@
+pipeline:
+  name: "Sprint Demo"
+  description: "Prepare a complete sprint demo package — progress summary, demo walkthrough script, and plain-English changelog for the audience"
+  role: product-owner
+  trigger: "Before a sprint review or demo session"
+
+steps:
+  - id: summarize-progress
+    skill: progress-summary
+    args: "$INPUT"
+    description: "Gather sprint activity and generate a progress overview"
+
+  - id: build-demo-script
+    skill: demo-prep
+    args: "$INPUT"
+    depends_on: [summarize-progress]
+    description: "Generate a walkthrough script with click paths, talking points, and landmine warnings"
+
+  - id: translate-changelog
+    skill: changelog-plain
+    args: "$INPUT"
+    depends_on: [summarize-progress]
+    description: "Translate all changes into plain language for the demo audience"
+
+output:
+  summary: "Sprint demo package ready — script, progress report, and plain-English changelog"
+  artifacts: [progress-summary.md, demo-prep.md, changelog-plain.md]

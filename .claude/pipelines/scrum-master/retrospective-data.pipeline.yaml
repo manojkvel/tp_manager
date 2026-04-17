@@ -1,0 +1,27 @@
+pipeline:
+  name: "Retrospective Data"
+  description: "Gather data for retrospectives — pipeline effectiveness, trends, scope analysis"
+  role: scrum-master
+  trigger: "Before sprint retrospective"
+
+steps:
+  - id: effectiveness
+    skill: feedback-loop
+    args: "analyze --all"
+    description: "Analyze pipeline effectiveness and estimate accuracy"
+
+  - id: trends
+    skill: report-trends
+    args: "dashboard"
+    depends_on: [effectiveness]
+    description: "Generate trend dashboard across sprint metrics"
+
+  - id: scope-review
+    skill: scope-tracker
+    args: "trend --all"
+    depends_on: [trends]
+    description: "Review scope change trends across sprints"
+
+output:
+  summary: "Retrospective data package with effectiveness, trends, and scope analysis"
+  artifacts: [feedback-analysis.md, trends-dashboard.md, scope-trends.md]

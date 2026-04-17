@@ -1,0 +1,27 @@
+pipeline:
+  name: "Regression Suite"
+  description: "Regression and performance analysis with trend tracking"
+  role: qa
+  trigger: "Before release or after significant changes"
+
+steps:
+  - id: regression
+    skill: regression-check
+    args: ""
+    description: "Predict what might break from recent changes"
+
+  - id: perf
+    skill: perf-review
+    args: "diff"
+    depends_on: [regression]
+    description: "Review recent changes for performance issues"
+
+  - id: trends
+    skill: report-trends
+    args: "dashboard"
+    depends_on: [perf]
+    description: "Generate quality trend dashboard"
+
+output:
+  summary: "Regression and performance analysis complete with trend dashboard"
+  artifacts: [regression-report.md, perf-review.md, trends-dashboard.md]

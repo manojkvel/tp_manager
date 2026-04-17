@@ -1,0 +1,34 @@
+pipeline:
+  name: "Release Signoff"
+  description: "Release go/no-go decision — readiness check, executive briefing, release notes"
+  role: product-owner
+  trigger: "Before a release to make go/no-go decision"
+
+steps:
+  - id: readiness
+    skill: release-readiness-checker
+    args: "$INPUT"
+    description: "Aggregate signals from pipelines, tests, audits, and docs"
+    gate:
+      type: decision
+      pass_condition: "verdict != NO_GO"
+      on_fail: hitl
+
+  - id: briefing
+    skill: gate-briefing
+    args: "--audience executive --gate approve-release $INPUT"
+    depends_on: [readiness]
+    description: "Generate executive-level release decision briefing"
+    gate:
+      type: hitl
+      description: "PO reviews release readiness and approves release"
+
+  - id: notes
+    skill: release-notes
+    args: "--version $INPUT"
+    depends_on: [briefing]
+    description: "Auto-generate categorized release notes"
+
+output:
+  summary: "Release approved — release notes generated"
+  artifacts: [release-readiness.md, gate-briefing.md, release-notes.md]

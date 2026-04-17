@@ -1,0 +1,37 @@
+pipeline:
+  name: "Design System Sync"
+  description: "Synchronize the design system — extract tokens, audit component coverage, sync values, and generate design system rules"
+  role: designer
+  trigger: "When design tokens or components have been updated in Figma"
+
+steps:
+  - id: extract-tokens
+    skill: design-token-sync
+    args: "$INPUT"
+    description: "Extract current design tokens from Figma variables"
+
+  - id: audit-components
+    skill: component-audit
+    args: "$INPUT"
+    depends_on: [extract-tokens]
+    description: "Audit codebase components against Figma design system for drift"
+
+  - id: sync-tokens
+    skill: design-token-sync
+    args: "$extract-tokens.output"
+    depends_on: [audit-components]
+    description: "Apply token updates to codebase token files"
+    gate:
+      type: quality
+      on_fail:
+        fallback: hitl
+
+  - id: review-system
+    skill: design-review
+    args: "full"
+    depends_on: [sync-tokens]
+    description: "Review the updated design system for consistency and architectural health"
+
+output:
+  summary: "Design system tokens synced and component coverage audited"
+  artifacts: [design-token-sync-report.md, component-audit-report.md, design-review-report.md]

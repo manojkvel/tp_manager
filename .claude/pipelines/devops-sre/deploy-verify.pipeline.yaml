@@ -1,0 +1,31 @@
+pipeline:
+  name: "Deploy & Verify"
+  description: "Post-deployment health check — release readiness, incident detection, SLO tracking"
+  role: devops-sre
+  trigger: "After a deployment to verify health"
+
+steps:
+  - id: readiness
+    skill: release-readiness-checker
+    args: "$INPUT"
+    description: "Verify release met all pre-deployment criteria"
+
+  - id: detect-incidents
+    skill: incident-detector
+    args: "scan"
+    depends_on: [readiness]
+    description: "Correlate deployment with error signals to detect issues"
+
+  - id: slo-check
+    skill: slo-sla-tracker
+    args: "full"
+    depends_on: [detect-incidents]
+    description: "Check SLOs and error budgets post-deployment"
+    gate:
+      type: decision
+      pass_condition: "no_active_incidents && slo_healthy"
+      on_fail: hitl
+
+output:
+  summary: "Post-deployment verification complete — service health confirmed"
+  artifacts: [release-readiness.md, incident-scan.md, slo-report.md]

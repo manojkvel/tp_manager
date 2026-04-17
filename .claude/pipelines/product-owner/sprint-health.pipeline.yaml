@@ -1,0 +1,33 @@
+pipeline:
+  name: "Sprint Health"
+  description: "Sprint dashboard — scope tracking, board sync, trends, and risk assessment"
+  role: product-owner
+  trigger: "During sprint to monitor progress and health"
+
+steps:
+  - id: scope-check
+    skill: scope-tracker
+    args: "report $INPUT"
+    description: "Track scope changes with effort deltas and approval status"
+
+  - id: sync-board
+    skill: board-sync
+    args: "status $INPUT"
+    depends_on: [scope-check]
+    description: "Sync implementation status with PM tool"
+
+  - id: trends
+    skill: report-trends
+    args: "dashboard"
+    depends_on: [sync-board]
+    description: "Generate health dashboard with trend analysis"
+
+  - id: risks
+    skill: risk-tracker
+    args: "scan --all --escalate"
+    depends_on: [trends]
+    description: "Scan risk register and escalate worsening signals"
+
+output:
+  summary: "Sprint health dashboard generated with scope, trends, and risk analysis"
+  artifacts: [scope-report.md, trends-dashboard.md, risk-register.md]

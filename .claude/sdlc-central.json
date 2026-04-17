@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "installed_at": "2026-04-17T14:18:19Z",
+  "source": "/Users/kvel/Documents/manoj_ws/sdlc_central",
+  "agent": "claude-code",
+  "roles": ["all"],
+  "skill_count": 51,
+  "pipelines_installed": true
+}

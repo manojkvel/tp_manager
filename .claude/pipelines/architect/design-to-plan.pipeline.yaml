@@ -1,0 +1,37 @@
+pipeline:
+  name: "Design to Plan"
+  description: "Transform an approved spec into a validated implementation plan with decision tracking"
+  role: architect
+  trigger: "When an approved spec needs an implementation plan"
+
+steps:
+  - id: review-design
+    skill: design-review
+    args: "$INPUT"
+    description: "Review architecture and design patterns for the spec"
+
+  - id: generate-plan
+    skill: plan-gen
+    args: "$INPUT"
+    depends_on: [review-design]
+    description: "Generate implementation plan from the spec"
+
+  - id: validate-plan
+    skill: quality-gate
+    args: "plan-to-tasks $generate-plan.output"
+    depends_on: [generate-plan]
+    description: "Validate plan meets quality bar"
+    gate:
+      type: quality
+      on_fail: hitl
+
+  - id: log-decisions
+    skill: decision-log
+    args: "capture $generate-plan.output"
+    depends_on: [validate-plan]
+    description: "Capture architectural decisions made during planning"
+
+output:
+  summary: "Implementation plan generated and validated with decision log"
+  artifacts: [plan.md, decision-log.md]
+  next_pipeline: "developer/feature-build"
