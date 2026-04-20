@@ -1,0 +1,74 @@
+{
+  "pipeline": "developer/feature-build",
+  "input": ".sdlc/architect/design-to-plan/plan.md (spec v1.6 — Docker-first, EN-only, 21-module MVP)",
+  "started_at": "2026-04-17T23:30:00Z",
+  "updated_at": "2026-04-18T01:10:00Z",
+  "gate_profile": "standard",
+  "status": "in_progress",
+  "total_steps": 5,
+  "completed_steps": 2,
+  "next_pipeline": "developer/pr-workflow",
+  "steps": {
+    "break-tasks": {
+      "status": "completed",
+      "skill": "task-gen",
+      "started_at": "2026-04-17T23:30:00Z",
+      "completed_at": "2026-04-17T23:35:00Z",
+      "output": ".sdlc/developer/feature-build/tasks.md",
+      "total_tasks": 86,
+      "agent_ready_yes": 68,
+      "agent_ready_partial": 14,
+      "agent_ready_no": 4
+    },
+    "schedule": {
+      "status": "completed",
+      "skill": "wave-scheduler",
+      "started_at": "2026-04-17T23:35:00Z",
+      "completed_at": "2026-04-17T23:40:00Z",
+      "output": ".sdlc/developer/feature-build/execution-schedule.json",
+      "waves": 10,
+      "critical_path_weeks": 14,
+      "parallel_efficiency": 0.72,
+      "streams": ["operational", "ml", "hardening"]
+    },
+    "implement": {
+      "status": "partial",
+      "skill": "task-implementer",
+      "scope_selected": "wave-1 (as first slice of the full build request)",
+      "started_at": "2026-04-18T00:00:00Z",
+      "wave_1": {
+        "status": "completed",
+        "completed_at": "2026-04-18T01:10:00Z",
+        "output": "reports/task-implementer-wave1-2026-04-18.md",
+        "tasks_in_wave": 14,
+        "tasks_done": 11,
+        "tasks_partial": 3,
+        "hitl_gate_after": true,
+        "gate_reason": "Azure creds + first deploy verification (execution-schedule.json)"
+      },
+      "waves_remaining": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "tasks_remaining": 72,
+      "blocker": "Waves 2–10 (~17 engineering-weeks) require fresh /task-implementer invocations with narrower scope — context budget prohibits single-session completion."
+    },
+    "verify-spec": {
+      "status": "pending",
+      "skill": "spec-review",
+      "depends_on": ["implement"]
+    },
+    "fix-findings": {
+      "status": "pending",
+      "skill": "review-fix",
+      "depends_on": ["verify-spec"]
+    }
+  },
+  "hitl_gate": {
+    "active": true,
+    "reason": "Scope selection for task-implementer — full feature build spans 16–22 engineering-weeks across 86 tasks and 10 waves. Running all of it autonomously is out of scope for a single pipeline invocation.",
+    "options": [
+      {"id": "a", "label": "Stop here", "scope": "Deliver tasks.md + execution-schedule.json as artifacts. End pipeline."},
+      {"id": "b", "label": "Wave 1 only (~1 week, 14 tasks)", "scope": "Infra + Dockerfiles + docker-compose + IaC + CI/CD + 10 ADRs + feature flags module. Exit = green `docker-compose up` locally + hello-world deployed to staging."},
+      {"id": "c", "label": "A specific phase / wave range", "scope": "User names the slice (e.g., 'waves 1-3', 'phase 2 only')."},
+      {"id": "d", "label": "Full build", "scope": "All 86 tasks over 10 waves. NOT recommended in a single invocation — requires multiple HITL checkpoints after waves 1, 5, 7, 10."}
+    ]
+  }
+}

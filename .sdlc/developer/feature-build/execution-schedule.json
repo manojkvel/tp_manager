@@ -1,0 +1,178 @@
+{
+  "spec": ".sdlc/product-owner/feature-intake/spec.md",
+  "spec_version": "v1.6",
+  "plan": ".sdlc/architect/design-to-plan/plan.md",
+  "tasks": ".sdlc/developer/feature-build/tasks.md",
+  "generated_at": "2026-04-17T23:40:00Z",
+  "total_tasks": 86,
+  "total_waves": 10,
+  "max_parallel": 4,
+  "config": {
+    "max_parallel": 4,
+    "respect_priority": true,
+    "prefer_test_first": true,
+    "max_wave_effort": "XL",
+    "hitl_before_human_tasks": true
+  },
+  "critical_path": [
+    "TASK-001", "TASK-002", "TASK-003", "TASK-004", "TASK-005",
+    "TASK-018", "TASK-019", "TASK-029", "TASK-040", "TASK-052",
+    "TASK-066", "TASK-070", "TASK-080", "TASK-086"
+  ],
+  "critical_path_effort_weeks": 14,
+  "parallel_efficiency": 0.72,
+  "streams": [
+    {
+      "id": "operational",
+      "description": "Critical path — auth → book → operational loop → POS → reports → cutover",
+      "tasks_count": 63
+    },
+    {
+      "id": "ml",
+      "description": "Separable ML stream from Wave 6; can slip without blocking MVP (DEC-011)",
+      "tasks_count": 9,
+      "tasks": ["TASK-071", "TASK-072", "TASK-073", "TASK-074", "TASK-075", "TASK-076", "TASK-077", "TASK-078", "TASK-079"]
+    },
+    {
+      "id": "hardening",
+      "description": "Wave 10 audits + cutover",
+      "tasks_count": 7
+    }
+  ],
+  "waves": [
+    {
+      "wave": 1,
+      "name": "Infrastructure & Docker scaffold",
+      "duration_weeks": 1,
+      "tasks": ["TASK-001","TASK-002","TASK-003","TASK-004","TASK-005","TASK-006","TASK-007","TASK-008","TASK-009","TASK-010","TASK-011","TASK-012","TASK-013","TASK-014"],
+      "effort_sum_band": "S+M+M+M+S+S+L+L+M+S+L+S+M+S",
+      "parallel_slots": 3,
+      "hitl_gate_after": true,
+      "hitl_reason": "First Azure deploy needs owner to provision subscription + DNS + ACR credentials (TASK-007, 009, 010 marked PARTIAL for creds)",
+      "notes": "Monorepo + Dockerfiles per service + docker-compose + IaC + CI/CD + 10 ADRs + feature flags module. Wave 1 exit = a green `docker-compose up` locally AND a deployed hello-world to staging Container Apps."
+    },
+    {
+      "wave": 2,
+      "name": "Schema + Conversions + Audit",
+      "duration_weeks": 2,
+      "tasks": ["TASK-015","TASK-016","TASK-017","TASK-018","TASK-019","TASK-020","TASK-021","TASK-022","TASK-023","TASK-024","TASK-025"],
+      "effort_sum_band": "M+M+L+L+M+M+L+S+XS+M+M",
+      "parallel_slots": 3,
+      "hitl_gate_after": false,
+      "notes": "Property-tested conversions module (AD-4); schema with row-level audit triggers (AD-5); restaurant_id lint rule; seeded portion utensils."
+    },
+    {
+      "wave": 3,
+      "name": "Auth + RBAC",
+      "duration_weeks": 1,
+      "tasks": ["TASK-026","TASK-027","TASK-028","TASK-029","TASK-030","TASK-031"],
+      "effort_sum_band": "M+M+S+L+M+M",
+      "parallel_slots": 2,
+      "hitl_gate_after": false,
+      "notes": "JWT-only API + refresh cookie (AD-6); argon2; role guard; PWA login. TEST tasks (026–028) block IMPLEMENT tasks within the wave."
+    },
+    {
+      "wave": 4,
+      "name": "Ingredients + Suppliers + Settings",
+      "duration_weeks": 1.5,
+      "tasks": ["TASK-032","TASK-033","TASK-034","TASK-035","TASK-036","TASK-037"],
+      "effort_sum_band": "M+L+M+M+L+L",
+      "parallel_slots": 3,
+      "hitl_gate_after": false,
+      "notes": "First user-facing modules. English-only PWA (v1.6). Tests precede implementation per TDD rule."
+    },
+    {
+      "wave": 5,
+      "name": "Recipes + Station views + Migration parsers",
+      "duration_weeks": 1.5,
+      "tasks": ["TASK-038","TASK-039","TASK-040","TASK-041","TASK-042","TASK-043","TASK-044","TASK-045","TASK-046","TASK-047","TASK-048"],
+      "effort_sum_band": "M+M+L+M+L+M+M+M+L+L+S",
+      "parallel_slots": 4,
+      "hitl_gate_after": true,
+      "hitl_reason": "Plan gate advisory #5 — migration dry-run checkpoint before running staging against real owner data. Also task-gen split candidate (≥ 20 files).",
+      "notes": "Largest wave. All 8 migration parsers land; recipes + nested BOM + versioning + station cheat-sheet PDFs."
+    },
+    {
+      "wave": 6,
+      "name": "Operational loop start // ML baseline training kickoff",
+      "duration_weeks": 1.5,
+      "tasks": ["TASK-049","TASK-050","TASK-051","TASK-052","TASK-053","TASK-054","TASK-055","TASK-071"],
+      "effort_sum_band": "M+M+M+M+M+M+L+M",
+      "parallel_slots": 4,
+      "streams_active": ["operational", "ml"],
+      "hitl_gate_after": false,
+      "notes": "Prep sheet + inventory + deliveries PWA screens shipping. ML stream opens (TASK-071 — Holt-Winters baseline)."
+    },
+    {
+      "wave": 7,
+      "name": "Orders + Waste + Migration review UI // ML training pipeline",
+      "duration_weeks": 1.5,
+      "tasks": ["TASK-056","TASK-057","TASK-058","TASK-059","TASK-060","TASK-061","TASK-062","TASK-072","TASK-075"],
+      "effort_sum_band": "M+M+M+M+M+L+M+M+L",
+      "parallel_slots": 4,
+      "streams_active": ["operational", "ml"],
+      "hitl_gate_after": true,
+      "hitl_reason": "Migration review UI first production use — owner needs to approve the dedupe/mapping experience before real batches are promoted.",
+      "notes": "Completes operational loop (order + waste + migration review). ML training pipeline stands up."
+    },
+    {
+      "wave": 8,
+      "name": "Aloha + Reports + Dashboard // ML inference + accuracy dashboard",
+      "duration_weeks": 2,
+      "tasks": ["TASK-063","TASK-064","TASK-065","TASK-066","TASK-067","TASK-068","TASK-069","TASK-070","TASK-073","TASK-074","TASK-076","TASK-077"],
+      "effort_sum_band": "M+M+M+L+L+S+L+L+M+M+M+S",
+      "parallel_slots": 4,
+      "streams_active": ["operational", "ml"],
+      "hitl_gate_after": false,
+      "notes": "Task-gen advisory: if scope feels tight, accuracy dashboard (part of TASK-078) can slip to Wave 9 as already planned."
+    },
+    {
+      "wave": 9,
+      "name": "ML wrap + integration",
+      "duration_weeks": 1,
+      "tasks": ["TASK-078","TASK-079"],
+      "effort_sum_band": "M+M",
+      "parallel_slots": 2,
+      "streams_active": ["ml"],
+      "hitl_gate_after": false,
+      "notes": "Forecast UI wired into prep sheet + ordering screens; accuracy dashboard live."
+    },
+    {
+      "wave": 10,
+      "name": "Cutover + Hardening",
+      "duration_weeks": 2,
+      "tasks": ["TASK-080","TASK-081","TASK-082","TASK-083","TASK-084","TASK-085","TASK-086"],
+      "effort_sum_band": "L+M+M+L+M+M+L",
+      "parallel_slots": 3,
+      "hitl_gate_after": true,
+      "hitl_reason": "Owner UAT on migration review screens + DR drill sign-off + prod promotion approval (§15 DoD #7).",
+      "notes": "Perf, a11y, security, DR drill, OpenAPI, and owner cutover. Exit = live pilot with all 12 DoD items signed."
+    }
+  ],
+  "file_conflicts_resolved": [
+    {
+      "file": "apps/api/prisma/schema.prisma",
+      "tasks": ["TASK-018", "TASK-021"],
+      "resolution": "TASK-018 creates schema in Wave 2; TASK-021 adds audit triggers also in Wave 2 but sequenced after TASK-020 test passes"
+    },
+    {
+      "file": "apps/web/src/pages",
+      "tasks": ["TASK-031", "TASK-037", "TASK-042", "TASK-055", "TASK-062", "TASK-070"],
+      "resolution": "Serialized by wave — each wave adds new pages in a distinct subdirectory; no cross-task overlap within a wave"
+    },
+    {
+      "file": "apps/api/src/migration",
+      "tasks": ["TASK-046", "TASK-047", "TASK-061"],
+      "resolution": "046 + 047 in Wave 5 (parsers + staging engine); 061 in Wave 7 (review UI)"
+    }
+  ],
+  "priority_overrides_applied": [],
+  "hitl_gates": [
+    {"after_wave": 1, "reason": "Azure creds + first deploy verification"},
+    {"after_wave": 5, "reason": "Migration dry-run checkpoint (gate advisory #5)"},
+    {"after_wave": 7, "reason": "Owner review of migration UI before real batch promotion"},
+    {"after_wave": 10, "reason": "Owner UAT + DR drill sign-off + prod cutover"}
+  ],
+  "human_only_tasks": ["TASK-082", "TASK-084", "TASK-086"],
+  "notes": "Schedule matches plan §9 wave table (~15 wk critical + 3 wk hardening buffer, within v1.6 16–22 wk envelope). ML stream runs in parallel from Wave 6; can slip cleanly without blocking MVP per DEC-011."
+}

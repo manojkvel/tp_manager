@@ -1,0 +1,604 @@
+deck,slide_number,item_name,line_index,line_text
+Beverage Flash Cards,1,Beverage Item Descriptions & Pictures,0,Beverage Item Descriptions & Pictures
+Beverage Flash Cards,2,Creamers & Milks,0,Creamers & Milks
+Beverage Flash Cards,2,Creamers & Milks,1,PC Creamers
+Beverage Flash Cards,2,Creamers & Milks,2,Mixture of the PC French vanilla and PC regular creamers served in a soup cup
+Beverage Flash Cards,2,Creamers & Milks,3,Regular milk
+Beverage Flash Cards,2,Creamers & Milks,4,Served in a milk carton
+Beverage Flash Cards,2,Creamers & Milks,5,Milk Alternatives
+Beverage Flash Cards,2,Creamers & Milks,6,Served in a mini glass carafe
+Beverage Flash Cards,2,Creamers & Milks,7,Almond
+Beverage Flash Cards,2,Creamers & Milks,8,Oat
+Beverage Flash Cards,3,Cold Brew,0,Cold Brew
+Beverage Flash Cards,3,Cold Brew,1,Coffee ice cube
+Beverage Flash Cards,3,Cold Brew,2,Carafe of cold brew
+Beverage Flash Cards,3,Cold Brew,3,Guest’s choice of creamer/milk
+Beverage Flash Cards,3,Cold Brew,4,Served in a stemless wineglass
+Beverage Flash Cards,3,Cold Brew,5,On  tray
+Beverage Flash Cards,3,Cold Brew,6,Always ask guest if they would like to add cold foam
+Beverage Flash Cards,4,New Orleans Cold Brew,0,New Orleans Cold Brew
+Beverage Flash Cards,4,New Orleans Cold Brew,1,Coffee ice cube
+Beverage Flash Cards,4,New Orleans Cold Brew,2,Carafe of cold brew
+Beverage Flash Cards,4,New Orleans Cold Brew,3,Guest’s choice of creamer/milk
+Beverage Flash Cards,4,New Orleans Cold Brew,4,Served in a stemless wineglass
+Beverage Flash Cards,4,New Orleans Cold Brew,5,On  tray
+Beverage Flash Cards,4,New Orleans Cold Brew,6,Always ask guest if they would like to add cold foam
+Beverage Flash Cards,5,Marshmallow World Cold Brew,0,Marshmallow World Cold Brew
+Beverage Flash Cards,5,Marshmallow World Cold Brew,1,Coffee ice cube with mocha cold brew
+Beverage Flash Cards,5,Marshmallow World Cold Brew,2,Topped with marshmallow cold foam
+Beverage Flash Cards,5,Marshmallow World Cold Brew,3,Dusted with hot chocolate powder and 3 mini marshmallows
+Beverage Flash Cards,5,Marshmallow World Cold Brew,4,Served in a stemless wineglass
+Beverage Flash Cards,5,Marshmallow World Cold Brew,5,On a tray
+Beverage Flash Cards,6,Vanilla Coconut Cold Brew,0,Vanilla Coconut Cold Brew
+Beverage Flash Cards,6,Vanilla Coconut Cold Brew,1,Coffee ice cube with coconut syrup and cold brew
+Beverage Flash Cards,6,Vanilla Coconut Cold Brew,2,Topped with cold foam
+Beverage Flash Cards,6,Vanilla Coconut Cold Brew,3,Add 3 coconut chips
+Beverage Flash Cards,6,Vanilla Coconut Cold Brew,4,Served in a stemless wineglass
+Beverage Flash Cards,6,Vanilla Coconut Cold Brew,5,On a tray
+Beverage Flash Cards,7,Annie’s Lemonade,0,Annie’s Lemonade
+Beverage Flash Cards,7,Annie’s Lemonade,1,"Ice, Strawberry reduction, and pink lemonade blended"
+Beverage Flash Cards,7,Annie’s Lemonade,2,Served in a tall glass
+Beverage Flash Cards,7,Annie’s Lemonade,3,On a tray
+Beverage Flash Cards,8,Tropical Bliss Smoothie,0,Tropical Bliss Smoothie
+Beverage Flash Cards,8,Tropical Bliss Smoothie,1,"Ice, banana, strawberry reduction, pineapple and OJ blended"
+Beverage Flash Cards,8,Tropical Bliss Smoothie,2,Served in a tall glass
+Beverage Flash Cards,8,Tropical Bliss Smoothie,3,On a tray
+Beverage Flash Cards,9,Cold Pressed Juices,0,Cold Pressed Juices
+Beverage Flash Cards,9,Cold Pressed Juices,1,Ice
+Beverage Flash Cards,9,Cold Pressed Juices,2,"Choice of Kale to the King, Walk on the Beach, or Just Beet It Juice"
+Beverage Flash Cards,9,Cold Pressed Juices,3,Served in a stemless wineglass
+Beverage Flash Cards,9,Cold Pressed Juices,4,On a tray
+Beverage Flash Cards,9,Cold Pressed Juices,5,Just Beet It Juice will get 6oz Just Beet It Juice and 4oz OJ
+Beverage Flash Cards,10,Glass of Juice,0,Glass of Juice
+Beverage Flash Cards,10,Glass of Juice,1,Juice choice of OJ or Apple
+Beverage Flash Cards,10,Glass of Juice,2,Served in a tall glass
+Beverage Flash Cards,10,Glass of Juice,3,On a tray
+Beverage Flash Cards,11,Pam’s Half and Half,0,Pam’s Half and Half
+Beverage Flash Cards,11,Pam’s Half and Half,1,Ice
+Beverage Flash Cards,11,Pam’s Half and Half,2,100% Fresh lemonade & black iced tea
+Beverage Flash Cards,11,Pam’s Half and Half,3,Served in a tall glass
+Beverage Flash Cards,11,Pam’s Half and Half,4,On a tray
+Beverage Flash Cards,11,Pam’s Half and Half,5,Ask the guest if they would like lemon
+Beverage Flash Cards,12,Iced Chai,0,Iced Chai
+Beverage Flash Cards,12,Iced Chai,1,Ice
+Beverage Flash Cards,12,Iced Chai,2,Iced Chai
+Beverage Flash Cards,12,Iced Chai,3,Served in a tall glass
+Beverage Flash Cards,12,Iced Chai,4,On a tray
+Beverage Flash Cards,13,Unsweetened Iced Tea,0,Unsweetened Iced Tea
+Beverage Flash Cards,13,Unsweetened Iced Tea,1,Ice
+Beverage Flash Cards,13,Unsweetened Iced Tea,2,Black iced tea
+Beverage Flash Cards,13,Unsweetened Iced Tea,3,Served in a tall glass
+Beverage Flash Cards,13,Unsweetened Iced Tea,4,On a tray
+Beverage Flash Cards,13,Unsweetened Iced Tea,5,Ask the guest if they would like lemon
+Beverage Flash Cards,14,Lemonade,0,Lemonade
+Beverage Flash Cards,14,Lemonade,1,Ice
+Beverage Flash Cards,14,Lemonade,2,100% Fresh lemonade
+Beverage Flash Cards,14,Lemonade,3,Served in a tall glass
+Beverage Flash Cards,14,Lemonade,4,On a tray
+Beverage Flash Cards,15,Soda,0,Soda
+Beverage Flash Cards,15,Soda,1,Ice
+Beverage Flash Cards,15,Soda,2,Soda choice
+Beverage Flash Cards,15,Soda,3,"Pepsi, Diet Pepsi, Root beer, Ginger Ale, or Pink lemonade"
+Beverage Flash Cards,15,Soda,4,Served in a tall glass
+Beverage Flash Cards,15,Soda,5,On a tray
+Beverage Flash Cards,15,Soda,6,Ask guests if they would like lemon with a diet soda
+Beverage Flash Cards,16,French Press,0,French Press
+Beverage Flash Cards,16,French Press,1,Coffee choice
+Beverage Flash Cards,16,French Press,2,"House Blend, House Blend Decaf, Costa Rican, Kona, Jamaican Blue Mountain, Jersey Devil"
+Beverage Flash Cards,16,French Press,3,Served in a TP mug on a saucer with a doily and sugar stick
+Beverage Flash Cards,16,French Press,4,Guest choice of creamer
+Beverage Flash Cards,16,French Press,5,On a tray
+Beverage Flash Cards,17,Unlimited Gourmet Coffee,0,Unlimited Gourmet Coffee
+Beverage Flash Cards,17,Unlimited Gourmet Coffee,1,Served in a coffee carafe with a TP mug
+Beverage Flash Cards,17,Unlimited Gourmet Coffee,2,Guest’s choice of creamer
+Beverage Flash Cards,17,Unlimited Gourmet Coffee,3,On a tray
+Beverage Flash Cards,18,Hot Tea,0,Hot Tea
+Beverage Flash Cards,18,Hot Tea,1,Hot water in tea pot
+Beverage Flash Cards,18,Hot Tea,2,"TP mug on a saucer with a doily, and tea bag"
+Beverage Flash Cards,18,Hot Tea,3,On a tray
+Beverage Flash Cards,19,Vanilla Chai Tea,0,Vanilla Chai Tea
+Beverage Flash Cards,19,Vanilla Chai Tea,1,Hot Chai
+Beverage Flash Cards,19,Vanilla Chai Tea,2,Served in BIG MUG
+Beverage Flash Cards,19,Vanilla Chai Tea,3,On a tray
+Beverage Flash Cards,20,Salted Caramel Mocha-chino,0,Salted Caramel Mocha-chino
+Beverage Flash Cards,20,Salted Caramel Mocha-chino,1,"Espresso, salted caramel syrup, and hot chocolate"
+Beverage Flash Cards,20,Salted Caramel Mocha-chino,2,"Topped with whipped cream, chocolate sauce, caramel sauce, and sea salt"
+Beverage Flash Cards,20,Salted Caramel Mocha-chino,3,Served in a BIG MUG
+Beverage Flash Cards,20,Salted Caramel Mocha-chino,4,On a tray
+Beverage Flash Cards,21,Latte,0,Latte
+Beverage Flash Cards,21,Latte,1,"Espresso, steamed milk"
+Beverage Flash Cards,21,Latte,2,Served in a BIG MUG
+Beverage Flash Cards,21,Latte,3,On a tray
+Beverage Flash Cards,22,Cappuccino,0,Cappuccino
+Beverage Flash Cards,22,Cappuccino,1,"Espresso, steamed milk and foam"
+Beverage Flash Cards,22,Cappuccino,2,Dusted with cinnamon
+Beverage Flash Cards,22,Cappuccino,3,Served in a BIG MUG
+Beverage Flash Cards,22,Cappuccino,4,On a tray
+Beverage Flash Cards,23,Traditional Hot Chocolate,0,Traditional Hot Chocolate
+Beverage Flash Cards,23,Traditional Hot Chocolate,1,Hot chocolate
+Beverage Flash Cards,23,Traditional Hot Chocolate,2,Topped with whipped cream and chocolate syrup
+Beverage Flash Cards,23,Traditional Hot Chocolate,3,Served in a BIG MUG
+Beverage Flash Cards,23,Traditional Hot Chocolate,4,On a tray
+Beverage Flash Cards,24,Peppermint Hot Chocolate,0,Peppermint Hot Chocolate
+Beverage Flash Cards,24,Peppermint Hot Chocolate,1,Hot chocolate with peppermint syrup
+Beverage Flash Cards,24,Peppermint Hot Chocolate,2,"Topped with whipped cream, chocolate syrup, and peppermint"
+Beverage Flash Cards,24,Peppermint Hot Chocolate,3,Served in a BIG MUG
+Beverage Flash Cards,24,Peppermint Hot Chocolate,4,On a tray
+Beverage Flash Cards,25,Smore’s Hot Chocolate,0,Smore’s Hot Chocolate
+Beverage Flash Cards,25,Smore’s Hot Chocolate,1,Hot chocolate with marshmallow syrup
+Beverage Flash Cards,25,Smore’s Hot Chocolate,2,"Topped with whipped cream, chocolate syrup, graham cracker, and marshmallows"
+Beverage Flash Cards,25,Smore’s Hot Chocolate,3,Served in a BIG MUG
+Beverage Flash Cards,25,Smore’s Hot Chocolate,4,On a tray
+Beverage Flash Cards,26,Cookie Explosion Cup Hot Chocolate,0,Cookie Explosion Cup Hot Chocolate
+Beverage Flash Cards,26,Cookie Explosion Cup Hot Chocolate,1,Hot chocolate
+Beverage Flash Cards,26,Cookie Explosion Cup Hot Chocolate,2,"Topped with whipped cream, Oreo cookie pieces, chocolate chips, and caramel drizzle"
+Beverage Flash Cards,26,Cookie Explosion Cup Hot Chocolate,3,Served in a BIG MUG
+Beverage Flash Cards,26,Cookie Explosion Cup Hot Chocolate,4,On a tray
+Menu Flash Cards,1,Menu Item Descriptions & Pictures,0,Menu Item Descriptions & Pictures
+Menu Flash Cards,2,Avocado Toast,0,Avocado Toast
+Menu Flash Cards,2,Avocado Toast,1,Multigrain Toast
+Menu Flash Cards,2,Avocado Toast,2,smashed avocado
+Menu Flash Cards,2,Avocado Toast,3,plum tomatoes
+Menu Flash Cards,2,Avocado Toast,4,"sea salt, black ground pepper, lemon zest"
+Menu Flash Cards,2,Avocado Toast,5,"On a wooden platter, drizzled with olive oil and serve with side plates per guests"
+Menu Flash Cards,2,Avocado Toast,6,Served with 2 eggs their way on a side plate
+Menu Flash Cards,3,New Yorker Salmon Platter,0,New Yorker Salmon Platter
+Menu Flash Cards,3,New Yorker Salmon Platter,1,Smoked salmon
+Menu Flash Cards,3,New Yorker Salmon Platter,2,pickled onions
+Menu Flash Cards,3,New Yorker Salmon Platter,3,Avocado
+Menu Flash Cards,3,New Yorker Salmon Platter,4,Cucumbers
+Menu Flash Cards,3,New Yorker Salmon Platter,5,Tomato
+Menu Flash Cards,3,New Yorker Salmon Platter,6,Philly cream cheese
+Menu Flash Cards,3,New Yorker Salmon Platter,7,toasted bagel
+Menu Flash Cards,3,New Yorker Salmon Platter,8,everything bagel seasoning
+Menu Flash Cards,3,New Yorker Salmon Platter,9,On a wooden platter and served with side plates per person
+Menu Flash Cards,4,Cinnamon Rolls,0,Cinnamon Rolls
+Menu Flash Cards,4,Cinnamon Rolls,1,5 Cinnamon rolls in a black skillet
+Menu Flash Cards,4,Cinnamon Rolls,2,On a wooden platter with a doilie
+Menu Flash Cards,4,Cinnamon Rolls,3,Drizzle with cheesecake frosting in a tri-tip green squeeze bottle until guest says when to stop
+Menu Flash Cards,4,Cinnamon Rolls,4,Serve with side plates for # of guests
+Menu Flash Cards,5,Chips & Salsa,0,Chips & Salsa
+Menu Flash Cards,5,Chips & Salsa,1,Soup bowl of tri-color tortilla chips
+Menu Flash Cards,5,Chips & Salsa,2,Soup cup of salsa
+Menu Flash Cards,5,Chips & Salsa,3,Ramekin of sour cream
+Menu Flash Cards,5,Chips & Salsa,4,On an oval plate with doilies and a soup spoon
+Menu Flash Cards,5,Chips & Salsa,5,Serve with side plates for # of guests
+Menu Flash Cards,6,Turkey Chili Bowl,0,Turkey Chili Bowl
+Menu Flash Cards,6,Turkey Chili Bowl,1,Turkey chili
+Menu Flash Cards,6,Turkey Chili Bowl,2,"Soup bowl on round plate with a doilie, soup spoon and about 10 tortilla chips"
+Menu Flash Cards,7,Chef’s Soup Bowl,0,Chef’s Soup Bowl
+Menu Flash Cards,7,Chef’s Soup Bowl,1,Choice of soup
+Menu Flash Cards,7,Chef’s Soup Bowl,2,Soup bowl on round plate with a doily and a soup spoon
+Menu Flash Cards,8,Turkey Chili & Chef’s Soup Cups,0,Turkey Chili & Chef’s Soup Cups
+Menu Flash Cards,8,Turkey Chili & Chef’s Soup Cups,1,Turkey chili
+Menu Flash Cards,8,Turkey Chili & Chef’s Soup Cups,2,"Soup cup on a side plate with a doilie, soup spoon and about 5 tortilla chips"
+Menu Flash Cards,8,Turkey Chili & Chef’s Soup Cups,3,OR
+Menu Flash Cards,8,Turkey Chili & Chef’s Soup Cups,4,Choice of soup
+Menu Flash Cards,8,Turkey Chili & Chef’s Soup Cups,5,Soup cup on a side plate with a doily and a soup spoon
+Menu Flash Cards,9,Lemon Blueberry Dream Pancakes,0,Lemon Blueberry Dream Pancakes
+Menu Flash Cards,9,Lemon Blueberry Dream Pancakes,1,Bluebery Pancakes
+Menu Flash Cards,9,Lemon Blueberry Dream Pancakes,2,Lemon Zest
+Menu Flash Cards,9,Lemon Blueberry Dream Pancakes,3,Blueberries
+Menu Flash Cards,9,Lemon Blueberry Dream Pancakes,4,"On an oval plate, served with a bottle of syrup"
+Menu Flash Cards,10,Berry Chocolaty Pancakes,0,Berry Chocolaty Pancakes
+Menu Flash Cards,10,Berry Chocolaty Pancakes,1,Chocolate chip pancakes
+Menu Flash Cards,10,Berry Chocolaty Pancakes,2,Strawberries
+Menu Flash Cards,10,Berry Chocolaty Pancakes,3,Chocolate drizzle
+Menu Flash Cards,10,Berry Chocolaty Pancakes,4,"On an oval plate, served with a ramekin of strawberry reduction and a bottle of syrup"
+Menu Flash Cards,11,Cinnamon Roll Pancakes,0,Cinnamon Roll Pancakes
+Menu Flash Cards,11,Cinnamon Roll Pancakes,1,Cinnamon sugar swirled pancakes
+Menu Flash Cards,11,Cinnamon Roll Pancakes,2,Creamcheese Frosting
+Menu Flash Cards,11,Cinnamon Roll Pancakes,3,"On an oval plate, served with a bottle of syrup"
+Menu Flash Cards,12,Power Grain Pancakes,0,Power Grain Pancakes
+Menu Flash Cards,12,Power Grain Pancakes,1,Power grain pancakes
+Menu Flash Cards,12,Power Grain Pancakes,2,"On an oval plate, served with a scoop of whipped butter on top and a bottle of syrup"
+Menu Flash Cards,13,I Can’t Believe They’re Vegan Pancakes,0,I Can’t Believe They’re Vegan Pancakes
+Menu Flash Cards,13,I Can’t Believe They’re Vegan Pancakes,1,Vegan pancakes made with oat milk and canola oil
+Menu Flash Cards,13,I Can’t Believe They’re Vegan Pancakes,2,Strawberries
+Menu Flash Cards,13,I Can’t Believe They’re Vegan Pancakes,3,Bananas
+Menu Flash Cards,13,I Can’t Believe They’re Vegan Pancakes,4,"On an oval plate, served with a bottle of syrup"
+Menu Flash Cards,14,Plain Pancakes,0,Plain Pancakes
+Menu Flash Cards,14,Plain Pancakes,1,Plain pancakes
+Menu Flash Cards,14,Plain Pancakes,2,"On an oval plate, served with a scoop of whipped butter on top and a bottle of syrup"
+Menu Flash Cards,15,Tropical Crunch Waffle,0,Tropical Crunch Waffle
+Menu Flash Cards,15,Tropical Crunch Waffle,1,Belgian waffle
+Menu Flash Cards,15,Tropical Crunch Waffle,2,Strawberries
+Menu Flash Cards,15,Tropical Crunch Waffle,3,Mango
+Menu Flash Cards,15,Tropical Crunch Waffle,4,Banana
+Menu Flash Cards,15,Tropical Crunch Waffle,5,Granola
+Menu Flash Cards,15,Tropical Crunch Waffle,6,"On an oval plate, served with a ramekin of strawberry reduction and a bottle of syrup"
+Menu Flash Cards,16,Southern Chicken & Waffles,0,Southern Chicken & Waffles
+Menu Flash Cards,16,Southern Chicken & Waffles,1,Belgian Waffle
+Menu Flash Cards,16,Southern Chicken & Waffles,2,Sriracha hot honey chicken tenders
+Menu Flash Cards,16,Southern Chicken & Waffles,3,Chopped bacon
+Menu Flash Cards,16,Southern Chicken & Waffles,4,Sriracha hot honey bottle
+Menu Flash Cards,16,Southern Chicken & Waffles,5,"On a round plate, served with a bottle of syrup"
+Menu Flash Cards,17,Plain Belgian Waffle,0,Plain Belgian Waffle
+Menu Flash Cards,17,Plain Belgian Waffle,1,Belgian waffle
+Menu Flash Cards,17,Plain Belgian Waffle,2,"On a round plate, served with a scoop of whipped butter on top and a bottle of syrup"
+Menu Flash Cards,18,OMG French Toast,0,OMG French Toast
+Menu Flash Cards,18,OMG French Toast,1,Multigrain French toast
+Menu Flash Cards,18,OMG French Toast,2,Honey maple walnuts
+Menu Flash Cards,18,OMG French Toast,3,Chopped bacon
+Menu Flash Cards,18,OMG French Toast,4,Caramel sauce
+Menu Flash Cards,18,OMG French Toast,5,Sweet cream drizzle
+Menu Flash Cards,18,OMG French Toast,6,"On an oval plate, served with a bottle of syrup"
+Menu Flash Cards,18,OMG French Toast,7,*Contains tree nuts
+Menu Flash Cards,19,Strawberry Cheesecake French Toast,0,Strawberry Cheesecake French Toast
+Menu Flash Cards,19,Strawberry Cheesecake French Toast,1,Brioche French toast
+Menu Flash Cards,19,Strawberry Cheesecake French Toast,2,Strawberries
+Menu Flash Cards,19,Strawberry Cheesecake French Toast,3,Cheesecake frosting
+Menu Flash Cards,19,Strawberry Cheesecake French Toast,4,Graham cracker crumbs
+Menu Flash Cards,19,Strawberry Cheesecake French Toast,5,"On an oval plate, served with a ramekin of strawberry reduction and a bottle of syrup"
+Menu Flash Cards,20,Grand French Toast,0,Grand French Toast
+Menu Flash Cards,20,Grand French Toast,1,Brioche French toast
+Menu Flash Cards,20,Grand French Toast,2,"On an oval plate, served with a scoop of whipped butter on top and a bottle of syrup"
+Menu Flash Cards,21,Western Omelet,0,Western Omelet
+Menu Flash Cards,21,Western Omelet,1,3 egg omelet
+Menu Flash Cards,21,Western Omelet,2,Diced ham
+Menu Flash Cards,21,Western Omelet,3,Peppers
+Menu Flash Cards,21,Western Omelet,4,Onions
+Menu Flash Cards,21,Western Omelet,5,Mixed cheddar jack cheese
+Menu Flash Cards,21,Western Omelet,6,"On a round plate, served with a buttered English muffin and choice of potatoes or mixed greens w/ lemon vinaigrette"
+Menu Flash Cards,22,Key West Shrimp Omelet,0,Key West Shrimp Omelet
+Menu Flash Cards,22,Key West Shrimp Omelet,1,3 egg omelet
+Menu Flash Cards,22,Key West Shrimp Omelet,2,Shrimp
+Menu Flash Cards,22,Key West Shrimp Omelet,3,Tomato
+Menu Flash Cards,22,Key West Shrimp Omelet,4,Chopped bacon
+Menu Flash Cards,22,Key West Shrimp Omelet,5,Jack cheese
+Menu Flash Cards,22,Key West Shrimp Omelet,6,Cilantro
+Menu Flash Cards,22,Key West Shrimp Omelet,7,"On a round plate, served with a buttered English muffin and choice of potatoes or mixed greens w/ lemon vinaigrette"
+Menu Flash Cards,22,Key West Shrimp Omelet,8,*Contains shellfish
+Menu Flash Cards,23,G.O.A.T. Omelet,0,G.O.A.T. Omelet
+Menu Flash Cards,23,G.O.A.T. Omelet,1,3 egg omelet
+Menu Flash Cards,23,G.O.A.T. Omelet,2,Caramelized onions
+Menu Flash Cards,23,G.O.A.T. Omelet,3,Roasted red peppers
+Menu Flash Cards,23,G.O.A.T. Omelet,4,Spinach
+Menu Flash Cards,23,G.O.A.T. Omelet,5,Chopped bacon
+Menu Flash Cards,23,G.O.A.T. Omelet,6,Goat cheese
+Menu Flash Cards,23,G.O.A.T. Omelet,7,"On a round plate,served with a buttered English muffin and choice of potatoes or mixed greens w/ lemon vinaigrette"
+Menu Flash Cards,24,Tuscany Omelet,0,Tuscany Omelet
+Menu Flash Cards,24,Tuscany Omelet,1,3 egg omelet
+Menu Flash Cards,24,Tuscany Omelet,2,Pork sausage
+Menu Flash Cards,24,Tuscany Omelet,3,Roasted red peppers
+Menu Flash Cards,24,Tuscany Omelet,4,Spinach
+Menu Flash Cards,24,Tuscany Omelet,5,Mozzarella cheese
+Menu Flash Cards,24,Tuscany Omelet,6,On a round plate. served with a buttered English muffin and choice of potatoes or mixed greens w/ lemon vinaigrette
+Menu Flash Cards,25,Basic Omelet,0,Basic Omelet
+Menu Flash Cards,25,Basic Omelet,1,3 egg omelet
+Menu Flash Cards,25,Basic Omelet,2,Cheddar jack cheese
+Menu Flash Cards,25,Basic Omelet,3,Ingredients can be added
+Menu Flash Cards,25,Basic Omelet,4,"On a round plate, served with a buttered English muffin and choice of potatoes or mixed greens w/ lemon vinaigrette"
+Menu Flash Cards,26,Wilbur Skillet,0,Wilbur Skillet
+Menu Flash Cards,26,Wilbur Skillet,1,Breakfast potatoes
+Menu Flash Cards,26,Wilbur Skillet,2,Tomatoes
+Menu Flash Cards,26,Wilbur Skillet,3,Diced avocado
+Menu Flash Cards,26,Wilbur Skillet,4,Chopped bacon
+Menu Flash Cards,26,Wilbur Skillet,5,Jack cheese
+Menu Flash Cards,26,Wilbur Skillet,6,2 eggs any style
+Menu Flash Cards,26,Wilbur Skillet,7,"In a black skillet on an oval plate with a doily, served with buttered English muffin"
+Menu Flash Cards,27,Basic Skillet,0,Basic Skillet
+Menu Flash Cards,27,Basic Skillet,1,Breakfast potatoes
+Menu Flash Cards,27,Basic Skillet,2,Cheddar jack cheese
+Menu Flash Cards,27,Basic Skillet,3,2 eggs any style
+Menu Flash Cards,27,Basic Skillet,4,Ingredients can be added
+Menu Flash Cards,27,Basic Skillet,5,"In a black skillet on an oval plate with a doily, served with a buttered English muffin"
+Menu Flash Cards,28,Classic Pork Roll Sammy,0,Classic Pork Roll Sammy
+Menu Flash Cards,28,Classic Pork Roll Sammy,1,Over hard eggs
+Menu Flash Cards,28,Classic Pork Roll Sammy,2,Taylor ham
+Menu Flash Cards,28,Classic Pork Roll Sammy,3,American cheese
+Menu Flash Cards,28,Classic Pork Roll Sammy,4,Toasted bagel
+Menu Flash Cards,28,Classic Pork Roll Sammy,5,"On a round plate, served with choice of breakfast potatoes or mixed greens with lemon vinaigrette"
+Menu Flash Cards,29,Grande Huevos Rancheros,0,Grande Huevos Rancheros
+Menu Flash Cards,29,Grande Huevos Rancheros,1,Whole wheat tortilla
+Menu Flash Cards,29,Grande Huevos Rancheros,2,Potatoes
+Menu Flash Cards,29,Grande Huevos Rancheros,3,Peppers
+Menu Flash Cards,29,Grande Huevos Rancheros,4,Onions
+Menu Flash Cards,29,Grande Huevos Rancheros,5,Black beans
+Menu Flash Cards,29,Grande Huevos Rancheros,6,Chicken chorizo
+Menu Flash Cards,29,Grande Huevos Rancheros,7,Chipotle paste
+Menu Flash Cards,29,Grande Huevos Rancheros,8,Cheddar jack cheese
+Menu Flash Cards,29,Grande Huevos Rancheros,9,3 eggs any style
+Menu Flash Cards,29,Grande Huevos Rancheros,10,Salsa
+Menu Flash Cards,29,Grande Huevos Rancheros,11,Avocado
+Menu Flash Cards,29,Grande Huevos Rancheros,12,Cilantro
+Menu Flash Cards,29,Grande Huevos Rancheros,13,"In a large salad bowl, served with a scoop of sour cream on top"
+Menu Flash Cards,30,Shrimp & Grits,0,Shrimp & Grits
+Menu Flash Cards,30,Shrimp & Grits,1,Cheddar Grits
+Menu Flash Cards,30,Shrimp & Grits,2,Shrimp
+Menu Flash Cards,30,Shrimp & Grits,3,Bacon
+Menu Flash Cards,30,Shrimp & Grits,4,Caramelized onions
+Menu Flash Cards,30,Shrimp & Grits,5,Cajun seasoning
+Menu Flash Cards,30,Shrimp & Grits,6,"In a black skillet on an oval plate with a doily, with 1 piece of cornbread and a ½ ramekin of honey sriracha"
+Menu Flash Cards,30,Shrimp & Grits,7,*Contains shellfish
+Menu Flash Cards,31,Breakfast Combo,0,Breakfast Combo
+Menu Flash Cards,31,Breakfast Combo,1,Choice of waffle (round plate) or 2 pancakes (oval plate)
+Menu Flash Cards,31,Breakfast Combo,2,Choice of breakfast meat
+Menu Flash Cards,31,Breakfast Combo,3,Choice of eggs
+Menu Flash Cards,31,Breakfast Combo,4,On a round plate served with choice of breakfast potatoes or mixed greens with lemon vinaigrette
+Menu Flash Cards,31,Breakfast Combo,5,Serve with syrup bottle and butter on waffle or pancakes
+Menu Flash Cards,32,Traditional Eggs,0,Traditional Eggs
+Menu Flash Cards,32,Traditional Eggs,1,Two eggs any style
+Menu Flash Cards,32,Traditional Eggs,2,Buttered English muffin
+Menu Flash Cards,32,Traditional Eggs,3,"On a round plate, served with breakfast potatoes or mixed greens with lemon vinaigrette"
+Menu Flash Cards,32,Traditional Eggs,4,With Meat:
+Menu Flash Cards,32,Traditional Eggs,5,Add choice of breakfast meat
+Menu Flash Cards,33,Big Easy Benedict,0,Big Easy Benedict
+Menu Flash Cards,33,Big Easy Benedict,1,Cornbread
+Menu Flash Cards,33,Big Easy Benedict,2,Avocado
+Menu Flash Cards,33,Big Easy Benedict,3,Cajun seasoned peppers & onions
+Menu Flash Cards,33,Big Easy Benedict,4,Chicken chorizo
+Menu Flash Cards,33,Big Easy Benedict,5,2 poached eggs
+Menu Flash Cards,33,Big Easy Benedict,6,Cajun seasoned hollandaise
+Menu Flash Cards,33,Big Easy Benedict,7,In a large salad bowl served with choice of breakfast potatoes or mixed greens with lemon vinaigrette
+Menu Flash Cards,34,Classic Benedict,0,Classic Benedict
+Menu Flash Cards,34,Classic Benedict,1,Toasted English muffin
+Menu Flash Cards,34,Classic Benedict,2,Sliced tomato
+Menu Flash Cards,34,Classic Benedict,3,Ham
+Menu Flash Cards,34,Classic Benedict,4,2 poached eggs
+Menu Flash Cards,34,Classic Benedict,5,Hollandaise sauce
+Menu Flash Cards,34,Classic Benedict,6,Paprika
+Menu Flash Cards,34,Classic Benedict,7,In a large salad bowl served with choice of breakfast potatoes or mixed greens with lemon vinaigrette
+Menu Flash Cards,35,Avocado Smash Benny,0,Avocado Smash Benny
+Menu Flash Cards,35,Avocado Smash Benny,1,Toasted ciabatta
+Menu Flash Cards,35,Avocado Smash Benny,2,Smashed avocado
+Menu Flash Cards,35,Avocado Smash Benny,3,Sliced tomato
+Menu Flash Cards,35,Avocado Smash Benny,4,Bacon
+Menu Flash Cards,35,Avocado Smash Benny,5,2 poached eggs
+Menu Flash Cards,35,Avocado Smash Benny,6,Hollandaise sauce
+Menu Flash Cards,35,Avocado Smash Benny,7,Paprika
+Menu Flash Cards,35,Avocado Smash Benny,8,In a large salad bowl served with choice of breakfast potatoes or mixed greens with lemon vinaigrette
+Menu Flash Cards,36,Smoked Salmon Benny,0,Smoked Salmon Benny
+Menu Flash Cards,36,Smoked Salmon Benny,1,Toasted English Muffin
+Menu Flash Cards,36,Smoked Salmon Benny,2,Sliced tomato
+Menu Flash Cards,36,Smoked Salmon Benny,3,Pickled onion
+Menu Flash Cards,36,Smoked Salmon Benny,4,Smoked salmon
+Menu Flash Cards,36,Smoked Salmon Benny,5,2 poached eggs
+Menu Flash Cards,36,Smoked Salmon Benny,6,Hollandaise sauce
+Menu Flash Cards,36,Smoked Salmon Benny,7,Everything seasoning
+Menu Flash Cards,36,Smoked Salmon Benny,8,In a large salad bowl served with choice of breakfast potatoes or mixed greens with lemon vinaigrette
+Menu Flash Cards,37,Power Up Grains Bowl,0,Power Up Grains Bowl
+Menu Flash Cards,37,Power Up Grains Bowl,1,"Quinoa, lentils, and black beans"
+Menu Flash Cards,37,Power Up Grains Bowl,2,Spinach
+Menu Flash Cards,37,Power Up Grains Bowl,3,Zucchini
+Menu Flash Cards,37,Power Up Grains Bowl,4,Green Peppers
+Menu Flash Cards,37,Power Up Grains Bowl,5,Mushroom
+Menu Flash Cards,37,Power Up Grains Bowl,6,Choice of Protein
+Menu Flash Cards,37,Power Up Grains Bowl,7,Sliced avocado and pickled onions
+Menu Flash Cards,37,Power Up Grains Bowl,8,"In a square bowl on an oval plate with a doilie, served with mixed greens w/ lemon vinaigrette"
+Menu Flash Cards,37,Power Up Grains Bowl,9,Ramekin of Salsa
+Menu Flash Cards,38,CrossFit  Omelet,0,CrossFit  Omelet
+Menu Flash Cards,38,CrossFit  Omelet,1,Egg white omelet
+Menu Flash Cards,38,CrossFit  Omelet,2,Spinach
+Menu Flash Cards,38,CrossFit  Omelet,3,Zucchini
+Menu Flash Cards,38,CrossFit  Omelet,4,Roasted Red Peppers
+Menu Flash Cards,38,CrossFit  Omelet,5,Caramelized onion
+Menu Flash Cards,38,CrossFit  Omelet,6,Mushroom
+Menu Flash Cards,38,CrossFit  Omelet,7,"On a round plate, served with mixed greens with lemon vinaigrette"
+Menu Flash Cards,39,Health Freak Combo,0,Health Freak Combo
+Menu Flash Cards,39,Health Freak Combo,1,CrossFit Omelet
+Menu Flash Cards,39,Health Freak Combo,2,2 pieces of Chicken Sausage
+Menu Flash Cards,39,Health Freak Combo,3,On a round plate
+Menu Flash Cards,39,Health Freak Combo,4,1 Powergrain Pancake with a scoop of whipped butter and ramekin of syrup on a round plate
+Menu Flash Cards,40,Hot Oatmeal Bowl,0,Hot Oatmeal Bowl
+Menu Flash Cards,40,Hot Oatmeal Bowl,1,Oatmeal in a soup bowl on an oval plate with a doilie
+Menu Flash Cards,40,Hot Oatmeal Bowl,2,"If fruit is added to the oatmeal, they will be in ramekins on the side"
+Menu Flash Cards,40,Hot Oatmeal Bowl,3,Sprinkle with cinnamon
+Menu Flash Cards,40,Hot Oatmeal Bowl,4,Serve with a half ramekin of brown sugar and a soup spoon
+Menu Flash Cards,41,Hot Oatmeal Cup,0,Hot Oatmeal Cup
+Menu Flash Cards,41,Hot Oatmeal Cup,1,Oatmeal in a soup cup on a side plate with a doily
+Menu Flash Cards,41,Hot Oatmeal Cup,2,"If fruit is added to the oatmeal, they will be in ramekins on the side and put on a round plate with a doily"
+Menu Flash Cards,41,Hot Oatmeal Cup,3,Sprinkle with cinnamon
+Menu Flash Cards,41,Hot Oatmeal Cup,4,Serve with a half ramekin of brown sugar and a soup spoon
+Menu Flash Cards,42,Cosmopolitan Salad,0,Cosmopolitan Salad
+Menu Flash Cards,42,Cosmopolitan Salad,1,Mixed greens
+Menu Flash Cards,42,Cosmopolitan Salad,2,Cranberry Walnut Chicken Salad
+Menu Flash Cards,42,Cosmopolitan Salad,3,Pineapple
+Menu Flash Cards,42,Cosmopolitan Salad,4,Grapes
+Menu Flash Cards,42,Cosmopolitan Salad,5,Dried Cranberries
+Menu Flash Cards,42,Cosmopolitan Salad,6,Honey maple walnuts
+Menu Flash Cards,42,Cosmopolitan Salad,7,"In a large salad bowl, served with choice of dressing in a ramekin on the side"
+Menu Flash Cards,42,Cosmopolitan Salad,8,*Contains tree nuts
+Menu Flash Cards,43,Chop Chop Salad,0,Chop Chop Salad
+Menu Flash Cards,43,Chop Chop Salad,1,Chopped romaine lettuce
+Menu Flash Cards,43,Chop Chop Salad,2,Diced tomato
+Menu Flash Cards,43,Chop Chop Salad,3,Diced cucumber
+Menu Flash Cards,43,Chop Chop Salad,4,Diced onion
+Menu Flash Cards,43,Chop Chop Salad,5,Chopped bacon
+Menu Flash Cards,43,Chop Chop Salad,6,Chicken tenders
+Menu Flash Cards,43,Chop Chop Salad,7,Cheddar jack cheese
+Menu Flash Cards,43,Chop Chop Salad,8,"In a large salad bowl, served with choice of dressing in a ramekin on the side"
+Menu Flash Cards,44,Martha’s Vineyard Salad,0,Martha’s Vineyard Salad
+Menu Flash Cards,44,Martha’s Vineyard Salad,1,Mixed greens
+Menu Flash Cards,44,Martha’s Vineyard Salad,2,Grilled chicken
+Menu Flash Cards,44,Martha’s Vineyard Salad,3,Strawberries
+Menu Flash Cards,44,Martha’s Vineyard Salad,4,Blueberries
+Menu Flash Cards,44,Martha’s Vineyard Salad,5,Mango
+Menu Flash Cards,44,Martha’s Vineyard Salad,6,Honey maple walnuts
+Menu Flash Cards,44,Martha’s Vineyard Salad,7,Toasted coconut
+Menu Flash Cards,44,Martha’s Vineyard Salad,8,"In a large salad bowl, served with choice of dressing in a ramekin on the side"
+Menu Flash Cards,44,Martha’s Vineyard Salad,9,*Contains tree nuts
+Menu Flash Cards,45,Chicken Pesto Panini,0,Chicken Pesto Panini
+Menu Flash Cards,45,Chicken Pesto Panini,1,Grilled chicken
+Menu Flash Cards,45,Chicken Pesto Panini,2,Zucchini
+Menu Flash Cards,45,Chicken Pesto Panini,3,Roasted red peppers
+Menu Flash Cards,45,Chicken Pesto Panini,4,Mozzarella cheese
+Menu Flash Cards,45,Chicken Pesto Panini,5,Pesto (Nut free)
+Menu Flash Cards,45,Chicken Pesto Panini,6,Pressed Ciabatta bread
+Menu Flash Cards,45,Chicken Pesto Panini,7,"On a round plate, served with choice of chips and a ramekin of salsa or dressed mixed greens with lemon vinaigrette"
+Menu Flash Cards,45,Chicken Pesto Panini,8,*Our pesto is nut free
+Menu Flash Cards,46,Cran-Walnut Chicken Salad Sandwich,0,Cran-Walnut Chicken Salad Sandwich
+Menu Flash Cards,46,Cran-Walnut Chicken Salad Sandwich,1,Cranberry walnut chicken salad
+Menu Flash Cards,46,Cran-Walnut Chicken Salad Sandwich,2,Spinach
+Menu Flash Cards,46,Cran-Walnut Chicken Salad Sandwich,3,Choice of bread or wrap
+Menu Flash Cards,46,Cran-Walnut Chicken Salad Sandwich,4,"On a round plate, served with choice of chips and a ramekin of salsa or dressed mixed greens with lemon vinaigrette"
+Menu Flash Cards,46,Cran-Walnut Chicken Salad Sandwich,5,*Contains tree nuts
+Menu Flash Cards,47,Nashville Hot Honey Chicken Wrap,0,Nashville Hot Honey Chicken Wrap
+Menu Flash Cards,47,Nashville Hot Honey Chicken Wrap,1,Sriracha hot honey crispy chicken tenders
+Menu Flash Cards,47,Nashville Hot Honey Chicken Wrap,2,Pickles
+Menu Flash Cards,47,Nashville Hot Honey Chicken Wrap,3,Tomatoes
+Menu Flash Cards,47,Nashville Hot Honey Chicken Wrap,4,Romaine lettuce
+Menu Flash Cards,47,Nashville Hot Honey Chicken Wrap,5,Mayo
+Menu Flash Cards,47,Nashville Hot Honey Chicken Wrap,6,Wheat tortilla
+Menu Flash Cards,47,Nashville Hot Honey Chicken Wrap,7,"On a round plate, served with choice of chips and a ramekin of salsa or dressed mixed greens with lemon vinaigrette"
+Menu Flash Cards,48,Pavo Cubano,0,Pavo Cubano
+Menu Flash Cards,48,Pavo Cubano,1,Turkey
+Menu Flash Cards,48,Pavo Cubano,2,Ham
+Menu Flash Cards,48,Pavo Cubano,3,Tomato
+Menu Flash Cards,48,Pavo Cubano,4,Pickles
+Menu Flash Cards,48,Pavo Cubano,5,Swiss cheese
+Menu Flash Cards,48,Pavo Cubano,6,Cilantro honey mustard
+Menu Flash Cards,48,Pavo Cubano,7,Ciabatta bread
+Menu Flash Cards,48,Pavo Cubano,8,"On a round plate, served with choice of chips and a ramekin of salsa or dressed mixed greens with lemon vinaigrette"
+Menu Flash Cards,49,Roadhouse Bacon Stack,0,Roadhouse Bacon Stack
+Menu Flash Cards,49,Roadhouse Bacon Stack,1,Bacon
+Menu Flash Cards,49,Roadhouse Bacon Stack,2,Tomato
+Menu Flash Cards,49,Roadhouse Bacon Stack,3,Caramelized onion
+Menu Flash Cards,49,Roadhouse Bacon Stack,4,Spinach
+Menu Flash Cards,49,Roadhouse Bacon Stack,5,Chipotle aioli
+Menu Flash Cards,49,Roadhouse Bacon Stack,6,Cheddar jack cheese
+Menu Flash Cards,49,Roadhouse Bacon Stack,7,3 slices of sourdough bread
+Menu Flash Cards,49,Roadhouse Bacon Stack,8,"On a round plate, served with choice of chips and a ramekin of salsa or dressed mixed greens with lemon vinaigrette"
+Menu Flash Cards,50,Seaside Jersey Club,0,Seaside Jersey Club
+Menu Flash Cards,50,Seaside Jersey Club,1,Turkey
+Menu Flash Cards,50,Seaside Jersey Club,2,Bacon
+Menu Flash Cards,50,Seaside Jersey Club,3,Swiss cheese
+Menu Flash Cards,50,Seaside Jersey Club,4,Romaine lettuce
+Menu Flash Cards,50,Seaside Jersey Club,5,Sliced tomato
+Menu Flash Cards,50,Seaside Jersey Club,6,Onion rings
+Menu Flash Cards,50,Seaside Jersey Club,7,Toasted multigrain bread
+Menu Flash Cards,50,Seaside Jersey Club,8,"On a round plate, served with choice of chips and a ramekin of salsa or dressed mixed greens with lemon vinaigrette"
+Menu Flash Cards,51,Combo Soup & Salad,0,Combo Soup & Salad
+Menu Flash Cards,51,Combo Soup & Salad,1,Half portion of soup in a soup cup on an oval plate with a doilie
+Menu Flash Cards,51,Combo Soup & Salad,2,Half portion of salad in a square bowl and choice of dressing in a ramekin on an oval plate with a doilie
+Menu Flash Cards,52,Combo Soup & Sandwich,0,Combo Soup & Sandwich
+Menu Flash Cards,52,Combo Soup & Sandwich,1,Half portion of soup in a soup cup on an oval plate with a doilie
+Menu Flash Cards,52,Combo Soup & Sandwich,2,Half portion of sandwich on an oval plate
+Menu Flash Cards,53,Combo Sandwich & Sandwich,0,Combo Sandwich & Sandwich
+Menu Flash Cards,53,Combo Sandwich & Sandwich,1,Half portion of each sandwich on an oval plate
+Menu Flash Cards,54,Combo Sandwich & Salad,0,Combo Sandwich & Salad
+Menu Flash Cards,54,Combo Sandwich & Salad,1,Half portion of soup in a soup cup on an oval plate with a doilie
+Menu Flash Cards,54,Combo Sandwich & Salad,2,Half portion of sandwich on an oval plate
+Menu Flash Cards,55,Combo Mac & Cheese,0,Combo Mac & Cheese
+Menu Flash Cards,55,Combo Mac & Cheese,1,1 pack of mac & cheese in a soup cup on an oval plate with a doilie
+Menu Flash Cards,55,Combo Mac & Cheese,2,"Half portion of sandwich, salad or soup cup on an oval plate"
+Menu Flash Cards,56,Kid’s Eggies,0,Kid’s Eggies
+Menu Flash Cards,56,Kid’s Eggies,1,Choice of 2 eggs
+Menu Flash Cards,56,Kid’s Eggies,2,Breakfast potatoes
+Menu Flash Cards,56,Kid’s Eggies,3,Dry English muffin
+Menu Flash Cards,56,Kid’s Eggies,4,Served on a round plate
+Menu Flash Cards,57,Kid’s Daisy Cakes,0,Kid’s Daisy Cakes
+Menu Flash Cards,57,Kid’s Daisy Cakes,1,Silver dollar pancakes
+Menu Flash Cards,57,Kid’s Daisy Cakes,2,Served on a round plate
+Menu Flash Cards,57,Kid’s Daisy Cakes,3,Ramekin of bananas and strawberries
+Menu Flash Cards,57,Kid’s Daisy Cakes,4,Served with a bottle of syrup
+Menu Flash Cards,58,Kid’s Bowl of Cereal,0,Kid’s Bowl of Cereal
+Menu Flash Cards,58,Kid’s Bowl of Cereal,1,Choice of cereal
+Menu Flash Cards,58,Kid’s Bowl of Cereal,2,Served in a soup bowl on an oval plate with a doilie
+Menu Flash Cards,58,Kid’s Bowl of Cereal,3,Ceramic pitcher of milk choice and a soup spoon
+Menu Flash Cards,59,Kid’s Volcano French Toast,0,Kid’s Volcano French Toast
+Menu Flash Cards,59,Kid’s Volcano French Toast,1,French toast strips
+Menu Flash Cards,59,Kid’s Volcano French Toast,2,Sliced strawberries
+Menu Flash Cards,59,Kid’s Volcano French Toast,3,Whipped cream
+Menu Flash Cards,59,Kid’s Volcano French Toast,4,Served on a round plate with a bottle of syrup
+Menu Flash Cards,60,Kid’s Pancakes,0,Kid’s Pancakes
+Menu Flash Cards,60,Kid’s Pancakes,1,2 Pancakes
+Menu Flash Cards,60,Kid’s Pancakes,2,Served on an oval plate with a purple scoop of butter and a bottle of syrup
+Menu Flash Cards,61,Kid’s Waffle Wedges,0,Kid’s Waffle Wedges
+Menu Flash Cards,61,Kid’s Waffle Wedges,1,1 Belgian waffle cut in wedges
+Menu Flash Cards,61,Kid’s Waffle Wedges,2,Served on an oval plate with a purple scoop of butter and a bottle of syrup
+Menu Flash Cards,62,Kid’s French Toast,0,Kid’s French Toast
+Menu Flash Cards,62,Kid’s French Toast,1,2 slices of French toast
+Menu Flash Cards,62,Kid’s French Toast,2,Served on an oval plate with a purple scoop of butter and a bottle of  syrup
+Menu Flash Cards,63,Cinnamon Swirlz,0,Cinnamon Swirlz
+Menu Flash Cards,63,Cinnamon Swirlz,1,Cinnamon sugar swirl
+Menu Flash Cards,63,Cinnamon Swirlz,2,Cream cheese frosting drizzle
+Menu Flash Cards,64,Cookies & Cream Style,0,Cookies & Cream Style
+Menu Flash Cards,64,Cookies & Cream Style,1,Oreo cookie pieces
+Menu Flash Cards,64,Cookies & Cream Style,2,Whipped cream
+Menu Flash Cards,65,Kid’s Fruity Style,0,Kid’s Fruity Style
+Menu Flash Cards,65,Kid’s Fruity Style,1,Bananas
+Menu Flash Cards,65,Kid’s Fruity Style,2,Blueberries
+Menu Flash Cards,65,Kid’s Fruity Style,3,Strawberries
+Menu Flash Cards,65,Kid’s Fruity Style,4,Served with syrup
+Menu Flash Cards,66,Kid’s S’Mores Style,0,Kid’s S’Mores Style
+Menu Flash Cards,66,Kid’s S’Mores Style,1,Mini marshmallows
+Menu Flash Cards,66,Kid’s S’Mores Style,2,Chocolate chips
+Menu Flash Cards,66,Kid’s S’Mores Style,3,Graham cracker crumbs
+Menu Flash Cards,66,Kid’s S’Mores Style,4,Chocolate syrup
+Menu Flash Cards,67,Kid’s Grilled Cheese,0,Kid’s Grilled Cheese
+Menu Flash Cards,67,Kid’s Grilled Cheese,1,Sourdough Bread
+Menu Flash Cards,67,Kid’s Grilled Cheese,2,American Cheese
+Menu Flash Cards,67,Kid’s Grilled Cheese,3,Choice of kid’s side
+Menu Flash Cards,67,Kid’s Grilled Cheese,4,Served on a round plate
+Menu Flash Cards,68,Mac N Cheese,0,Mac N Cheese
+Menu Flash Cards,68,Mac N Cheese,1,Kraft White Cheddar Mac N Cheese
+Menu Flash Cards,68,Mac N Cheese,2,Choice of kid’s side
+Menu Flash Cards,68,Mac N Cheese,3,Served in soup bowl on an oval plate with a doilie
+Menu Flash Cards,69,Kid’s Chicken Tenders,0,Kid’s Chicken Tenders
+Menu Flash Cards,69,Kid’s Chicken Tenders,1,3 Tyson Chicken Tenders
+Menu Flash Cards,69,Kid’s Chicken Tenders,2,Choice of Kid’s Side
+Menu Flash Cards,69,Kid’s Chicken Tenders,3,Served on a round plate
+Menu Flash Cards,70,Side of Multigrain,0,Side of Multigrain
+Menu Flash Cards,70,Side of Multigrain,1,Two slices of multigrain on a side plate
+Menu Flash Cards,71,Side of Sourdough,0,Side of Sourdough
+Menu Flash Cards,71,Side of Sourdough,1,Two slices of toasted sourdough on a side plate
+Menu Flash Cards,72,Side of Rye,0,Side of Rye
+Menu Flash Cards,72,Side of Rye,1,Two slices of toasted rye on a side plate
+Menu Flash Cards,73,Side of English Muffin,0,Side of English Muffin
+Menu Flash Cards,73,Side of English Muffin,1,One whole toasted English muffin on a side plate
+Menu Flash Cards,74,Side of Bagel,0,Side of Bagel
+Menu Flash Cards,74,Side of Bagel,1,One whole toasted Bagel on a side plate
+Menu Flash Cards,75,Side of Ciabatta,0,Side of Ciabatta
+Menu Flash Cards,75,Side of Ciabatta,1,One whole toasted ciabatta on a side plate
+Menu Flash Cards,76,Side of Udi’s Gluten Free Bread,0,Side of Udi’s Gluten Free Bread
+Menu Flash Cards,76,Side of Udi’s Gluten Free Bread,1,Two slices of toasted Udi’s Gluten Free bread on a side plate
+Menu Flash Cards,77,Side of Cornbread,0,Side of Cornbread
+Menu Flash Cards,77,Side of Cornbread,1,Two pieces of toasted cornbread on a side plate
+Menu Flash Cards,78,Side of Bacon,0,Side of Bacon
+Menu Flash Cards,78,Side of Bacon,1,Three pieces of bacon on a side plate
+Menu Flash Cards,79,Side of Pork Roll,0,Side of Pork Roll
+Menu Flash Cards,79,Side of Pork Roll,1,Three pieces of pork roll on a side plate
+Menu Flash Cards,80,Side of Ham,0,Side of Ham
+Menu Flash Cards,80,Side of Ham,1,Two slices of seared ham on a side plate
+Menu Flash Cards,81,Side of Chicken Sausage,0,Side of Chicken Sausage
+Menu Flash Cards,81,Side of Chicken Sausage,1,Two pieces of chicken sausage on a side plate
+Menu Flash Cards,82,Side of Pork Sausage,0,Side of Pork Sausage
+Menu Flash Cards,82,Side of Pork Sausage,1,Two pieces of pork sausage on a side plate
+Menu Flash Cards,83,Side of Beyond Breakfast Sausage,0,Side of Beyond Breakfast Sausage
+Menu Flash Cards,83,Side of Beyond Breakfast Sausage,1,Two pieces of Beyond Breakfast Sausage on a side plate
+Menu Flash Cards,84,Side of Grilled Chicken,0,Side of Grilled Chicken
+Menu Flash Cards,84,Side of Grilled Chicken,1,1 grilled chicken breast (10-11 slices) on a side plate
+Menu Flash Cards,85,Side of Chicken Tenders,0,Side of Chicken Tenders
+Menu Flash Cards,85,Side of Chicken Tenders,1,Three chicken tenders on a side plate
+Menu Flash Cards,86,Side of Scrambled Eggs,0,Side of Scrambled Eggs
+Menu Flash Cards,86,Side of Scrambled Eggs,1,Two scrambled eggs on a side plate
+Menu Flash Cards,87,Side of Egg Whites,0,Side of Egg Whites
+Menu Flash Cards,87,Side of Egg Whites,1,Two scrambled egg whites on a side plate
+Menu Flash Cards,88,Side of Sunny Side Up Eggs,0,Side of Sunny Side Up Eggs
+Menu Flash Cards,88,Side of Sunny Side Up Eggs,1,Two sunny side up eggs on a side plate
+Menu Flash Cards,89,Side of Over Easy Eggs,0,Side of Over Easy Eggs
+Menu Flash Cards,89,Side of Over Easy Eggs,1,Two over easy eggs on a side plate
+Menu Flash Cards,90,Side of Over Medium Eggs,0,Side of Over Medium Eggs
+Menu Flash Cards,90,Side of Over Medium Eggs,1,Two over medium eggs on a side plate
+Menu Flash Cards,91,Side of Over Hard Eggs,0,Side of Over Hard Eggs
+Menu Flash Cards,91,Side of Over Hard Eggs,1,Two over hard eggs on a side plate
+Menu Flash Cards,92,Side of Poached Eggs,0,Side of Poached Eggs
+Menu Flash Cards,92,Side of Poached Eggs,1,Two poached eggs in a soup cup on a side plate with a doilie
+Menu Flash Cards,93,Side of Vegan Just Eggs,0,Side of Vegan Just Eggs
+Menu Flash Cards,93,Side of Vegan Just Eggs,1,Two scrambled Just Eggs on a side plate
+Menu Flash Cards,94,Side of Potatoes,0,Side of Potatoes
+Menu Flash Cards,94,Side of Potatoes,1,Potatoes on a side plate
+Menu Flash Cards,95,Side of Citrus Dressed Mixed Greens,0,Side of Citrus Dressed Mixed Greens
+Menu Flash Cards,95,Side of Citrus Dressed Mixed Greens,1,Mixed greens in a soup bowl drizzled with lemon vinaigrette
+Menu Flash Cards,96,Side of Cheese Grits,0,Side of Cheese Grits
+Menu Flash Cards,96,Side of Cheese Grits,1,Cheese Grits in a soup cup on a side plate with a doilie and a soup spoon
+Menu Flash Cards,97,Side of Mac & Cheese,0,Side of Mac & Cheese
+Menu Flash Cards,97,Side of Mac & Cheese,1,White cheddar mac & cheese in a soup cup on a side plate with a doilie
+Menu Flash Cards,98,Fruit Cup,0,Fruit Cup
+Menu Flash Cards,98,Fruit Cup,1,"Pineapple, Grapes, Strawberries and Blueberries"
+Menu Flash Cards,98,Fruit Cup,2,In a soup cup on a side plate with a doilie
+Menu Flash Cards,98,Fruit Cup,3,"Served when subbing for mixed greens, potatoes, or bread"
+Menu Flash Cards,99,Fruit Bowl,0,Fruit Bowl
+Menu Flash Cards,99,Fruit Bowl,1,"Pineapple, Grapes, Banana, Strawberries, and Blueberries"
+Menu Flash Cards,99,Fruit Bowl,2,In a soup bowl on a round plate with a doilie

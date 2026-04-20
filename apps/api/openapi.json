@@ -1,0 +1,91 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TP Manager API",
+    "version": "1.6.0",
+    "description": "REST API for the TP Manager restaurant operations platform. Every response uses the envelope { data, error }. All endpoints require authentication unless marked public."
+  },
+  "servers": [{ "url": "/api/v1", "description": "API root" }],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    },
+    "schemas": {
+      "Envelope": {
+        "type": "object",
+        "properties": {
+          "data": {},
+          "error": {
+            "oneOf": [
+              { "type": "null" },
+              { "type": "object", "properties": { "code": { "type": "string" }, "message": { "type": "string" } } }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Login with email + password",
+        "security": [],
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Envelope" } } } } }
+      }
+    },
+    "/auth/logout": { "post": { "summary": "Clear refresh cookie", "responses": { "204": { "description": "No content" } } } },
+    "/auth/refresh": { "post": { "summary": "Rotate access token via refresh cookie", "security": [], "responses": { "200": { "description": "OK" } } } },
+    "/auth/forgot-password": { "post": { "summary": "Kick off password reset", "security": [], "responses": { "202": { "description": "Accepted" } } } },
+    "/ingredients": { "get": { "summary": "List ingredients" }, "post": { "summary": "Create ingredient" } },
+    "/ingredients/{id}": { "get": { "summary": "Get ingredient" }, "put": { "summary": "Update" }, "delete": { "summary": "Soft-archive" } },
+    "/suppliers": { "get": {}, "post": {} },
+    "/suppliers/{id}": { "get": {}, "put": {} },
+    "/suppliers/{id}/offers": { "get": {}, "post": {} },
+    "/recipes": { "get": {}, "post": {} },
+    "/recipes/{id}": { "get": {}, "put": {} },
+    "/recipes/{id}/versions": { "get": {}, "post": { "summary": "Append new version" } },
+    "/recipes/{id}/archive": { "post": { "summary": "Soft-archive recipe" } },
+    "/recipes/{id}/cost": { "get": { "summary": "Plated cost for current version" } },
+    "/recipe-versions/{version_id}/cost": { "get": { "summary": "Plated cost for a specific version" } },
+    "/recipes/{id}/pdf": { "get": { "summary": "Printable flash-card HTML (browser Save-as-PDF)", "description": "§6.3 AC-6. Returns text/html with @media print CSS so the browser renders the card as a PDF via Ctrl+P / \u2318P.", "responses": { "200": { "description": "HTML", "content": { "text/html": {} } } } } },
+    "/recipes/station/{station}": { "get": { "summary": "Station view (cost hidden)" } },
+    "/recipes/station/{station}/pdf": { "get": { "summary": "Printable 4-up station cheat-sheet HTML", "description": "\u00a76.3b AC-3. Returns text/html with a 2-col @media print grid so the browser renders a 4-up sheet per US Letter / A4 page.", "responses": { "200": { "description": "HTML", "content": { "text/html": {} } } } } },
+    "/settings/locations": { "get": {}, "post": {} },
+    "/settings/utensils": { "get": {}, "post": {} },
+    "/settings/waste-reasons": { "get": {}, "post": {} },
+    "/settings/par-levels": { "get": {}, "post": {} },
+    "/prep/sheet/today": { "get": { "summary": "Today's prep list" } },
+    "/prep/runs": { "post": {} },
+    "/inventory/counts": { "get": {}, "post": {} },
+    "/inventory/counts/{id}": { "get": {}, "patch": {} },
+    "/deliveries": { "get": {}, "post": {} },
+    "/deliveries/{id}/verify": { "post": {} },
+    "/orders/suggestions": { "get": {} },
+    "/orders": { "get": {}, "post": {} },
+    "/orders/{id}": { "get": {} },
+    "/orders/{id}/send": { "post": {} },
+    "/orders/{id}/receive": { "post": {} },
+    "/orders/{id}/export.csv": { "get": {} },
+    "/waste": { "get": {}, "post": {} },
+    "/waste/expired-suggestions": { "get": {} },
+    "/aloha/import": { "post": { "summary": "Upload PMIX (manual)" } },
+    "/aloha/runs": { "get": {} },
+    "/aloha/reconciliation": { "get": {} },
+    "/aloha/map/menu": { "post": {} },
+    "/aloha/map/modifier": { "post": {} },
+    "/reports/avt": { "get": { "summary": "Actual vs Theoretical per menu item" } },
+    "/reports/price-creep": { "get": {} },
+    "/reports/waste": { "get": {} },
+    "/forecasts/lookup": { "post": { "summary": "Batch forecast lookup (advisory)", "description": "Each prediction carries p10 / p90 bands plus the `top_drivers` triple (\u00a76.12b AC-8): last-4-weeks same DoW avg, seasonality adjustment, recent-trend percentage. The UI renders them in the ForecastBadge tooltip." } },
+    "/forecasts/accuracy": { "get": { "summary": "Per-entity MAPE over 4/8/12w windows" } },
+    "/forecasts/override": { "post": { "summary": "Capture advisory-forecast override (\u00a76.12b AC-5)", "description": "Records (expected, override, reason, user_id) at the moment a human disagrees with the model. Phase 2 uses these tuples as a learning signal." } },
+    "/forecasts/overrides": { "get": { "summary": "List forecast overrides", "description": "Filterable by entity_type, entity_id, from_date, to_date." } },
+    "/forecasts/overrides/{id}/actual": { "patch": { "summary": "Back-fill actual quantity once the day closes" } },
+    "/migration/batches": { "get": {} },
+    "/migration/batches/{id}": { "get": {} },
+    "/migration/batches/{id}/items/{item_id}/decision": { "post": {} },
+    "/migration/batches/{id}/approve": { "post": {} },
+    "/migration/batches/{id}/rollback": { "post": {} }
+  }
+}

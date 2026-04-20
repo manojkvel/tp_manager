@@ -1,0 +1,56 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+  push:
+    tags: ['v*']
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-staging:
+    name: Deploy → staging
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Deploy Bicep (staging)
+        run: |
+          az deployment group create \
+            --resource-group rg-tp-staging \
+            --template-file infra/bicep/main.bicep \
+            --parameters @infra/bicep/params/staging.json \
+            --parameters imageTags='{"api":"${{ github.sha }}","web":"${{ github.sha }}","alohaWorker":"${{ github.sha }}","ml":"${{ github.sha }}"}'
+
+  deploy-prod:
+    name: Deploy → prod
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Deploy Bicep (prod)
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          az deployment group create \
+            --resource-group rg-tp-prod \
+            --template-file infra/bicep/main.bicep \
+            --parameters @infra/bicep/params/prod.json \
+            --parameters imageTags="{\"api\":\"$TAG\",\"web\":\"$TAG\",\"alohaWorker\":\"$TAG\",\"ml\":\"$TAG\"}"

@@ -1,0 +1,904 @@
+// TP Manager — Prisma schema (TASK-018 / Wave 2)
+// Mirrors spec §8 Domain Model. Every row-scoped entity carries `restaurant_id`
+// from day one per DEC-012, so Phase-3 multi-tenant is a row-scoping change,
+// not a schema rewrite.
+//
+// Conventions:
+//  - IDs are UUIDs unless otherwise noted (cuid() for application-generated;
+//    Postgres gen_random_uuid() at migration time).
+//  - Money stored in integer cents to avoid float drift.
+//  - Quantities stored as Decimal(18, 6) — enough precision for oz↔g↔mL without
+//    silent truncation; cost math lives in `packages/conversions`.
+//  - Timestamps are `timestamptz` (`@db.Timestamptz(3)`); server clock is UTC.
+//  - Soft-archive via `is_archived` / `archived_at`; hard-delete is never used
+//    for entities referenced by financial/audit history (§6.1 AC-4).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgcrypto]
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────────────────────────────────────
+
+enum UomCategory {
+  weight
+  volume
+  count
+}
+
+enum Role {
+  owner
+  manager
+  staff
+}
+
+enum LocationKind {
+  dry
+  cold
+  freezer
+  bar
+  prep
+}
+
+enum UtensilKind {
+  scoop
+  ladle
+  bag
+  spoon
+  cap
+}
+
+enum EquivalenceSource {
+  default
+  override
+}
+
+enum CostSource {
+  delivery
+  manual
+  migration
+}
+
+enum RecipeType {
+  prep
+  menu
+}
+
+enum RecipeLineRefType {
+  ingredient
+  recipe
+}
+
+enum PrepSheetRowStatus {
+  pending
+  in_progress
+  complete
+  skipped
+}
+
+enum InventoryCountStatus {
+  open
+  paused
+  completed
+  amended
+}
+
+enum DeliveryStatus {
+  pending
+  verified
+  disputed
+}
+
+enum OrderStatus {
+  draft
+  sent
+  received
+}
+
+enum WasteRefType {
+  ingredient
+  prep
+}
+
+enum AlohaImportSource {
+  sftp
+  api
+  middleware
+  manual_upload
+}
+
+enum AlohaImportStatus {
+  ok
+  failed
+  partial
+}
+
+enum PosRowKind {
+  item
+  modifier
+  stockout_86
+  cover
+  unclassified
+}
+
+enum ForecastEntityType {
+  ingredient
+  prep
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Tenant root
+// ──────────────────────────────────────────────────────────────────────────────
+
+model Restaurant {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  timezone   String   @default("America/New_York")
+  aloha_store_id String?
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  users               User[]
+  locations           Location[]
+  portion_utensils    PortionUtensil[]
+  ingredients         Ingredient[]
+  suppliers           Supplier[]
+  recipes             Recipe[]
+  prep_sheets         PrepSheet[]
+  inventory_counts    InventoryCount[]
+  deliveries          Delivery[]
+  orders              Order[]
+  waste_entries       WasteEntry[]
+  aloha_import_runs   AlohaImportRun[]
+  forecast_models     ForecastModel[]
+  feature_flag_values FeatureFlagValue[]
+
+  @@map("restaurant")
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Auth
+// ──────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  restaurant_id  String   @db.Uuid
+  restaurant     Restaurant @relation(fields: [restaurant_id], references: [id])
+  email          String
+  name           String?
+  password_hash  String // argon2 — TASK-029
+  role           Role     @default(staff)
+  active         Boolean  @default(true)
+  last_login_at  DateTime? @db.Timestamptz(3)
+  created_at     DateTime @default(now()) @db.Timestamptz(3)
+
+  refresh_tokens RefreshToken[]
+
+  @@unique([restaurant_id, email])
+  @@index([restaurant_id])
+  @@map("user_account")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  token_hash  String   @unique
+  expires_at  DateTime @db.Timestamptz(3)
+  revoked_at  DateTime? @db.Timestamptz(3)
+  created_at  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([user_id])
+  @@map("refresh_token")
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Settings / catalogues
+// ──────────────────────────────────────────────────────────────────────────────
+
+model Location {
+  id            String       @id @default(uuid()) @db.Uuid
+  restaurant_id String       @db.Uuid
+  restaurant    Restaurant   @relation(fields: [restaurant_id], references: [id])
+  name          String
+  kind          LocationKind
+  is_archived   Boolean      @default(false)
+  created_at    DateTime     @default(now()) @db.Timestamptz(3)
+
+  ingredients Ingredient[]
+
+  @@unique([restaurant_id, name])
+  @@index([restaurant_id])
+  @@map("location")
+}
+
+model PortionUtensil {
+  id             String      @id @default(uuid()) @db.Uuid
+  restaurant_id  String      @db.Uuid
+  restaurant     Restaurant  @relation(fields: [restaurant_id], references: [id])
+  name           String
+  label_colour   String?
+  kind           UtensilKind
+  default_uom    String // 'oz' | 'mL' | 'g' | etc. — free-form to accept non-enum units
+  default_qty    Decimal     @db.Decimal(18, 6)
+  is_archived    Boolean     @default(false)
+  created_at     DateTime    @default(now()) @db.Timestamptz(3)
+
+  equivalences UtensilEquivalence[]
+
+  @@unique([restaurant_id, name])
+  @@index([restaurant_id])
+  @@map("portion_utensil")
+}
+
+model UtensilEquivalence {
+  id             String            @id @default(uuid()) @db.Uuid
+  utensil_id     String            @db.Uuid
+  utensil        PortionUtensil    @relation(fields: [utensil_id], references: [id])
+  ingredient_id  String?           @db.Uuid // NULL = utensil default
+  ingredient     Ingredient?       @relation(fields: [ingredient_id], references: [id])
+  equivalent_qty Decimal           @db.Decimal(18, 6)
+  equivalent_uom String
+  source         EquivalenceSource
+  created_at     DateTime          @default(now()) @db.Timestamptz(3)
+
+  @@unique([utensil_id, ingredient_id]) // one override per (utensil, ingredient); one default where ingredient_id IS NULL
+  @@index([utensil_id])
+  @@index([ingredient_id])
+  @@map("utensil_equivalence")
+}
+
+model WasteReason {
+  id            String     @id @default(uuid()) @db.Uuid
+  restaurant_id String     @db.Uuid
+  code          String
+  label         String
+  is_archived   Boolean    @default(false)
+  created_at    DateTime   @default(now()) @db.Timestamptz(3)
+
+  waste_entries WasteEntry[]
+
+  @@unique([restaurant_id, code])
+  @@index([restaurant_id])
+  @@map("waste_reason")
+}
+
+// §6.11 — Kitchen stations are an editable catalogue per restaurant.
+// RecipeLine.station holds the station's `code` as plain text (no FK) so that
+// renaming or archiving a station does not orphan recipe history.
+model Station {
+  id            String    @id @default(uuid()) @db.Uuid
+  restaurant_id String    @db.Uuid
+  code          String
+  label         String
+  sort_order    Int       @default(0)
+  is_archived   Boolean   @default(false)
+  archived_at   DateTime? @db.Timestamptz(3)
+  created_at    DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@unique([restaurant_id, code])
+  @@index([restaurant_id])
+  @@map("station")
+}
+
+model ParLevel {
+  id            String   @id @default(uuid()) @db.Uuid
+  restaurant_id String   @db.Uuid
+  recipe_id     String   @db.Uuid
+  recipe        Recipe   @relation(fields: [recipe_id], references: [id])
+  day_of_week   Int // 0 = Sun ... 6 = Sat
+  qty           Decimal  @db.Decimal(18, 6)
+  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@unique([recipe_id, day_of_week])
+  @@index([restaurant_id])
+  @@map("par_level")
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Ingredients, costs, suppliers
+// ──────────────────────────────────────────────────────────────────────────────
+
+model Ingredient {
+  id                  String     @id @default(uuid()) @db.Uuid
+  restaurant_id       String     @db.Uuid
+  restaurant          Restaurant @relation(fields: [restaurant_id], references: [id])
+  name                String
+  uom                 String
+  uom_category        UomCategory
+  pack_size           Decimal?   @db.Decimal(18, 6)
+  storage_location_id String?    @db.Uuid
+  storage_location    Location?  @relation(fields: [storage_location_id], references: [id])
+  default_supplier_id String?    @db.Uuid
+  default_supplier    Supplier?  @relation("IngredientDefaultSupplier", fields: [default_supplier_id], references: [id])
+  shelf_life_days     Int?
+  allergen_flags      String[]   @default([])
+  density_g_per_ml    Decimal?   @db.Decimal(18, 6) // enables volume↔weight conversions (AD-4)
+  is_archived         Boolean    @default(false)
+  archived_at         DateTime?  @db.Timestamptz(3)
+  created_at          DateTime   @default(now()) @db.Timestamptz(3)
+  updated_at          DateTime   @default(now()) @updatedAt @db.Timestamptz(3)
+
+  costs                 IngredientCost[]
+  utensil_equivalences  UtensilEquivalence[]
+  supplier_offers       SupplierIngredient[]
+  recipe_lines          RecipeLine[]
+  delivery_lines        DeliveryLine[]
+  order_lines           OrderLine[]
+
+  @@unique([restaurant_id, name])
+  @@index([restaurant_id])
+  @@index([restaurant_id, is_archived])
+  @@map("ingredient")
+}
+
+model IngredientCost {
+  id              String     @id @default(uuid()) @db.Uuid
+  ingredient_id   String     @db.Uuid
+  ingredient      Ingredient @relation(fields: [ingredient_id], references: [id])
+  unit_cost_cents Int
+  effective_from  DateTime   @db.Timestamptz(3)
+  source          CostSource
+  note            String?
+  created_at      DateTime   @default(now()) @db.Timestamptz(3)
+
+  @@index([ingredient_id, effective_from])
+  @@map("ingredient_cost")
+}
+
+model Supplier {
+  id              String     @id @default(uuid()) @db.Uuid
+  restaurant_id   String     @db.Uuid
+  restaurant      Restaurant @relation(fields: [restaurant_id], references: [id])
+  name            String
+  contact_name    String?
+  email           String?
+  phone           String?
+  lead_time_days  Int        @default(1)
+  min_order_cents Int        @default(0)
+  order_cadence   String?
+  is_active       Boolean    @default(true)
+  created_at      DateTime   @default(now()) @db.Timestamptz(3)
+
+  offers      SupplierIngredient[]
+  default_for Ingredient[]        @relation("IngredientDefaultSupplier")
+  deliveries  Delivery[]
+  orders      Order[]
+
+  @@unique([restaurant_id, name])
+  @@index([restaurant_id])
+  @@map("supplier")
+}
+
+model SupplierIngredient {
+  id                 String     @id @default(uuid()) @db.Uuid
+  supplier_id        String     @db.Uuid
+  supplier           Supplier   @relation(fields: [supplier_id], references: [id])
+  ingredient_id      String     @db.Uuid
+  ingredient         Ingredient @relation(fields: [ingredient_id], references: [id])
+  supplier_pack_size Decimal?   @db.Decimal(18, 6)
+  unit_cost_cents    Int
+  rank               Int        @default(1)
+  effective_from     DateTime   @db.Timestamptz(3)
+  effective_until    DateTime?  @db.Timestamptz(3)
+  created_at         DateTime   @default(now()) @db.Timestamptz(3)
+
+  @@unique([supplier_id, ingredient_id, effective_from])
+  @@index([ingredient_id, rank])
+  @@map("supplier_ingredient")
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Recipes — versioned per §6.3 AC-5 / DEC-014
+// ──────────────────────────────────────────────────────────────────────────────
+
+model Recipe {
+  id              String        @id @default(uuid()) @db.Uuid
+  restaurant_id   String        @db.Uuid
+  restaurant      Restaurant    @relation(fields: [restaurant_id], references: [id])
+  type            RecipeType
+  name            String
+  is_archived     Boolean       @default(false)
+  created_at      DateTime      @default(now()) @db.Timestamptz(3)
+
+  versions     RecipeVersion[]
+  par_levels   ParLevel[]
+  menu_maps    AlohaMenuMap[]
+  modifier_maps AlohaModifierMap[]
+
+  @@unique([restaurant_id, type, name])
+  @@index([restaurant_id, is_archived])
+  @@map("recipe")
+}
+
+model RecipeVersion {
+  id                       String       @id @default(uuid()) @db.Uuid
+  recipe_id                String       @db.Uuid
+  recipe                   Recipe       @relation(fields: [recipe_id], references: [id])
+  version                  Int
+  is_current               Boolean      @default(false)
+  yield_qty                Decimal      @db.Decimal(18, 6)
+  yield_uom                String
+  shelf_life_days          Int?
+  equipment                String[]     @default([])
+  procedure                String       @default("")
+  photo_url                String?
+  is_portion_bag_prep      Boolean      @default(false)
+  portion_bag_content_json Json?
+  created_by_user_id       String?      @db.Uuid
+  created_at               DateTime     @default(now()) @db.Timestamptz(3)
+
+  lines       RecipeLine[]
+  prep_runs   PrepRun[]
+  prep_rows   PrepSheetRow[]
+
+  @@unique([recipe_id, version])
+  @@index([recipe_id, is_current])
+  @@map("recipe_version")
+}
+
+model RecipeLine {
+  id                String            @id @default(uuid()) @db.Uuid
+  recipe_version_id String            @db.Uuid
+  recipe_version    RecipeVersion     @relation(fields: [recipe_version_id], references: [id])
+  position          Int
+  ref_type          RecipeLineRefType
+  ingredient_id     String?           @db.Uuid
+  ingredient        Ingredient?       @relation(fields: [ingredient_id], references: [id])
+  ref_recipe_id     String?           @db.Uuid
+  qty               Decimal           @db.Decimal(18, 6)
+  qty_text          String? // "to taste" / "as specified" — excluded from cost math (§6.3 edge case)
+  uom               String?
+  note              String?
+  station           String?
+  step_order        Int?
+  utensil_id        String?           @db.Uuid
+
+  @@index([recipe_version_id, position])
+  @@index([station])
+  @@map("recipe_line")
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Operational loop
+// ──────────────────────────────────────────────────────────────────────────────
+
+model PrepRun {
+  id                   String        @id @default(uuid()) @db.Uuid
+  recipe_version_id    String        @db.Uuid
+  recipe_version       RecipeVersion @relation(fields: [recipe_version_id], references: [id])
+  prepared_on          DateTime      @db.Date
+  prepared_by_user_id  String?       @db.Uuid
+  qty_yielded          Decimal       @db.Decimal(18, 6)
+  expires_on           DateTime?     @db.Date
+  created_at           DateTime      @default(now()) @db.Timestamptz(3)
+
+  @@index([recipe_version_id, prepared_on])
+  @@map("prep_run")
+}
+
+model PrepSheet {
+  id            String         @id @default(uuid()) @db.Uuid
+  restaurant_id String         @db.Uuid
+  restaurant    Restaurant     @relation(fields: [restaurant_id], references: [id])
+  date          DateTime       @db.Date
+  generated_at  DateTime       @default(now()) @db.Timestamptz(3)
+
+  rows PrepSheetRow[]
+
+  @@unique([restaurant_id, date])
+  @@index([restaurant_id])
+  @@map("prep_sheet")
+}
+
+model PrepSheetRow {
+  id                 String             @id @default(uuid()) @db.Uuid
+  prep_sheet_id      String             @db.Uuid
+  prep_sheet         PrepSheet          @relation(fields: [prep_sheet_id], references: [id], onDelete: Cascade)
+  recipe_version_id  String             @db.Uuid
+  recipe_version     RecipeVersion      @relation(fields: [recipe_version_id], references: [id])
+  needed_qty         Decimal            @db.Decimal(18, 6)
+  status             PrepSheetRowStatus @default(pending)
+  started_at         DateTime?          @db.Timestamptz(3)
+  completed_at       DateTime?          @db.Timestamptz(3)
+  user_id            String?            @db.Uuid
+  skip_reason        String?
+
+  @@index([prep_sheet_id])
+  @@index([recipe_version_id])
+  @@map("prep_sheet_row")
+}
+
+model InventoryCount {
+  id             String                @id @default(uuid()) @db.Uuid
+  restaurant_id  String                @db.Uuid
+  restaurant     Restaurant            @relation(fields: [restaurant_id], references: [id])
+  date           DateTime              @db.Date
+  status         InventoryCountStatus  @default(open)
+  started_by     String?               @db.Uuid
+  completed_by   String?               @db.Uuid
+  amends_count_id String?              @db.Uuid
+  amends_count   InventoryCount?       @relation("AmendedBy", fields: [amends_count_id], references: [id])
+  amendments     InventoryCount[]      @relation("AmendedBy")
+  created_at     DateTime              @default(now()) @db.Timestamptz(3)
+
+  lines InventoryCountLine[]
+
+  @@index([restaurant_id, date])
+  @@map("inventory_count")
+}
+
+model InventoryCountLine {
+  id                   String         @id @default(uuid()) @db.Uuid
+  count_id             String         @db.Uuid
+  count                InventoryCount @relation(fields: [count_id], references: [id], onDelete: Cascade)
+  ref_type             RecipeLineRefType
+  ingredient_id        String?        @db.Uuid
+  recipe_version_id    String?        @db.Uuid
+  location_id          String?        @db.Uuid
+  expected_qty         Decimal?       @db.Decimal(18, 6)
+  actual_qty           Decimal        @db.Decimal(18, 6)
+  unit_cost_cents      Int?
+
+  @@index([count_id])
+  @@map("inventory_count_line")
+}
+
+model Delivery {
+  id            String         @id @default(uuid()) @db.Uuid
+  restaurant_id String         @db.Uuid
+  restaurant    Restaurant     @relation(fields: [restaurant_id], references: [id])
+  supplier_id   String         @db.Uuid
+  supplier      Supplier       @relation(fields: [supplier_id], references: [id])
+  po_id         String?        @db.Uuid
+  order         Order?         @relation(fields: [po_id], references: [id])
+  received_on   DateTime       @db.Date
+  status        DeliveryStatus @default(pending)
+  received_by   String?        @db.Uuid
+  created_at    DateTime       @default(now()) @db.Timestamptz(3)
+
+  lines DeliveryLine[]
+
+  @@index([restaurant_id, received_on])
+  @@map("delivery")
+}
+
+model DeliveryLine {
+  id              String     @id @default(uuid()) @db.Uuid
+  delivery_id     String     @db.Uuid
+  delivery        Delivery   @relation(fields: [delivery_id], references: [id], onDelete: Cascade)
+  ingredient_id   String     @db.Uuid
+  ingredient      Ingredient @relation(fields: [ingredient_id], references: [id])
+  ordered_qty     Decimal?   @db.Decimal(18, 6)
+  received_qty    Decimal    @db.Decimal(18, 6)
+  unit_cost_cents Int
+  note            String?
+
+  @@index([delivery_id])
+  @@index([ingredient_id])
+  @@map("delivery_line")
+}
+
+model Order {
+  id            String      @id @default(uuid()) @db.Uuid
+  restaurant_id String      @db.Uuid
+  restaurant    Restaurant  @relation(fields: [restaurant_id], references: [id])
+  supplier_id   String      @db.Uuid
+  supplier      Supplier    @relation(fields: [supplier_id], references: [id])
+  status        OrderStatus @default(draft)
+  sent_at       DateTime?   @db.Timestamptz(3)
+  expected_on   DateTime?   @db.Date
+  created_at    DateTime    @default(now()) @db.Timestamptz(3)
+
+  lines      OrderLine[]
+  deliveries Delivery[]
+
+  @@index([restaurant_id, status])
+  @@map("purchase_order")
+}
+
+model OrderLine {
+  id              String     @id @default(uuid()) @db.Uuid
+  order_id        String     @db.Uuid
+  order           Order      @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  ingredient_id   String     @db.Uuid
+  ingredient      Ingredient @relation(fields: [ingredient_id], references: [id])
+  qty             Decimal    @db.Decimal(18, 6)
+  pack_size       Decimal?   @db.Decimal(18, 6)
+  unit_cost_cents Int
+
+  @@index([order_id])
+  @@index([ingredient_id])
+  @@map("order_line")
+}
+
+model WasteEntry {
+  id                    String        @id @default(uuid()) @db.Uuid
+  restaurant_id         String        @db.Uuid
+  restaurant            Restaurant    @relation(fields: [restaurant_id], references: [id])
+  ref_type              WasteRefType
+  ingredient_id         String?       @db.Uuid
+  recipe_version_id     String?       @db.Uuid
+  qty                   Decimal       @db.Decimal(18, 6)
+  uom                   String
+  reason_id             String        @db.Uuid
+  reason                WasteReason   @relation(fields: [reason_id], references: [id])
+  note                  String?
+  photo_url             String?
+  unit_cost_cents_pinned Int
+  value_cents           Int
+  user_id               String?       @db.Uuid
+  at                    DateTime      @default(now()) @db.Timestamptz(3)
+
+  @@index([restaurant_id, at])
+  @@map("waste_entry")
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Aloha POS integration
+// ──────────────────────────────────────────────────────────────────────────────
+
+model AlohaImportRun {
+  id             String             @id @default(uuid()) @db.Uuid
+  restaurant_id  String             @db.Uuid
+  restaurant     Restaurant         @relation(fields: [restaurant_id], references: [id])
+  business_date  DateTime           @db.Date
+  source         AlohaImportSource
+  started_at     DateTime           @default(now()) @db.Timestamptz(3)
+  completed_at   DateTime?          @db.Timestamptz(3)
+  status         AlohaImportStatus  @default(ok)
+  rows_ingested  Int                @default(0)
+  error_detail   String?
+
+  pos_sales        PosSale[]
+  stockout_events  StockoutEvent[]
+  cover_counts     CoverCount[]
+
+  @@index([restaurant_id, business_date])
+  @@map("aloha_import_run")
+}
+
+// NOTE: CHECK constraint on `row_kind` is added in migration 0001 directly —
+// Prisma enums already restrict at the ORM layer but AD-7 + §6.12a AC-3 require
+// the database to enforce the discriminator (ops/backfill scripts can bypass
+// Prisma). The constraint is tested by TASK-022.
+model PosSale {
+  id                 String     @id @default(uuid()) @db.Uuid
+  import_run_id      String     @db.Uuid
+  import_run         AlohaImportRun @relation(fields: [import_run_id], references: [id], onDelete: Cascade)
+  restaurant_id      String     @db.Uuid
+  business_date      DateTime   @db.Date
+  category           String?
+  aloha_item_name    String
+  row_kind           PosRowKind
+  qty                Decimal    @db.Decimal(18, 6)
+  unit_price_cents   Int?
+  item_sales_cents   Int?
+  aloha_cost_cents   Int?
+  ingested_at        DateTime   @default(now()) @db.Timestamptz(3)
+
+  @@index([restaurant_id, business_date])
+  @@index([import_run_id])
+  @@index([row_kind])
+  @@map("pos_sale")
+}
+
+model AlohaMenuMap {
+  id              String     @id @default(uuid()) @db.Uuid
+  restaurant_id   String     @db.Uuid
+  aloha_item_name String
+  menu_recipe_id  String     @db.Uuid
+  menu_recipe     Recipe     @relation(fields: [menu_recipe_id], references: [id])
+  effective_from  DateTime   @db.Date
+  effective_until DateTime?  @db.Date
+  mapped_by       String?    @db.Uuid
+  confidence      String     @default("manual") // manual | suggested
+
+  @@index([restaurant_id, aloha_item_name, effective_from])
+  @@map("aloha_menu_map")
+}
+
+model AlohaModifierMap {
+  id                   String     @id @default(uuid()) @db.Uuid
+  restaurant_id        String     @db.Uuid
+  aloha_modifier_name  String
+  ingredient_id        String?    @db.Uuid
+  recipe_id            String?    @db.Uuid
+  recipe               Recipe?    @relation(fields: [recipe_id], references: [id])
+  qty                  Decimal    @db.Decimal(18, 6)
+  uom                  String
+  effective_from       DateTime   @db.Date
+  effective_until      DateTime?  @db.Date
+  mapped_by            String?    @db.Uuid
+
+  @@index([restaurant_id, aloha_modifier_name, effective_from])
+  @@map("aloha_modifier_map")
+}
+
+model StockoutEvent {
+  id               String   @id @default(uuid()) @db.Uuid
+  restaurant_id    String   @db.Uuid
+  import_run_id    String?  @db.Uuid
+  import_run       AlohaImportRun? @relation(fields: [import_run_id], references: [id])
+  business_date    DateTime @db.Date
+  ingredient_id    String?  @db.Uuid
+  recipe_id        String?  @db.Uuid
+  aloha_marker_name String
+  count            Int      @default(1)
+  mapped           Boolean  @default(false)
+
+  @@index([restaurant_id, business_date])
+  @@map("stockout_event")
+}
+
+model CoverCount {
+  id            String   @id @default(uuid()) @db.Uuid
+  restaurant_id String   @db.Uuid
+  import_run_id String?  @db.Uuid
+  import_run    AlohaImportRun? @relation(fields: [import_run_id], references: [id])
+  business_date DateTime @db.Date
+  covers        Int
+
+  @@unique([restaurant_id, business_date])
+  @@map("cover_count")
+}
+
+model AlohaReconciliationQueue {
+  id              String   @id @default(uuid()) @db.Uuid
+  restaurant_id   String   @db.Uuid
+  aloha_item_name String
+  row_kind        PosRowKind
+  first_seen_on   DateTime @db.Date
+  occurrences     Int      @default(1)
+  resolved        Boolean  @default(false)
+  resolved_at     DateTime? @db.Timestamptz(3)
+
+  @@unique([restaurant_id, aloha_item_name, row_kind])
+  @@map("aloha_reconciliation_queue")
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// ML
+// ──────────────────────────────────────────────────────────────────────────────
+
+model ForecastModel {
+  id                 String              @id @default(uuid()) @db.Uuid
+  restaurant_id      String              @db.Uuid
+  restaurant         Restaurant          @relation(fields: [restaurant_id], references: [id])
+  entity_type        ForecastEntityType
+  entity_id          String              @db.Uuid
+  algorithm          String
+  trained_on_start   DateTime            @db.Date
+  trained_on_end     DateTime            @db.Date
+  holdout_mape       Decimal?            @db.Decimal(8, 4)
+  params             Json?
+  artefact_ref       String // blob URI
+  trained_at         DateTime            @default(now()) @db.Timestamptz(3)
+
+  predictions ForecastPrediction[]
+
+  @@index([restaurant_id, entity_type, entity_id])
+  @@map("forecast_model")
+}
+
+model ForecastPrediction {
+  id                String        @id @default(uuid()) @db.Uuid
+  model_id          String        @db.Uuid
+  model             ForecastModel @relation(fields: [model_id], references: [id])
+  target_date       DateTime      @db.Date
+  point             Decimal       @db.Decimal(18, 6)
+  p10               Decimal?      @db.Decimal(18, 6)
+  p90               Decimal?      @db.Decimal(18, 6)
+  top_drivers_json  Json?
+  generated_at      DateTime      @default(now()) @db.Timestamptz(3)
+
+  @@index([model_id, target_date])
+  @@map("forecast_prediction")
+}
+
+model ForecastOverride {
+  id            String              @id @default(uuid()) @db.Uuid
+  restaurant_id String              @db.Uuid
+  entity_type   ForecastEntityType
+  entity_id     String              @db.Uuid
+  target_date   DateTime            @db.Date
+  expected_qty  Decimal             @db.Decimal(18, 6)
+  override_qty  Decimal             @db.Decimal(18, 6)
+  actual_qty    Decimal?            @db.Decimal(18, 6)
+  user_id       String?             @db.Uuid
+  reason        String?
+  at            DateTime            @default(now()) @db.Timestamptz(3)
+
+  @@index([restaurant_id, entity_type, entity_id, target_date])
+  @@map("forecast_override")
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Cross-cutting: audit + feature flags
+// ──────────────────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id            BigInt   @id @default(autoincrement())
+  restaurant_id String?  @db.Uuid
+  user_id       String?  @db.Uuid
+  entity        String
+  entity_id     String
+  field         String?
+  before        Json?
+  after         Json?
+  action        String   @default("update") // insert | update | delete
+  at            DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([entity, entity_id, at])
+  @@index([restaurant_id, at])
+  @@map("audit_log")
+}
+
+model FeatureFlag {
+  id            String    @id @default(uuid()) @db.Uuid
+  key           String    @unique
+  default_value Boolean   @default(false)
+  description   String?
+  created_at    DateTime  @default(now()) @db.Timestamptz(3)
+
+  values FeatureFlagValue[]
+
+  @@map("feature_flag")
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Migration review (TASK-061) — staged batches + items, owner-approved promotion
+// ──────────────────────────────────────────────────────────────────────────────
+
+model StagedMigrationBatch {
+  id              String   @id @default(uuid()) @db.Uuid
+  restaurant_id   String   @db.Uuid
+  source_file     String
+  parser_version  String
+  staged_at       DateTime @default(now()) @db.Timestamptz(3)
+  status          String   @default("staged") // staged | approved | rolled_back
+  approved_at     DateTime? @db.Timestamptz(3)
+  approved_by     String?  @db.Uuid
+  rolled_back_at  DateTime? @db.Timestamptz(3)
+
+  items StagedMigrationItem[]
+
+  @@index([restaurant_id, status])
+  @@map("staged_migration_batch")
+}
+
+model StagedMigrationItem {
+  id                 String   @id @default(uuid()) @db.Uuid
+  batch_id           String   @db.Uuid
+  batch              StagedMigrationBatch @relation(fields: [batch_id], references: [id], onDelete: Cascade)
+  kind               String // ingredient | recipe | pos_sale
+  probe              Json
+  payload            Json
+  bucket             String // new | matched | ambiguous | unmapped
+  matches            Json     @default("[]")
+  decision           String   @default("pending") // pending | accept_new | merge | reject
+  decision_target_id String?  @db.Uuid
+
+  @@index([batch_id])
+  @@map("staged_migration_item")
+}
+
+model FeatureFlagValue {
+  id            String      @id @default(uuid()) @db.Uuid
+  flag_id       String      @db.Uuid
+  flag          FeatureFlag @relation(fields: [flag_id], references: [id], onDelete: Cascade)
+  restaurant_id String      @db.Uuid
+  restaurant    Restaurant  @relation(fields: [restaurant_id], references: [id])
+  value         Boolean
+  updated_at    DateTime    @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@unique([flag_id, restaurant_id])
+  @@map("feature_flag_value")
+}

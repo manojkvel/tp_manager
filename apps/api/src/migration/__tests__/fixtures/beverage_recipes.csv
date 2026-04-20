@@ -1,0 +1,149 @@
+section,recipe_name,vessel,step_number,step_text,source_style
+Hot Drinks,French Press,TP Mug,0,,Normal
+Hot Drinks,French Press,TP Mug,1,Fill a 4oz spoodle with whole beans to the top (leveled),Normal
+Hot Drinks,French Press,TP Mug,2,Grind beans into French Press on “Regular Perk”,Normal
+Hot Drinks,French Press,TP Mug,3,Wet the grinds slightly with hot water and let sit for a few seconds (they will expand/grow),Normal
+Hot Drinks,French Press,TP Mug,4,Fill the pot to under the lip of the pot with hot water,Normal
+Hot Drinks,French Press,TP Mug,5,*Gently stir the beans,Normal
+Hot Drinks,French Press,TP Mug,6,Place lid on top of press (*do not press down),Normal
+Hot Drinks,French Press,TP Mug,7,"Serve on a round tray with a TP mug upside down on a saucer with a doily & sugar stick, and creamer of guest choice",Normal
+Hot Drinks,Cappuccino,BIG MUG,0,,Normal
+Hot Drinks,Cappuccino,BIG MUG,1,Fill small frothing pitcher to the 9 oz line with whole milk (unless otherwise specified),Normal
+Hot Drinks,Cappuccino,BIG MUG,2,"Before putting steam wand in the milk, turn it on to blow out any water or milk might be in the line",Normal
+Hot Drinks,Cappuccino,BIG MUG,3,Put frothing thermometer in the pitcher,Normal
+Hot Drinks,Cappuccino,BIG MUG,4,Put wand just under the surface of the milk and turn dial on all the way,Normal
+Hot Drinks,Cappuccino,BIG MUG,5,"As froth starts to rise slowly pull the pitcher downward always keeping the wand just under the surface of the foam, allowing it to foam to rise more.",Normal
+Hot Drinks,Cappuccino,BIG MUG,6,Turn steamer off once the thermometer reaches 140⁰ for adult drinks,Normal
+Hot Drinks,Cappuccino,BIG MUG,7,"Brew 2 shots of espresso (6oz), while letting the foam and milk settle",Normal
+Hot Drinks,Cappuccino,BIG MUG,8,"Pour the espresso into a big mug, pour the milk and top with all the foam",Normal
+Hot Drinks,Cappuccino,BIG MUG,9,Lightly dust the top with cinnamon,Normal
+Hot Drinks,Cappuccino,BIG MUG,10,Turn the steamer on for a second to blow out any liquid in the wand,Normal
+Hot Drinks,Cappuccino,BIG MUG,11,Wipe down wand with a clean damp towel,Normal
+Hot Drinks,Cappuccino,BIG MUG,12,Empty grinds after each brew (to avoid the screen burning),Normal
+Hot Drinks,Latte,BIG MUG,0,,Normal
+Hot Drinks,Latte,BIG MUG,1,Fill frothing pitcher to the 11 oz line with whole milk (unless otherwise specified),Normal
+Hot Drinks,Latte,BIG MUG,2,"Before putting steam wand in the milk, turn it on to blow out any water or milk might be in the line",Normal
+Hot Drinks,Latte,BIG MUG,3,Put frothing thermometer in pitcher,Normal
+Hot Drinks,Latte,BIG MUG,4,Place wand in the center or the bottom of the milk in the pitcher & turn steamer on all the way,Normal
+Hot Drinks,Latte,BIG MUG,5,Brew 2 shots of espresso (6oz),Normal
+Hot Drinks,Latte,BIG MUG,6,Turn steamer off once the thermometer reaches 140⁰ for adult drinks,Normal
+Hot Drinks,Latte,BIG MUG,7,Pour 2 shots of espresso and all the steamed milk into a Big Mug,Normal
+Hot Drinks,Latte,BIG MUG,8,Turn the steamer on for a second to blow out any liquid in the wand,Normal
+Hot Drinks,Latte,BIG MUG,9,Wipe down wand with a clean damp towel,Normal
+Hot Drinks,Latte,BIG MUG,10,Empty grinds after each brew (to avoid to the screen burning),Normal
+Hot Drinks,Salted Caramel Mocha-chino,BIG MUG,0,,Normal
+Hot Drinks,Salted Caramel Mocha-chino,BIG MUG,1,2 shots espresso (6oz),List Paragraph
+Hot Drinks,Salted Caramel Mocha-chino,BIG MUG,2,1 oz (3 pumps) of salted caramel syrup,List Paragraph
+Hot Drinks,Salted Caramel Mocha-chino,BIG MUG,3,11 oz Hot Chocolate,List Paragraph
+Hot Drinks,Salted Caramel Mocha-chino,BIG MUG,4,"Top with whip cream, caramel sauce, chocolate sauce and a pinch of coarse sea salt",List Paragraph
+Hot Drinks,Espresso,Espresso Cup,0,,Normal
+Hot Drinks,Espresso,Espresso Cup,1,1 shot of espresso (2 shots for a double),List Paragraph
+Hot Drinks,Chai Tea,BIG MUG,0,,Normal
+Hot Drinks,Chai Tea,BIG MUG,1,"Big mug filled ¾ of the way with Chai, release button and let water fill rest of cup",Body Text
+Hot Chocolates,Traditional Hot Chocolate,BIG MUG,0,,Normal
+Hot Chocolates,Traditional Hot Chocolate,BIG MUG,1,Fill Big Mug ¾ of the way (16oz) with hot chocolate,List Paragraph
+Hot Chocolates,Traditional Hot Chocolate,BIG MUG,2,Top with whip Cream and chocolate drizzle,List Paragraph
+Hot Chocolates,S’mores Hot Chocolate,BIG MUG,0,,Normal
+Hot Chocolates,S’mores Hot Chocolate,BIG MUG,1,1oz (3 pumps) of Marshmallow syrup,Normal
+Hot Chocolates,S’mores Hot Chocolate,BIG MUG,2,"Fill Big mug ¾ of the way (16oz) with hot chocolate, leaving room for whipped cream",Normal
+Hot Chocolates,S’mores Hot Chocolate,BIG MUG,3,"Top with whip cream, chocolate syrup, graham cracker crumbs & 5 marshmallows",Normal
+Hot Chocolates,Cookie Explosion Hot Chocolate,BIG MUG,0,,Normal
+Hot Chocolates,Cookie Explosion Hot Chocolate,BIG MUG,1,1oz (3 pumps) of caramel syrup,Normal
+Hot Chocolates,Cookie Explosion Hot Chocolate,BIG MUG,2,"Fill mug ¾ of the way (16oz) with Hot chocolate, leaving room for whipped cream",Normal
+Hot Chocolates,Cookie Explosion Hot Chocolate,BIG MUG,3,"Top with whip cream, caramel drizzle, oreo pieces, and chocolate chips",Normal
+Hot Chocolates,Peppermint Hot Chocolate,BIG MUG,0,,Normal
+Hot Chocolates,Peppermint Hot Chocolate,BIG MUG,1,1oz (3 pumps) peppermint syrup,Normal
+Hot Chocolates,Peppermint Hot Chocolate,BIG MUG,2,"Fill mug ¾ of the way (16oz) with hot chocolate-, eaving room for whipped cream",Normal
+Hot Chocolates,Peppermint Hot Chocolate,BIG MUG,3,"Top with whip cream, chocolate drizzle, and peppermint chips",Normal
+Hot Chocolates,*Kids Sized Hot Chocolate,Small to go hot cup with a lid,0,,Normal
+Hot Chocolates,*Kids Sized Hot Chocolate,Small to go hot cup with a lid,1,"Fill cup ¾ of the way (9oz) with hot chocolate, leaving room for whipped cream",Normal
+Hot Chocolates,*Kids Sized Hot Chocolate,Small to go hot cup with a lid,2,If flavored- 2 pumps flavored syrup,Normal
+Hot Chocolates,*Kids Sized Hot Chocolate,Small to go hot cup with a lid,3,Add ice cubes,Normal
+Hot Chocolates,*Kids Sized Hot Chocolate,Small to go hot cup with a lid,4,Top with whip Cream and appropriate topping (listed above),Normal
+Blender Drinks,,,1,*BLEND ALL ON #4 (28 SECONDS),Normal
+Blender Drinks,,,2,*½ recipe for Kid’s size drinks,Normal
+Blender Drinks,Tropical Bliss Smoothie,Tall Glass,0,,Normal
+Blender Drinks,Tropical Bliss Smoothie,Tall Glass,1,2oz Strawberry reduction,Normal
+Blender Drinks,Tropical Bliss Smoothie,Tall Glass,2,2oz OJ shaken,Normal
+Blender Drinks,Tropical Bliss Smoothie,Tall Glass,3,1 Grey scoop (4 oz) cubed pineapple,Normal
+Blender Drinks,Tropical Bliss Smoothie,Tall Glass,4,1 Medium sized ripe banana,Normal
+Blender Drinks,Tropical Bliss Smoothie,Tall Glass,5,1 Small blue ice scoop of ice,Normal
+Blender Drinks,Annie’s Lemonade,Tall Glass,0,,Normal
+Blender Drinks,Annie’s Lemonade,Tall Glass,1,6oz Pink lemonade,Heading 2
+Blender Drinks,Annie’s Lemonade,Tall Glass,2,2oz Jigger Strawberry reduction,Normal
+Blender Drinks,Annie’s Lemonade,Tall Glass,3,1 Small blue ice scoop of ice,Normal
+Iced Drinks,Iced Chai,Tall Glass,0,,Normal
+Iced Drinks,Iced Chai,Tall Glass,1,1 Small blue ice scoop of ice,Normal
+Iced Drinks,Iced Chai,Tall Glass,2,Chilled chai to fill glass,Normal
+Iced Drinks,Iced Latte,Tall Glass,0,,Normal
+Iced Drinks,Iced Latte,Tall Glass,1,In a measuring cup:,Normal
+Iced Drinks,Iced Latte,Tall Glass,2,4oz Espresso,Normal
+Iced Drinks,Iced Latte,Tall Glass,3,8oz Whole milk - (also available almond or oat),Normal
+Iced Drinks,Iced Latte,Tall Glass,4,1 Small blue ice scoop of ice in regular glass,Normal
+Iced Drinks,Iced Latte,Tall Glass,5,Pour iced latte over ice,Normal
+Iced Drinks,Iced Latte,Tall Glass,6,Add flavor to iced latte:,Normal
+Iced Drinks,Iced Latte,Tall Glass,7,Add 1oz flavor shot (3 pumps),Normal
+Iced Drinks,Cold Brew,Stemless Wine Glass,0,,Normal
+Iced Drinks,Cold Brew,Stemless Wine Glass,1,16oz in a carafe,Normal
+Iced Drinks,Cold Brew,Stemless Wine Glass,2,Coffee ice cube in stemless glass on side,Normal
+Iced Drinks,Cold Brew,Stemless Wine Glass,3,Guest choice of creamer,Normal
+Iced Drinks,New Orleans Cold Brew,Stemless Wine Glass,0,,Normal
+Iced Drinks,New Orleans Cold Brew,Stemless Wine Glass,1,16oz in a carafe,Normal
+Iced Drinks,New Orleans Cold Brew,Stemless Wine Glass,2,Coffee ice cube in stemless glass on side,Normal
+Iced Drinks,New Orleans Cold Brew,Stemless Wine Glass,3,Guest choice of creamer,Normal
+Iced Drinks,Cold Foam Cold Brew,Stemless Wine Glass,0,,Normal
+Iced Drinks,Cold Foam Cold Brew,Stemless Wine Glass,1,16oz in a carafe,Normal
+Iced Drinks,Cold Foam Cold Brew,Stemless Wine Glass,2,Coffee ice cube in stemless glass on side,Normal
+Iced Drinks,Cold Foam Cold Brew,Stemless Wine Glass,3,Glass vase carafe of cold foam,Normal
+Iced Drinks,Marshmallow World Cold Brew,Stemless Wine Glass,0,,Normal
+Iced Drinks,Marshmallow World Cold Brew,Stemless Wine Glass,1,Coffee ice cube in stemless wine glass,Normal
+Iced Drinks,Marshmallow World Cold Brew,Stemless Wine Glass,2,10oz Prepped mocha cold brew,Normal
+Iced Drinks,Marshmallow World Cold Brew,Stemless Wine Glass,3,2oz Marshmallow cold foam,Normal
+Iced Drinks,Marshmallow World Cold Brew,Stemless Wine Glass,4,Dust with hot chocolate powder on top and 3 mini marshmallows,Normal
+Iced Drinks,Vanilla Coconut Cold Brew,Stemless Wine Glass,0,,Normal
+Iced Drinks,Vanilla Coconut Cold Brew,Stemless Wine Glass,1,Coffee ice cube in stemless wine glass,Normal
+Iced Drinks,Vanilla Coconut Cold Brew,Stemless Wine Glass,2,oz Coconut syrup mixed with 9oz regular cold brew,Normal
+Iced Drinks,Vanilla Coconut Cold Brew,Stemless Wine Glass,3,2oz Cold foam,Normal
+Iced Drinks,Vanilla Coconut Cold Brew,Stemless Wine Glass,4,Add 3 coconut chips on top,Normal
+Iced Drinks,Cold Pressed Juice,Stemless Wine Glass,0,,Normal
+Iced Drinks,Cold Pressed Juice,Stemless Wine Glass,1,Full blue scoop of ice,Normal
+Iced Drinks,Cold Pressed Juice,Stemless Wine Glass,2,10oz Kale to the King or Walk on the Beach,Normal
+Iced Drinks,Cold Pressed Juice,Stemless Wine Glass,3,Just Beet It gets 6oz Beet Juice and 4oz OJ,Normal
+Barista Prep,Chocolate Milk,,0,,Normal
+Barista Prep,Chocolate Milk,,1,8oz Chocolate syrup,List Paragraph
+Barista Prep,Chocolate Milk,,2,2qts Whole milk,List Paragraph
+Barista Prep,Mocha Cold Brew,,0,,Normal
+Barista Prep,Mocha Cold Brew,,1,24oz Cold Brew,List Paragraph
+Barista Prep,Mocha Cold Brew,,2,9oz Chocolate Milk,List Paragraph
+Barista Prep,Marshmallow Cold Foam,,0,,Normal
+Barista Prep,Marshmallow Cold Foam,,1,1qt Rich’s Pourable Whip Topping,List Paragraph
+Barista Prep,Marshmallow Cold Foam,,2,8oz Marshmallow Syrup,List Paragraph
+Barista Prep,Marshmallow Cold Foam,,3,Add to blender pitcher,List Paragraph
+Barista Prep,Marshmallow Cold Foam,,4,Blend on 4,List Paragraph
+Barista Prep,Annie’s Lemonade – In a pint container,,0,,Normal
+Barista Prep,Annie’s Lemonade – In a pint container,,1,2oz of reduction,List Paragraph
+Barista Prep,Annie’s Lemonade – In a pint container,,2,6oz of pink lemonade,List Paragraph
+Barista Prep,Annie’s Lemonade – In a pint container,,3,Add to blender pitcher,List Paragraph
+Barista Prep,Annie’s Lemonade – In a pint container,,4,Add a blue scoop of ice and blend on 4,List Paragraph
+Barista Prep,Tropical Bliss Smoothie – In a pint container,,0,,Normal
+Barista Prep,Tropical Bliss Smoothie – In a pint container,,1,2oz Strawberry reduction,List Paragraph
+Barista Prep,Tropical Bliss Smoothie – In a pint container,,2,2oz Orange juice,List Paragraph
+Barista Prep,Tropical Bliss Smoothie – In a pint container,,3,1 Grey scoop pineapple (4oz),List Paragraph
+Barista Prep,Tropical Bliss Smoothie – In a pint container,,4,1 Whole banana,List Paragraph
+Barista Prep,Tropical Bliss Smoothie – In a pint container,,5,Add to blender pitcher,List Paragraph
+Barista Prep,Tropical Bliss Smoothie – In a pint container,,6,Add a leveled blue scoop of ice and blend on 4,List Paragraph
+Barista Prep,Tropical Bliss Smoothie – In a pint container,,7,"* Chocolate Milk, Marshmallow Cold Foam & Mocha Cold Brew shelf life is 3 days",x_msonormal
+Barista Prep,Tropical Bliss Smoothie – In a pint container,,8,* Tropical Bliss & Annie’s shelf life is 2 days,x_msonormal
+Barista Prep,Brewed Coffee for Air Pots,,0,,Normal
+Barista Prep,Half pot,,0,,Normal
+Barista Prep,Half pot,,1,Fill a pint container with whole beans,List Paragraph
+Barista Prep,Half pot,,2,Grind on Regular brew,Normal
+Barista Prep,Half pot,,3,Place grinds in “Regular” basket,Normal
+Barista Prep,Half pot,,4,Brew on Second Level Button,Normal
+Barista Prep,Half pot,,5,"Repeat for Flavored, but use “Flavored” basket",Normal
+Barista Prep,Full Pot,,0,,Normal
+Barista Prep,Full Pot,,1,Fill 2 pint containers with whole beans,List Paragraph
+Barista Prep,Full Pot,,2,Grind on Regular brew,Normal
+Barista Prep,Full Pot,,3,Place grinds in “Regular” basket,Normal
+Barista Prep,Full Pot,,4,Brew on Bottom Level Button,Normal
+Barista Prep,Full Pot,,5,"Repeat for Flavored, but use “Flavored” basket",Normal

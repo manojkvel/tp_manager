@@ -1,0 +1,26 @@
+# Local-dev overrides: bind-mount source for hot reload, loosen resource limits.
+# `docker-compose up` picks this up automatically alongside docker-compose.yml.
+
+services:
+  api:
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: debug
+    volumes:
+      - ./apps/api/src:/app/apps/api/src:ro
+    command: ["node", "apps/api/dist/main.js"]
+
+  ml:
+    environment:
+      LOG_LEVEL: debug
+    volumes:
+      - ./services/ml/src:/app/src:ro
+
+  aloha-worker:
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: debug
+
+  web:
+    environment:
+      NODE_ENV: development

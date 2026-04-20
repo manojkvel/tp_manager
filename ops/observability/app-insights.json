@@ -1,0 +1,47 @@
+{
+  "$schema": "./log-schema.schema.json",
+  "description": "Canonical TP Manager structured log line. Every service emits JSON lines matching this shape. Required: correlation_id, user_id (if authenticated), entity_id (if applicable). Enforced by gate-impl-to-release advisory #4.",
+  "version": "1.0.0",
+  "required": ["timestamp", "level", "service", "correlation_id", "message"],
+  "fields": {
+    "timestamp": { "type": "string", "format": "iso8601", "note": "ISO 8601 UTC" },
+    "level": { "type": "enum", "values": ["trace", "debug", "info", "warn", "error", "fatal"] },
+    "service": { "type": "enum", "values": ["api", "web", "aloha-worker", "ml"] },
+    "correlation_id": { "type": "string", "note": "ULID; propagated via x-correlation-id header" },
+    "user_id": { "type": "uuid|null", "note": "Auth subject, null for anon/boot traffic" },
+    "restaurant_id": { "type": "uuid|null", "note": "Multi-tenant scope; null for global actions" },
+    "entity_id": { "type": "uuid|null", "note": "Primary record id the log line refers to" },
+    "entity_kind": { "type": "string|null", "note": "Table name, e.g., 'recipe' or 'pos_sale'" },
+    "action": { "type": "string|null", "note": "Business action verb: create|update|delete|approve|import|etc." },
+    "duration_ms": { "type": "number|null", "note": "For request/job spans" },
+    "http": {
+      "type": "object",
+      "fields": {
+        "method": "string",
+        "path": "string",
+        "status": "int",
+        "route": "string",
+        "user_agent": "string",
+        "ip": "string"
+      }
+    },
+    "error": {
+      "type": "object|null",
+      "fields": {
+        "kind": "string",
+        "message": "string",
+        "stack": "string"
+      }
+    },
+    "message": { "type": "string" }
+  },
+  "sinks": {
+    "prod": "App Insights (via APPLICATIONINSIGHTS_CONNECTION_STRING)",
+    "local": "stdout (pino-pretty)"
+  },
+  "alerts": [
+    { "name": "ErrorRate", "query": "level == 'error' rate > 1/min for 5 min", "action": "PagerDuty" },
+    { "name": "AuthFailureSpike", "query": "path == '/auth/login' and status == 401 count > 20 in 5 min", "action": "Email" },
+    { "name": "AlohaIngestFailure", "query": "service == 'aloha-worker' and level == 'error' in daily window", "action": "Email + owner SMS" }
+  ]
+}
