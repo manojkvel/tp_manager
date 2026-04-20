@@ -25,6 +25,7 @@ interface RecipeLine {
   step_order: number | null;
   utensil_id?: string | null;
   note?: string | null;
+  ref_name?: string | null;
 }
 
 interface Version {
@@ -250,18 +251,28 @@ export default function RecipeDetailPage() {
               <tbody className="divide-y divide-surface-border">
                 {current.lines.map((l) => {
                   const lc = cost?.lines.find((c) => c.line_id === l.id);
+                  const href = l.ref_type === 'ingredient' && l.ingredient_id
+                    ? `/ingredients/${l.ingredient_id}`
+                    : l.ref_type === 'recipe' && l.ref_recipe_id
+                    ? `/recipes/${l.ref_recipe_id}`
+                    : null;
+                  const displayName = l.ref_name ?? '—';
+                  const qtyCell = l.qty_text != null
+                    ? <span className="text-slate-500">{l.qty_text}</span>
+                    : (l.qty > 0 ? l.qty : '—');
                   return (
                     <TRow key={l.id}>
                       <Td className="tabular-nums">{l.position + 1}</Td>
                       <Td>
-                        <Badge tone={l.ref_type === 'ingredient' ? 'info' : 'brand'}>{l.ref_type}</Badge>{' '}
-                        {l.ref_type === 'ingredient' && l.ingredient_id
-                          ? <Link to={`/ingredients/${l.ingredient_id}`} className="text-brand-700 hover:underline">view</Link>
-                          : l.ref_type === 'recipe' && l.ref_recipe_id
-                          ? <Link to={`/recipes/${l.ref_recipe_id}`} className="text-brand-700 hover:underline">view</Link>
-                          : '—'}
+                        <div className="flex items-center gap-2">
+                          <Badge tone={l.ref_type === 'ingredient' ? 'info' : 'brand'}>{l.ref_type}</Badge>
+                          {href
+                            ? <Link to={href} className="text-brand-700 hover:underline font-medium">{displayName}</Link>
+                            : <span className="font-medium">{displayName}</span>}
+                        </div>
+                        {l.note && <div className="mt-0.5 text-xs text-slate-500">{l.note}</div>}
                       </Td>
-                      <Td className="text-right tabular-nums">{l.qty_text ?? l.qty}</Td>
+                      <Td className="text-right tabular-nums">{qtyCell}</Td>
                       <Td>{l.uom ?? '—'}</Td>
                       <Td>{l.station ?? '—'}</Td>
                       <Td className="text-right tabular-nums">

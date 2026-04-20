@@ -29,6 +29,10 @@ export interface RecipeLineRow {
   station: string | null;
   step_order: number | null;
   utensil_id: string | null;
+  /** Resolved display name of the referenced ingredient or sub-recipe. Joined
+   *  by the repo; cost math ignores it. Optional so non-repo callers (tests,
+   *  pure fixtures) don't need to supply it. */
+  ref_name?: string | null;
 }
 
 export interface RecipeVersionRow {

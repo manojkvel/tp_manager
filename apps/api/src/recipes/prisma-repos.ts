@@ -50,31 +50,64 @@ export function prismaRecipeRepo(prisma: PrismaClient): RecipeRepo {
 }
 
 export function prismaRecipeVersionRepo(prisma: PrismaClient): RecipeVersionRepo {
+  // `ref_recipe_id` has no Prisma relation on RecipeLine, so we resolve
+  // sub-recipe names in one batched lookup after the version query.
+  async function resolveSubRecipeNames(refIds: Array<string | null>): Promise<Map<string, string>> {
+    const unique = Array.from(new Set(refIds.filter((x): x is string => !!x)));
+    if (unique.length === 0) return new Map();
+    // eslint-disable-next-line @tp/tp/require-restaurant-id -- PK lookup; caller has already tenant-scoped via recipe_id FK
+    const rows = await prisma.recipe.findMany({
+      where: { id: { in: unique } },
+      select: { id: true, name: true },
+    });
+    return new Map(rows.map((r) => [r.id, r.name]));
+  }
+
   return {
     async current(recipe_id) {
       // eslint-disable-next-line @tp/tp/require-restaurant-id -- scoped via recipe_id FK
       const v = await prisma.recipeVersion.findFirst({
         where: { recipe_id, is_current: true },
-        include: { lines: { orderBy: { position: 'asc' } } },
+        include: {
+          lines: {
+            orderBy: { position: 'asc' },
+            include: { ingredient: { select: { name: true } } },
+          },
+        },
       });
-      return v ? mapVersion(v) : null;
+      if (!v) return null;
+      const subNames = await resolveSubRecipeNames(v.lines.map((l) => l.ref_recipe_id));
+      return mapVersion(v, subNames);
     },
     async byId(id) {
       // eslint-disable-next-line @tp/tp/require-restaurant-id -- scoped via recipe_id FK
       const v = await prisma.recipeVersion.findUnique({
         where: { id },
-        include: { lines: { orderBy: { position: 'asc' } } },
+        include: {
+          lines: {
+            orderBy: { position: 'asc' },
+            include: { ingredient: { select: { name: true } } },
+          },
+        },
       });
-      return v ? mapVersion(v) : null;
+      if (!v) return null;
+      const subNames = await resolveSubRecipeNames(v.lines.map((l) => l.ref_recipe_id));
+      return mapVersion(v, subNames);
     },
     async list(recipe_id) {
       // eslint-disable-next-line @tp/tp/require-restaurant-id -- scoped via recipe_id FK
       const vs = await prisma.recipeVersion.findMany({
         where: { recipe_id },
         orderBy: { version: 'asc' },
-        include: { lines: { orderBy: { position: 'asc' } } },
+        include: {
+          lines: {
+            orderBy: { position: 'asc' },
+            include: { ingredient: { select: { name: true } } },
+          },
+        },
       });
-      return vs.map(mapVersion);
+      const subNames = await resolveSubRecipeNames(vs.flatMap((v) => v.lines.map((l) => l.ref_recipe_id)));
+      return vs.map((v) => mapVersion(v, subNames));
     },
     async appendAndPromote(full) {
       await prisma.$transaction(async (tx) => {
@@ -189,8 +222,9 @@ function mapVersion(v: {
     ref_type: string; ingredient_id: string | null; ref_recipe_id: string | null;
     qty: unknown; qty_text: string | null; uom: string | null; note: string | null;
     station: string | null; step_order: number | null; utensil_id: string | null;
+    ingredient?: { name: string } | null;
   }>;
-}): RecipeVersionFull {
+}, subRecipeNames: Map<string, string> = new Map()): RecipeVersionFull {
   return {
     version: {
       id: v.id,
@@ -222,6 +256,9 @@ function mapVersion(v: {
       station: l.station,
       step_order: l.step_order,
       utensil_id: l.utensil_id,
+      ref_name: l.ref_type === 'ingredient'
+        ? (l.ingredient?.name ?? null)
+        : (l.ref_recipe_id ? subRecipeNames.get(l.ref_recipe_id) ?? null : null),
     })),
   };
 }
