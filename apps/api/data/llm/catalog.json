@@ -1,0 +1,858 @@
+{
+  "ingredients": [
+    {
+      "name": "All Diced/Chopped Meats and Vegetables on Stations",
+      "uom": "oz"
+    },
+    {
+      "name": "All Dressings",
+      "uom": "oz"
+    },
+    {
+      "name": "All Shredded and Crumbled Cheeses",
+      "uom": "oz"
+    },
+    {
+      "name": "All-purpose flour",
+      "uom": "oz"
+    },
+    {
+      "name": "Avocado",
+      "uom": "each"
+    },
+    {
+      "name": "Avocado Chunk",
+      "uom": "oz"
+    },
+    {
+      "name": "Baby spinach",
+      "uom": "oz"
+    },
+    {
+      "name": "Bacon, thick-cut",
+      "uom": "oz"
+    },
+    {
+      "name": "Basil, fresh",
+      "uom": "oz"
+    },
+    {
+      "name": "Beefsteak tomato",
+      "uom": "each"
+    },
+    {
+      "name": "Black Pepper",
+      "uom": "oz"
+    },
+    {
+      "name": "Brown sugar",
+      "uom": "oz"
+    },
+    {
+      "name": "Cajun Seasoning",
+      "uom": "oz"
+    },
+    {
+      "name": "Caramelized Onions",
+      "uom": "oz"
+    },
+    {
+      "name": "Cheesecake Delight for table side drizzle on Cinnamon Rolls",
+      "uom": "oz"
+    },
+    {
+      "name": "Cheesy Grits",
+      "uom": "oz"
+    },
+    {
+      "name": "Cinnamon",
+      "uom": "oz"
+    },
+    {
+      "name": "Coffee beans, whole",
+      "uom": "oz"
+    },
+    {
+      "name": "Cranberry Chicken Salad",
+      "uom": "oz"
+    },
+    {
+      "name": "Daisy Cakes",
+      "uom": "oz"
+    },
+    {
+      "name": "Dried Cranberries",
+      "uom": "oz"
+    },
+    {
+      "name": "Drizzles",
+      "uom": "oz"
+    },
+    {
+      "name": "Egg Whites",
+      "uom": "oz"
+    },
+    {
+      "name": "Eggs, large",
+      "uom": "each"
+    },
+    {
+      "name": "English muffin",
+      "uom": "each"
+    },
+    {
+      "name": "Espresso beans",
+      "uom": "oz"
+    },
+    {
+      "name": "Everything Bagel Seasoning",
+      "uom": "oz"
+    },
+    {
+      "name": "Fresh mozzarella",
+      "uom": "oz"
+    },
+    {
+      "name": "Full size pancakes",
+      "uom": "oz"
+    },
+    {
+      "name": "Garlic Pepper Seasoning",
+      "uom": "oz"
+    },
+    {
+      "name": "Garlic cloves",
+      "uom": "each"
+    },
+    {
+      "name": "Graham Cracker Crumbs",
+      "uom": "oz"
+    },
+    {
+      "name": "Granola",
+      "uom": "oz"
+    },
+    {
+      "name": "Granulated sugar",
+      "uom": "oz"
+    },
+    {
+      "name": "Heavy cream",
+      "uom": "fl_oz"
+    },
+    {
+      "name": "Hollandaise",
+      "uom": "oz"
+    },
+    {
+      "name": "Kosher salt",
+      "uom": "oz"
+    },
+    {
+      "name": "Lemon Zest",
+      "uom": "oz"
+    },
+    {
+      "name": "Lemon juice, fresh",
+      "uom": "fl_oz"
+    },
+    {
+      "name": "Maple Walnuts",
+      "uom": "oz"
+    },
+    {
+      "name": "Marshmallows",
+      "uom": "oz"
+    },
+    {
+      "name": "Oatmeal",
+      "uom": "oz"
+    },
+    {
+      "name": "Olive oil, extra virgin",
+      "uom": "fl_oz"
+    },
+    {
+      "name": "Oreo Cookie Pieces",
+      "uom": "oz"
+    },
+    {
+      "name": "Paprika",
+      "uom": "oz"
+    },
+    {
+      "name": "Pink Sea Salt",
+      "uom": "oz"
+    },
+    {
+      "name": "Roasted Red Peppers",
+      "uom": "oz"
+    },
+    {
+      "name": "Salsa",
+      "uom": "oz"
+    },
+    {
+      "name": "Sharp cheddar, shredded",
+      "uom": "oz"
+    },
+    {
+      "name": "Smoked ham",
+      "uom": "oz"
+    },
+    {
+      "name": "Smoked salmon",
+      "uom": "oz"
+    },
+    {
+      "name": "Soups",
+      "uom": "oz"
+    },
+    {
+      "name": "Sour Cream",
+      "uom": "oz"
+    },
+    {
+      "name": "Sourdough slice",
+      "uom": "each"
+    },
+    {
+      "name": "Strawberry Sauce",
+      "uom": "oz"
+    },
+    {
+      "name": "Toasted Coconut",
+      "uom": "oz"
+    },
+    {
+      "name": "Unsalted butter",
+      "uom": "oz"
+    },
+    {
+      "name": "Vanilla extract",
+      "uom": "fl_oz"
+    },
+    {
+      "name": "Vegan Egg",
+      "uom": "oz"
+    },
+    {
+      "name": "Whipped Butter",
+      "uom": "oz"
+    },
+    {
+      "name": "Whipped Egg",
+      "uom": "oz"
+    },
+    {
+      "name": "Whole milk",
+      "uom": "fl_oz"
+    },
+    {
+      "name": "and Sauces (Caramel and Chocolate sauce can stay in the squeeze bottles the come in unless they are in a bulk container and need to be bottled)",
+      "uom": "oz"
+    }
+  ],
+  "recipes": [
+    {
+      "name": "*Kids Sized Hot Chocolate",
+      "type": "menu"
+    },
+    {
+      "name": "Annie’s Lemonade",
+      "type": "menu"
+    },
+    {
+      "name": "Annie’s Lemonade – In a pint container",
+      "type": "menu"
+    },
+    {
+      "name": "Avocado Smash Benny",
+      "type": "menu"
+    },
+    {
+      "name": "Avocado Toast",
+      "type": "menu"
+    },
+    {
+      "name": "Bacon Cheddar Scramble",
+      "type": "menu"
+    },
+    {
+      "name": "Basic Omelet",
+      "type": "menu"
+    },
+    {
+      "name": "Basic Skillet",
+      "type": "menu"
+    },
+    {
+      "name": "Basil pesto (prep)",
+      "type": "prep"
+    },
+    {
+      "name": "Berry Chocolaty Pancakes",
+      "type": "menu"
+    },
+    {
+      "name": "Big Easy Benedict",
+      "type": "menu"
+    },
+    {
+      "name": "Breakfast Combo",
+      "type": "menu"
+    },
+    {
+      "name": "Brewed Coffee for Air Pots",
+      "type": "menu"
+    },
+    {
+      "name": "Cappuccino",
+      "type": "menu"
+    },
+    {
+      "name": "Caprese Toast",
+      "type": "menu"
+    },
+    {
+      "name": "Chai Tea",
+      "type": "menu"
+    },
+    {
+      "name": "Chef’s Soup Bowl",
+      "type": "menu"
+    },
+    {
+      "name": "Chicken Pesto Panini",
+      "type": "menu"
+    },
+    {
+      "name": "Chips & Salsa",
+      "type": "menu"
+    },
+    {
+      "name": "Chocolate Milk",
+      "type": "menu"
+    },
+    {
+      "name": "Chop Chop Salad",
+      "type": "menu"
+    },
+    {
+      "name": "Cinnamon Roll Pancakes",
+      "type": "menu"
+    },
+    {
+      "name": "Cinnamon Rolls",
+      "type": "menu"
+    },
+    {
+      "name": "Cinnamon Swirlz",
+      "type": "menu"
+    },
+    {
+      "name": "Classic Benedict",
+      "type": "menu"
+    },
+    {
+      "name": "Classic Pancakes",
+      "type": "menu"
+    },
+    {
+      "name": "Classic Pork Roll Sammy",
+      "type": "menu"
+    },
+    {
+      "name": "Cold Brew",
+      "type": "menu"
+    },
+    {
+      "name": "Cold Foam Cold Brew",
+      "type": "menu"
+    },
+    {
+      "name": "Cold Pressed Juice",
+      "type": "menu"
+    },
+    {
+      "name": "Cold Pressed Juices",
+      "type": "menu"
+    },
+    {
+      "name": "Combo Mac & Cheese",
+      "type": "menu"
+    },
+    {
+      "name": "Combo Sandwich & Salad",
+      "type": "menu"
+    },
+    {
+      "name": "Combo Sandwich & Sandwich",
+      "type": "menu"
+    },
+    {
+      "name": "Combo Soup & Salad",
+      "type": "menu"
+    },
+    {
+      "name": "Combo Soup & Sandwich",
+      "type": "menu"
+    },
+    {
+      "name": "Cookie Explosion Cup Hot Chocolate",
+      "type": "menu"
+    },
+    {
+      "name": "Cookie Explosion Hot Chocolate",
+      "type": "menu"
+    },
+    {
+      "name": "Cookies & Cream Style",
+      "type": "menu"
+    },
+    {
+      "name": "Cosmopolitan Salad",
+      "type": "menu"
+    },
+    {
+      "name": "Cran-Walnut Chicken Salad Sandwich",
+      "type": "menu"
+    },
+    {
+      "name": "Creamers & Milks",
+      "type": "menu"
+    },
+    {
+      "name": "CrossFit  Omelet",
+      "type": "menu"
+    },
+    {
+      "name": "Eggs Benedict",
+      "type": "menu"
+    },
+    {
+      "name": "Espresso",
+      "type": "menu"
+    },
+    {
+      "name": "French Press",
+      "type": "menu"
+    },
+    {
+      "name": "Fruit Bowl",
+      "type": "menu"
+    },
+    {
+      "name": "Fruit Cup",
+      "type": "menu"
+    },
+    {
+      "name": "Full Pot",
+      "type": "menu"
+    },
+    {
+      "name": "G.O.A.T. Omelet",
+      "type": "menu"
+    },
+    {
+      "name": "Glass of Juice",
+      "type": "menu"
+    },
+    {
+      "name": "Grand French Toast",
+      "type": "menu"
+    },
+    {
+      "name": "Grande Huevos Rancheros",
+      "type": "menu"
+    },
+    {
+      "name": "Half pot",
+      "type": "menu"
+    },
+    {
+      "name": "Health Freak Combo",
+      "type": "menu"
+    },
+    {
+      "name": "Hollandaise (prep)",
+      "type": "prep"
+    },
+    {
+      "name": "Hot Oatmeal Bowl",
+      "type": "menu"
+    },
+    {
+      "name": "Hot Oatmeal Cup",
+      "type": "menu"
+    },
+    {
+      "name": "Hot Tea",
+      "type": "menu"
+    },
+    {
+      "name": "I Can’t Believe They’re Vegan Pancakes",
+      "type": "menu"
+    },
+    {
+      "name": "Iced Chai",
+      "type": "menu"
+    },
+    {
+      "name": "Iced Latte",
+      "type": "menu"
+    },
+    {
+      "name": "Key West Shrimp Omelet",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s Bowl of Cereal",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s Chicken Tenders",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s Daisy Cakes",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s Eggies",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s French Toast",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s Fruity Style",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s Grilled Cheese",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s Pancakes",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s S’Mores Style",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s Volcano French Toast",
+      "type": "menu"
+    },
+    {
+      "name": "Kid’s Waffle Wedges",
+      "type": "menu"
+    },
+    {
+      "name": "Latte",
+      "type": "menu"
+    },
+    {
+      "name": "Lemon Blueberry Dream Pancakes",
+      "type": "menu"
+    },
+    {
+      "name": "Lemonade",
+      "type": "menu"
+    },
+    {
+      "name": "Mac N Cheese",
+      "type": "menu"
+    },
+    {
+      "name": "Marshmallow Cold Foam",
+      "type": "menu"
+    },
+    {
+      "name": "Marshmallow World Cold Brew",
+      "type": "menu"
+    },
+    {
+      "name": "Martha’s Vineyard Salad",
+      "type": "menu"
+    },
+    {
+      "name": "Mocha Cold Brew",
+      "type": "menu"
+    },
+    {
+      "name": "Nashville Hot Honey Chicken Wrap",
+      "type": "menu"
+    },
+    {
+      "name": "New Orleans Cold Brew",
+      "type": "menu"
+    },
+    {
+      "name": "New Yorker Salmon Platter",
+      "type": "menu"
+    },
+    {
+      "name": "OMG French Toast",
+      "type": "menu"
+    },
+    {
+      "name": "Pam’s Half and Half",
+      "type": "menu"
+    },
+    {
+      "name": "Pancake batter (prep)",
+      "type": "prep"
+    },
+    {
+      "name": "Pavo Cubano",
+      "type": "menu"
+    },
+    {
+      "name": "Peppermint Hot Chocolate",
+      "type": "menu"
+    },
+    {
+      "name": "Plain Belgian Waffle",
+      "type": "menu"
+    },
+    {
+      "name": "Plain Pancakes",
+      "type": "menu"
+    },
+    {
+      "name": "Power Grain Pancakes",
+      "type": "menu"
+    },
+    {
+      "name": "Power Up Grains Bowl",
+      "type": "menu"
+    },
+    {
+      "name": "Roadhouse Bacon Stack",
+      "type": "menu"
+    },
+    {
+      "name": "Salted Caramel Mocha-chino",
+      "type": "menu"
+    },
+    {
+      "name": "Seaside Jersey Club",
+      "type": "menu"
+    },
+    {
+      "name": "Shrimp & Grits",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Bacon",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Bagel",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Beyond Breakfast Sausage",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Cheese Grits",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Chicken Sausage",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Chicken Tenders",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Ciabatta",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Citrus Dressed Mixed Greens",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Cornbread",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Egg Whites",
+      "type": "menu"
+    },
+    {
+      "name": "Side of English Muffin",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Grilled Chicken",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Ham",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Mac & Cheese",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Multigrain",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Over Easy Eggs",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Over Hard Eggs",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Over Medium Eggs",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Poached Eggs",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Pork Roll",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Pork Sausage",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Potatoes",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Rye",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Scrambled Eggs",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Sourdough",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Sunny Side Up Eggs",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Udi’s Gluten Free Bread",
+      "type": "menu"
+    },
+    {
+      "name": "Side of Vegan Just Eggs",
+      "type": "menu"
+    },
+    {
+      "name": "Simple syrup (prep)",
+      "type": "prep"
+    },
+    {
+      "name": "Smoked Salmon Benny",
+      "type": "menu"
+    },
+    {
+      "name": "Smoked Salmon Plate",
+      "type": "menu"
+    },
+    {
+      "name": "Smore’s Hot Chocolate",
+      "type": "menu"
+    },
+    {
+      "name": "Soda",
+      "type": "menu"
+    },
+    {
+      "name": "Southern Chicken & Waffles",
+      "type": "menu"
+    },
+    {
+      "name": "Strawberry Cheesecake French Toast",
+      "type": "menu"
+    },
+    {
+      "name": "S’mores Hot Chocolate",
+      "type": "menu"
+    },
+    {
+      "name": "Traditional Eggs",
+      "type": "menu"
+    },
+    {
+      "name": "Traditional Hot Chocolate",
+      "type": "menu"
+    },
+    {
+      "name": "Tropical Bliss Smoothie",
+      "type": "menu"
+    },
+    {
+      "name": "Tropical Bliss Smoothie – In a pint container",
+      "type": "menu"
+    },
+    {
+      "name": "Tropical Crunch Waffle",
+      "type": "menu"
+    },
+    {
+      "name": "Turkey Chili & Chef’s Soup Cups",
+      "type": "menu"
+    },
+    {
+      "name": "Turkey Chili Bowl",
+      "type": "menu"
+    },
+    {
+      "name": "Tuscany Omelet",
+      "type": "menu"
+    },
+    {
+      "name": "Unlimited Gourmet Coffee",
+      "type": "menu"
+    },
+    {
+      "name": "Unsweetened Iced Tea",
+      "type": "menu"
+    },
+    {
+      "name": "Vanilla Chai Tea",
+      "type": "menu"
+    },
+    {
+      "name": "Vanilla Coconut Cold Brew",
+      "type": "menu"
+    },
+    {
+      "name": "Vanilla Latte",
+      "type": "menu"
+    },
+    {
+      "name": "Western Omelet",
+      "type": "menu"
+    },
+    {
+      "name": "Whipped cream (prep)",
+      "type": "prep"
+    },
+    {
+      "name": "Wilbur Skillet",
+      "type": "menu"
+    }
+  ]
+}
