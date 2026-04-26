@@ -6,9 +6,6 @@ services:
     environment:
       NODE_ENV: development
       LOG_LEVEL: debug
-    volumes:
-      - ./apps/api/src:/app/apps/api/src:ro
-    command: ["node", "apps/api/dist/main.js"]
 
   ml:
     environment:
