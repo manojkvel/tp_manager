@@ -5,6 +5,7 @@
 **/.turbo
 **/.cache
 **/coverage
+**/*.tsbuildinfo
 **/__pycache__
 **/.venv
 **/venv

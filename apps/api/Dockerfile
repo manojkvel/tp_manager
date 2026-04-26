@@ -20,7 +20,8 @@ COPY tsconfig.base.json ./
 COPY packages/types packages/types
 COPY packages/conversions packages/conversions
 COPY apps/api apps/api
-RUN pnpm --filter @tp/types build \
+RUN pnpm --filter @tp/api exec prisma generate \
+ && pnpm --filter @tp/types build \
  && pnpm --filter @tp/conversions build \
  && pnpm --filter @tp/api build
 
@@ -36,12 +37,14 @@ ENV NODE_ENV=production \
 COPY --from=build --chown=app:app /repo/package.json /repo/pnpm-workspace.yaml /repo/pnpm-lock.yaml* ./
 COPY --from=build --chown=app:app /repo/apps/api/package.json ./apps/api/
 COPY --from=build --chown=app:app /repo/apps/api/dist ./apps/api/dist
+COPY --from=build --chown=app:app /repo/apps/api/prisma ./apps/api/prisma
 COPY --from=build --chown=app:app /repo/packages/types/package.json ./packages/types/
 COPY --from=build --chown=app:app /repo/packages/types/dist ./packages/types/dist
 COPY --from=build --chown=app:app /repo/packages/conversions/package.json ./packages/conversions/
 COPY --from=build --chown=app:app /repo/packages/conversions/dist ./packages/conversions/dist
 
-RUN pnpm install --prod --frozen-lockfile --filter @tp/api...
+RUN pnpm install --prod --frozen-lockfile --filter @tp/api... \
+ && pnpm --filter @tp/api exec prisma generate
 
 USER app
 EXPOSE 3001
