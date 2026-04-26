@@ -128,7 +128,7 @@ services:
   # `docker exec`s scheduled commands. The only job today is the nightly ML
   # retrain on the api container; add more by labelling the target container.
   scheduler:
-    image: mcuadros/ofelia:v0.3.12
+    image: mcuadros/ofelia:0.3.12
     restart: unless-stopped
     command: daemon --docker
     depends_on:
