@@ -36,6 +36,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(here, '..', 'data', 'llm');
 const PREPS_FILE = join(DATA_DIR, 'preps-to-create.jsonl');
 const LINES_FILE = join(DATA_DIR, 'recipe-lines-extracted.jsonl');
+// Companion index file written by export-recipes-for-llm.ts. Used to translate
+// the Mac-local UUIDs in LINES_FILE into stable recipe names so this script
+// works against any freshly-seeded DB (where Prisma generates new UUIDs).
+const NAMES_FILE = join(DATA_DIR, 'recipes-to-extract.jsonl');
 
 type ExtRef = 'ingredient' | 'recipe';
 type ExtLine = {
@@ -82,7 +86,12 @@ async function main() {
     const proposedPreps = readJsonl<ProposedPrep>(PREPS_FILE);
     const extracted = readJsonl<ExtRec>(LINES_FILE);
     if (!extracted.length) throw new Error(`empty or missing ${LINES_FILE}`);
-    console.log(`loaded ${proposedPreps.length} proposed preps + ${extracted.length} recipe extractions`);
+    // Build an id→name index from the export companion file. Names from
+    // recipe-lines-extracted.jsonl's UUIDs may not exist in this DB, but the
+    // names will, since seed-demo-data uses the same source CSVs.
+    const idIndex = readJsonl<{ id: string; name: string }>(NAMES_FILE);
+    const nameByExportId = new Map(idIndex.map((r) => [r.id, r.name.toLowerCase().trim()]));
+    console.log(`loaded ${proposedPreps.length} proposed preps + ${extracted.length} recipe extractions (id→name index: ${nameByExportId.size})`);
 
     const ingredients = await prisma.ingredient.findMany({ where: { restaurant_id: rid } });
     const ingByName = new Map(ingredients.map((i) => [i.name.toLowerCase().trim(), i]));
@@ -198,11 +207,27 @@ async function main() {
     let wipedRecipes = 0;
 
     for (const rec of extracted) {
-      const version = await prisma.recipeVersion.findFirst({
+      // Try by id first (works on the original Mac where IDs match), then
+      // fall back to id→name→recipe (works on every other DB).
+      let recipeId: string | null = null;
+      let version = await prisma.recipeVersion.findFirst({
         where: { recipe_id: rec.id, is_current: true },
       });
-      if (!version) {
-        console.warn(`no current version for recipe ${rec.id} — skip`);
+      if (version) {
+        recipeId = rec.id;
+      } else {
+        const name = nameByExportId.get(rec.id);
+        const localRecipe = name ? recByName.get(name) : undefined;
+        if (localRecipe) {
+          recipeId = localRecipe.id;
+          version = await prisma.recipeVersion.findFirst({
+            where: { recipe_id: localRecipe.id, is_current: true },
+          });
+        }
+      }
+      if (!version || !recipeId) {
+        const hint = nameByExportId.get(rec.id) ?? '(unknown name)';
+        console.warn(`no current version for recipe ${rec.id} [${hint}] — skip`);
         recipesMissingVersion += 1;
         continue;
       }
