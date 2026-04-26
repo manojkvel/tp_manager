@@ -132,6 +132,59 @@ enum PosRowKind {
 enum ForecastEntityType {
   ingredient
   prep
+  recipe
+}
+
+// v1.7 — culinary grouping used on the ingredients list (colored pills).
+enum CulinaryCategory {
+  proteins
+  dairy
+  produce
+  grains
+  spirits
+  oils
+  condiments
+  beverage
+  bakery
+  other
+}
+
+enum SupplierCategory {
+  broadline
+  produce
+  beverage
+  bakery
+  dairy
+  specialty
+  other
+}
+
+enum SupplierStatus {
+  active
+  review
+  inactive
+}
+
+// v1.7 — two-dimensional waste model. `WasteReason` captures the operational
+// "why" (expiry, burned, server_mistake, …); `WasteAttributionBucket` captures
+// the accounting bucket for the Waste & Loss report donut.
+enum WasteAttributionBucket {
+  spoilage
+  prep_waste
+  comped_meals
+  theft_suspected
+}
+
+enum PrepCategory {
+  sauces
+  mise_en_place
+  dressings
+  marinades
+  stocks
+  doughs_batters
+  proteins_cooked
+  vegetables_prepped
+  other
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -321,6 +374,13 @@ model Ingredient {
   shelf_life_days     Int?
   allergen_flags      String[]   @default([])
   density_g_per_ml    Decimal?   @db.Decimal(18, 6) // enables volume↔weight conversions (AD-4)
+  // v1.7 — per-ingredient PAR, culinary grouping, photo-required flag,
+  // cross-ref SKU for barcode scan.
+  par_qty             Decimal?   @db.Decimal(18, 6)
+  par_uom             String?
+  culinary_category   CulinaryCategory?
+  photo_required      Boolean    @default(false)
+  supplier_sku        String?
   is_archived         Boolean    @default(false)
   archived_at         DateTime?  @db.Timestamptz(3)
   created_at          DateTime   @default(now()) @db.Timestamptz(3)
@@ -336,6 +396,7 @@ model Ingredient {
   @@unique([restaurant_id, name])
   @@index([restaurant_id])
   @@index([restaurant_id, is_archived])
+  @@index([restaurant_id, culinary_category])
   @@map("ingredient")
 }
 
@@ -365,6 +426,12 @@ model Supplier {
   min_order_cents Int        @default(0)
   order_cadence   String?
   is_active       Boolean    @default(true)
+  // v1.7 — supplier KPI fields
+  category        SupplierCategory?
+  star_rating     Decimal?   @db.Decimal(3, 2)
+  delivery_days   Int[]      @default([])
+  cutoff_time     String?
+  status          SupplierStatus @default(active)
   created_at      DateTime   @default(now()) @db.Timestamptz(3)
 
   offers      SupplierIngredient[]
@@ -405,6 +472,8 @@ model Recipe {
   restaurant      Restaurant    @relation(fields: [restaurant_id], references: [id])
   type            RecipeType
   name            String
+  // v1.7 — grouping for the Prep Items library nav
+  prep_category   PrepCategory?
   is_archived     Boolean       @default(false)
   created_at      DateTime      @default(now()) @db.Timestamptz(3)
 
@@ -427,6 +496,10 @@ model RecipeVersion {
   yield_qty                Decimal      @db.Decimal(18, 6)
   yield_uom                String
   shelf_life_days          Int?
+  // v1.7 — Prep Items library exposes these so the PO's storage-temp +
+  // hours-granularity shelf-life columns can render.
+  shelf_life_hours         Int?
+  storage_temp_f           Decimal?     @db.Decimal(6, 2)
   equipment                String[]     @default([])
   procedure                String       @default("")
   photo_url                String?
@@ -499,17 +572,22 @@ model PrepSheet {
 }
 
 model PrepSheetRow {
-  id                 String             @id @default(uuid()) @db.Uuid
-  prep_sheet_id      String             @db.Uuid
-  prep_sheet         PrepSheet          @relation(fields: [prep_sheet_id], references: [id], onDelete: Cascade)
-  recipe_version_id  String             @db.Uuid
-  recipe_version     RecipeVersion      @relation(fields: [recipe_version_id], references: [id])
-  needed_qty         Decimal            @db.Decimal(18, 6)
-  status             PrepSheetRowStatus @default(pending)
-  started_at         DateTime?          @db.Timestamptz(3)
-  completed_at       DateTime?          @db.Timestamptz(3)
-  user_id            String?            @db.Uuid
-  skip_reason        String?
+  id                   String             @id @default(uuid()) @db.Uuid
+  prep_sheet_id        String             @db.Uuid
+  prep_sheet           PrepSheet          @relation(fields: [prep_sheet_id], references: [id], onDelete: Cascade)
+  recipe_version_id    String             @db.Uuid
+  recipe_version       RecipeVersion      @relation(fields: [recipe_version_id], references: [id])
+  needed_qty           Decimal            @db.Decimal(18, 6)
+  status               PrepSheetRowStatus @default(pending)
+  started_at           DateTime?          @db.Timestamptz(3)
+  completed_at         DateTime?          @db.Timestamptz(3)
+  user_id              String?            @db.Uuid
+  skip_reason          String?
+  // v1.7 — assignee, QC sign-off, temp-probe reading
+  assigned_to_user_id  String?            @db.Uuid
+  qc_signed_by_user_id String?            @db.Uuid
+  qc_signed_at         DateTime?          @db.Timestamptz(3)
+  temp_f               Decimal?           @db.Decimal(6, 2)
 
   @@index([prep_sheet_id])
   @@index([recipe_version_id])
@@ -517,17 +595,21 @@ model PrepSheetRow {
 }
 
 model InventoryCount {
-  id             String                @id @default(uuid()) @db.Uuid
-  restaurant_id  String                @db.Uuid
-  restaurant     Restaurant            @relation(fields: [restaurant_id], references: [id])
-  date           DateTime              @db.Date
-  status         InventoryCountStatus  @default(open)
-  started_by     String?               @db.Uuid
-  completed_by   String?               @db.Uuid
-  amends_count_id String?              @db.Uuid
-  amends_count   InventoryCount?       @relation("AmendedBy", fields: [amends_count_id], references: [id])
-  amendments     InventoryCount[]      @relation("AmendedBy")
-  created_at     DateTime              @default(now()) @db.Timestamptz(3)
+  id              String                @id @default(uuid()) @db.Uuid
+  restaurant_id   String                @db.Uuid
+  restaurant      Restaurant            @relation(fields: [restaurant_id], references: [id])
+  date            DateTime              @db.Date
+  status          InventoryCountStatus  @default(open)
+  started_by      String?               @db.Uuid
+  completed_by    String?               @db.Uuid
+  amends_count_id String?               @db.Uuid
+  amends_count    InventoryCount?       @relation("AmendedBy", fields: [amends_count_id], references: [id])
+  amendments      InventoryCount[]      @relation("AmendedBy")
+  // v1.7 — GPS verification stamp (non-blocking; NULL if user denies permission)
+  gps_lat         Decimal?              @db.Decimal(10, 7)
+  gps_lng         Decimal?              @db.Decimal(10, 7)
+  gps_captured_at DateTime?             @db.Timestamptz(3)
+  created_at      DateTime              @default(now()) @db.Timestamptz(3)
 
   lines InventoryCountLine[]
 
@@ -546,23 +628,32 @@ model InventoryCountLine {
   expected_qty         Decimal?       @db.Decimal(18, 6)
   actual_qty           Decimal        @db.Decimal(18, 6)
   unit_cost_cents      Int?
+  // v1.7 — photo-required ingredients attach a proof image
+  photo_url            String?
 
   @@index([count_id])
+  @@index([count_id, location_id])
   @@map("inventory_count_line")
 }
 
 model Delivery {
-  id            String         @id @default(uuid()) @db.Uuid
-  restaurant_id String         @db.Uuid
-  restaurant    Restaurant     @relation(fields: [restaurant_id], references: [id])
-  supplier_id   String         @db.Uuid
-  supplier      Supplier       @relation(fields: [supplier_id], references: [id])
-  po_id         String?        @db.Uuid
-  order         Order?         @relation(fields: [po_id], references: [id])
-  received_on   DateTime       @db.Date
-  status        DeliveryStatus @default(pending)
-  received_by   String?        @db.Uuid
-  created_at    DateTime       @default(now()) @db.Timestamptz(3)
+  id                       String         @id @default(uuid()) @db.Uuid
+  restaurant_id            String         @db.Uuid
+  restaurant               Restaurant     @relation(fields: [restaurant_id], references: [id])
+  supplier_id              String         @db.Uuid
+  supplier                 Supplier       @relation(fields: [supplier_id], references: [id])
+  po_id                    String?        @db.Uuid
+  order                    Order?         @relation(fields: [po_id], references: [id])
+  received_on              DateTime       @db.Date
+  status                   DeliveryStatus @default(pending)
+  received_by              String?        @db.Uuid
+  // v1.7 — invoice OCR pipeline. `ocr_status` is text (not enum) so the ML
+  // service can add new states without a migration.
+  invoice_scan_url         String?
+  ocr_status               String         @default("none") // none | processing | parsed | failed
+  ocr_extracted_lines_json Json?
+  discrepancy_count        Int            @default(0)
+  created_at               DateTime       @default(now()) @db.Timestamptz(3)
 
   lines DeliveryLine[]
 
@@ -620,24 +711,29 @@ model OrderLine {
 }
 
 model WasteEntry {
-  id                    String        @id @default(uuid()) @db.Uuid
-  restaurant_id         String        @db.Uuid
-  restaurant            Restaurant    @relation(fields: [restaurant_id], references: [id])
-  ref_type              WasteRefType
-  ingredient_id         String?       @db.Uuid
-  recipe_version_id     String?       @db.Uuid
-  qty                   Decimal       @db.Decimal(18, 6)
-  uom                   String
-  reason_id             String        @db.Uuid
-  reason                WasteReason   @relation(fields: [reason_id], references: [id])
-  note                  String?
-  photo_url             String?
+  id                     String                 @id @default(uuid()) @db.Uuid
+  restaurant_id          String                 @db.Uuid
+  restaurant             Restaurant             @relation(fields: [restaurant_id], references: [id])
+  ref_type               WasteRefType
+  ingredient_id          String?                @db.Uuid
+  recipe_version_id      String?                @db.Uuid
+  qty                    Decimal                @db.Decimal(18, 6)
+  uom                    String
+  reason_id              String                 @db.Uuid
+  reason                 WasteReason            @relation(fields: [reason_id], references: [id])
+  // v1.7 — two-dimensional taxonomy. `reason` is operational (why did it
+  // get wasted); `attribution_bucket` is accounting (who ate the cost).
+  attribution_bucket     WasteAttributionBucket
+  station_code           String?
+  note                   String?
+  photo_url              String?
   unit_cost_cents_pinned Int
-  value_cents           Int
-  user_id               String?       @db.Uuid
-  at                    DateTime      @default(now()) @db.Timestamptz(3)
+  value_cents            Int
+  user_id                String?                @db.Uuid
+  at                     DateTime               @default(now()) @db.Timestamptz(3)
 
   @@index([restaurant_id, at])
+  @@index([restaurant_id, attribution_bucket, at])
   @@map("waste_entry")
 }
 

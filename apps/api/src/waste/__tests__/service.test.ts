@@ -17,6 +17,9 @@ function memRepo(): WasteRepo & { _all: WasteEntry[] } {
         .filter((x) => x.restaurant_id === rid && x.at >= since && x.at < until)
         .reduce((s, e) => s + e.value_cents, 0);
     },
+    async listRange(rid, since, until) {
+      return all.filter((x) => x.restaurant_id === rid && x.at >= since && x.at < until);
+    },
   };
 }
 
@@ -28,7 +31,7 @@ describe('WasteService.log', () => {
   it('pins unit cost at log time and computes value_cents', async () => {
     const svc = new WasteService({ repo: memRepo(), costs: fixedCost, now: () => NOW });
     const e = await svc.log(RID, {
-      ref_type: 'ingredient', ingredient_id: 'i1', qty: 2, uom: 'oz', reason_id: 'r1',
+      ref_type: 'ingredient', ingredient_id: 'i1', qty: 2, uom: 'oz', reason_id: 'r1', attribution_bucket: 'spoilage',
     });
     expect(e.unit_cost_cents_pinned).toBe(250);
     expect(e.value_cents).toBe(500);
@@ -38,7 +41,7 @@ describe('WasteService.log', () => {
   it('accepts partial portion-bag entry (qty < 1) on a prep ref', async () => {
     const svc = new WasteService({ repo: memRepo(), costs: fixedCost, now: () => NOW });
     const e = await svc.log(RID, {
-      ref_type: 'prep', recipe_version_id: 'rv1', qty: 0.4, uom: 'bag', reason_id: 'r1',
+      ref_type: 'prep', recipe_version_id: 'rv1', qty: 0.4, uom: 'bag', reason_id: 'r1', attribution_bucket: 'prep_waste',
     });
     expect(e.qty).toBe(0.4);
     expect(e.value_cents).toBe(100); // round(250 * 0.4)
@@ -47,14 +50,14 @@ describe('WasteService.log', () => {
   it('rejects qty <= 0', async () => {
     const svc = new WasteService({ repo: memRepo(), costs: fixedCost });
     await expect(svc.log(RID, {
-      ref_type: 'ingredient', ingredient_id: 'i1', qty: 0, uom: 'oz', reason_id: 'r1',
+      ref_type: 'ingredient', ingredient_id: 'i1', qty: 0, uom: 'oz', reason_id: 'r1', attribution_bucket: 'spoilage',
     })).rejects.toBeInstanceOf(WasteValidationError);
   });
 
   it('rejects ingredient ref without ingredient_id', async () => {
     const svc = new WasteService({ repo: memRepo(), costs: fixedCost });
     await expect(svc.log(RID, {
-      ref_type: 'ingredient', qty: 1, uom: 'oz', reason_id: 'r1',
+      ref_type: 'ingredient', qty: 1, uom: 'oz', reason_id: 'r1', attribution_bucket: 'spoilage',
     })).rejects.toBeInstanceOf(WasteValidationError);
   });
 });
@@ -77,12 +80,30 @@ describe('WasteService.expiredSuggestions', () => {
   });
 });
 
+describe('WasteService.byBucket (v1.7 §6.8 AC-6)', () => {
+  it('rolls up value and count per attribution bucket', async () => {
+    const repo = memRepo();
+    const svc = new WasteService({ repo, costs: fixedCost, now: () => NOW });
+    await svc.log(RID, { ref_type: 'ingredient', ingredient_id: 'i1', qty: 2, uom: 'oz', reason_id: 'r1', attribution_bucket: 'spoilage' });
+    await svc.log(RID, { ref_type: 'ingredient', ingredient_id: 'i2', qty: 1, uom: 'oz', reason_id: 'r1', attribution_bucket: 'spoilage' });
+    await svc.log(RID, { ref_type: 'ingredient', ingredient_id: 'i3', qty: 4, uom: 'oz', reason_id: 'r1', attribution_bucket: 'theft_suspected' });
+    const rollup = await svc.byBucket(RID, new Date('2026-04-01'), new Date('2026-05-01'));
+    expect(rollup.total_entries).toBe(3);
+    expect(rollup.total_value_cents).toBe(500 + 250 + 1000);
+    const spoil = rollup.by_bucket.find((b) => b.bucket === 'spoilage')!;
+    expect(spoil.value_cents).toBe(750);
+    expect(spoil.entry_count).toBe(2);
+    const theft = rollup.by_bucket.find((b) => b.bucket === 'theft_suspected')!;
+    expect(theft.value_cents).toBe(1000);
+  });
+});
+
 describe('WasteService.totalValueCents', () => {
   it('sums value within the time window', async () => {
     const repo = memRepo();
     const svc = new WasteService({ repo, costs: fixedCost, now: () => NOW });
-    await svc.log(RID, { ref_type: 'ingredient', ingredient_id: 'i1', qty: 1, uom: 'oz', reason_id: 'r1' });
-    await svc.log(RID, { ref_type: 'ingredient', ingredient_id: 'i2', qty: 3, uom: 'oz', reason_id: 'r1' });
+    await svc.log(RID, { ref_type: 'ingredient', ingredient_id: 'i1', qty: 1, uom: 'oz', reason_id: 'r1', attribution_bucket: 'spoilage' });
+    await svc.log(RID, { ref_type: 'ingredient', ingredient_id: 'i2', qty: 3, uom: 'oz', reason_id: 'r1', attribution_bucket: 'spoilage' });
     const total = await svc.totalValueCents(RID, new Date('2026-04-01'), new Date('2026-05-01'));
     expect(total).toBe(1000);
   });

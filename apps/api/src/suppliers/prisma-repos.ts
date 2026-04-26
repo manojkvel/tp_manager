@@ -7,7 +7,11 @@ import type {
   SupplierRow,
   SupplierOfferRow,
   ListSupplierFilters,
+  SupplierCategory,
+  SupplierStatus,
 } from './service.js';
+import type { SupplierKpiSource } from './routes.js';
+import type { DeliveryHeader, DeliveryLineFact } from './kpis.js';
 
 export function prismaSupplierRepo(prisma: PrismaClient): SupplierRepo {
   return {
@@ -41,6 +45,11 @@ export function prismaSupplierRepo(prisma: PrismaClient): SupplierRepo {
           min_order_cents: row.min_order_cents,
           order_cadence: row.order_cadence,
           is_active: row.is_active,
+          category: row.category,
+          star_rating: row.star_rating,
+          delivery_days: row.delivery_days,
+          cutoff_time: row.cutoff_time,
+          status: row.status,
           created_at: row.created_at,
         },
       });
@@ -102,10 +111,62 @@ export function prismaSupplierOfferRepo(prisma: PrismaClient): SupplierOfferRepo
   };
 }
 
+export function prismaSupplierKpiSource(prisma: PrismaClient): SupplierKpiSource {
+  return {
+    async loadDeliveries(restaurant_id: string): Promise<DeliveryHeader[]> {
+      const rows = await prisma.delivery.findMany({
+        where: { restaurant_id },
+        select: {
+          id: true,
+          supplier_id: true,
+          received_on: true,
+          order: { select: { expected_on: true } },
+        },
+      });
+      return rows.map((r) => ({
+        id: r.id,
+        supplier_id: r.supplier_id,
+        received_on: r.received_on,
+        expected_on: r.order?.expected_on ?? null,
+      }));
+    },
+    async loadDeliveryLines(restaurant_id: string): Promise<DeliveryLineFact[]> {
+      const rows = await prisma.deliveryLine.findMany({
+        where: { delivery: { restaurant_id } },
+        select: {
+          delivery_id: true,
+          ingredient_id: true,
+          ordered_qty: true,
+          received_qty: true,
+          unit_cost_cents: true,
+          delivery: { select: { supplier_id: true } },
+        },
+      });
+      return rows.map((r) => ({
+        delivery_id: r.delivery_id,
+        supplier_id: r.delivery.supplier_id,
+        ingredient_id: r.ingredient_id,
+        ordered_qty: r.ordered_qty == null ? null : Number(r.ordered_qty),
+        received_qty: Number(r.received_qty),
+        unit_cost_cents: r.unit_cost_cents,
+      }));
+    },
+    async activeSupplierIds(restaurant_id: string): Promise<string[]> {
+      const rows = await prisma.supplier.findMany({
+        where: { restaurant_id, is_active: true },
+        select: { id: true },
+      });
+      return rows.map((r) => r.id);
+    },
+  };
+}
+
 function mapSupplier(row: {
   id: string; restaurant_id: string; name: string; contact_name: string | null;
   email: string | null; phone: string | null; lead_time_days: number;
   min_order_cents: number; order_cadence: string | null; is_active: boolean;
+  category?: string | null; star_rating?: unknown; delivery_days?: number[];
+  cutoff_time?: string | null; status?: string;
   created_at: Date;
 }): SupplierRow {
   return {
@@ -119,6 +180,11 @@ function mapSupplier(row: {
     min_order_cents: row.min_order_cents,
     order_cadence: row.order_cadence,
     is_active: row.is_active,
+    category: (row.category ?? null) as SupplierCategory | null,
+    star_rating: row.star_rating == null ? null : Number(row.star_rating),
+    delivery_days: row.delivery_days ?? [],
+    cutoff_time: row.cutoff_time ?? null,
+    status: (row.status ?? 'active') as SupplierStatus,
     created_at: row.created_at,
   };
 }

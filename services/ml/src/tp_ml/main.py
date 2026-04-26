@@ -10,8 +10,10 @@ from pydantic import BaseModel, Field
 from tp_ml import __version__
 from tp_ml.cache import CacheKey, get_cache
 from tp_ml.models import Forecast, TrainedModel, forecast, select_model
+from tp_ml.ocr import router as ocr_router
 
 app = FastAPI(title="TP Manager ML", version=__version__)
+app.include_router(ocr_router)
 
 
 class TrainRequest(BaseModel):

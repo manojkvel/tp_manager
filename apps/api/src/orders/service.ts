@@ -120,6 +120,34 @@ export class OrdersService {
     return out;
   }
 
+  /**
+   * v1.7 §6.7 AC-7 — auto-generate draft orders from PAR shortfalls, one per
+   * supplier. Uses `suggest()` so PAR source (ingredient PAR vs recipe-derived)
+   * stays consistent with the preview endpoint.
+   */
+  async autoGenerate(restaurant_id: string): Promise<Order[]> {
+    const suggestions = await this.suggest(restaurant_id);
+    const bySupplier = new Map<string, OrderSuggestion[]>();
+    for (const s of suggestions) {
+      if (!bySupplier.has(s.supplier_id)) bySupplier.set(s.supplier_id, []);
+      bySupplier.get(s.supplier_id)!.push(s);
+    }
+    const orders: Order[] = [];
+    for (const [supplier_id, lines] of bySupplier) {
+      const draft = await this.createDraft(restaurant_id, {
+        supplier_id,
+        lines: lines.map((l) => ({
+          ingredient_id: l.ingredient_id,
+          qty: l.rounded_qty,
+          pack_size: l.pack_size,
+          unit_cost_cents: l.unit_cost_cents,
+        })),
+      });
+      orders.push(draft);
+    }
+    return orders;
+  }
+
   async createDraft(restaurant_id: string, input: CreateDraftInput): Promise<Order> {
     const order: Order = {
       id: uuidv4(),

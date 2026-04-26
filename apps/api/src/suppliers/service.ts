@@ -2,6 +2,11 @@
 
 import { randomBytes } from 'node:crypto';
 
+// v1.7 — supplier KPI taxonomy.
+export type SupplierCategory =
+  | 'broadline' | 'produce' | 'beverage' | 'bakery' | 'dairy' | 'specialty' | 'other';
+export type SupplierStatus = 'active' | 'review' | 'inactive';
+
 export interface SupplierRow {
   id: string;
   restaurant_id: string;
@@ -13,6 +18,12 @@ export interface SupplierRow {
   min_order_cents: number;
   order_cadence: string | null;
   is_active: boolean;
+  // v1.7 additions
+  category: SupplierCategory | null;
+  star_rating: number | null;
+  delivery_days: number[];
+  cutoff_time: string | null;
+  status: SupplierStatus;
   created_at: Date;
 }
 
@@ -36,6 +47,11 @@ export interface CreateSupplierInput {
   lead_time_days?: number;
   min_order_cents?: number;
   order_cadence?: string | null;
+  category?: SupplierCategory | null;
+  star_rating?: number | null;
+  delivery_days?: number[];
+  cutoff_time?: string | null;
+  status?: SupplierStatus;
 }
 export type UpdateSupplierInput = Partial<Omit<CreateSupplierInput, 'name'>> & { name?: string };
 
@@ -119,6 +135,11 @@ export class SuppliersService {
       min_order_cents: input.min_order_cents ?? 0,
       order_cadence: input.order_cadence ?? null,
       is_active: true,
+      category: input.category ?? null,
+      star_rating: input.star_rating ?? null,
+      delivery_days: input.delivery_days ?? [],
+      cutoff_time: input.cutoff_time ?? null,
+      status: input.status ?? 'active',
       created_at: this.now(),
     };
     await this.deps.repo.insert(row);

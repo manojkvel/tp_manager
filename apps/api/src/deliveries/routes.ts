@@ -12,6 +12,12 @@ function envelope<T>(data: T | null, error: { code: string; message: string } | 
 }
 
 export async function registerDeliveryRoutes(app: FastifyInstance, svc: DeliveriesService): Promise<void> {
+  app.get(
+    '/api/v1/deliveries',
+    { preHandler: [anyAuthed()] },
+    async (req) => envelope(await svc.list(req.auth!.restaurant_id), null),
+  );
+
   app.post<{ Body: Omit<CreateDeliveryInput, 'received_on'> & { received_on: string } }>(
     '/api/v1/deliveries',
     { preHandler: [anyAuthed()] },
@@ -32,6 +38,22 @@ export async function registerDeliveryRoutes(app: FastifyInstance, svc: Deliveri
         const d = await svc.get(req.auth!.restaurant_id, req.params.id);
         const lines = await svc.linesFor(d.id);
         return envelope({ delivery: d, lines }, null);
+      } catch (err) {
+        if (err instanceof DeliveryNotFoundError) {
+          return reply.code(404).send(envelope(null, { code: 'NOT_FOUND', message: err.message }));
+        }
+        throw err;
+      }
+    },
+  );
+
+  app.post<{ Params: { id: string }; Body: { invoice_scan_url: string } }>(
+    '/api/v1/deliveries/:id/scan',
+    { preHandler: [ownerOrManager()] },
+    async (req, reply) => {
+      try {
+        const d = await svc.attachInvoiceScan(req.auth!.restaurant_id, req.params.id, req.body.invoice_scan_url);
+        return envelope(d, null);
       } catch (err) {
         if (err instanceof DeliveryNotFoundError) {
           return reply.code(404).send(envelope(null, { code: 'NOT_FOUND', message: err.message }));

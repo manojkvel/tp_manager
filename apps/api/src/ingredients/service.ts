@@ -6,6 +6,11 @@
 import { randomBytes } from 'node:crypto';
 import type { UomCategory } from '@tp/types';
 
+// v1.7 — culinary grouping rendered as colored pills on the ingredients list.
+export type CulinaryCategory =
+  | 'proteins' | 'dairy' | 'produce' | 'grains' | 'spirits'
+  | 'oils' | 'condiments' | 'beverage' | 'bakery' | 'other';
+
 export interface IngredientRow {
   id: string;
   restaurant_id: string;
@@ -18,10 +23,23 @@ export interface IngredientRow {
   shelf_life_days: number | null;
   allergen_flags: string[];
   density_g_per_ml: number | null;
+  // v1.7 additions
+  par_qty: number | null;
+  par_uom: string | null;
+  culinary_category: CulinaryCategory | null;
+  photo_required: boolean;
+  supplier_sku: string | null;
   is_archived: boolean;
   archived_at: Date | null;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface IngredientListRow extends IngredientRow {
+  // v1.7 — optional joined fields populated when `includeKpis=true`.
+  supplier_name?: string | null;
+  latest_unit_cost_cents?: number | null;
+  recipes_using_count?: number;
 }
 
 export interface CreateIngredientInput {
@@ -34,6 +52,11 @@ export interface CreateIngredientInput {
   shelf_life_days?: number | null;
   allergen_flags?: string[];
   density_g_per_ml?: number | null;
+  par_qty?: number | null;
+  par_uom?: string | null;
+  culinary_category?: CulinaryCategory | null;
+  photo_required?: boolean;
+  supplier_sku?: string | null;
 }
 
 export type UpdateIngredientInput = Partial<Omit<CreateIngredientInput, 'uom_category'>> & { uom_category?: UomCategory };
@@ -43,10 +66,14 @@ export interface ListFilters {
   locationId?: string;
   supplierId?: string;
   includeArchived?: boolean;
+  // v1.7 — filter chips on the PO's ingredients screen
+  culinaryCategory?: CulinaryCategory;
+  belowPar?: boolean;
+  includeKpis?: boolean;
 }
 
 export interface IngredientRepo {
-  list(restaurant_id: string, filters?: ListFilters): Promise<IngredientRow[]>;
+  list(restaurant_id: string, filters?: ListFilters): Promise<IngredientListRow[]>;
   findById(id: string): Promise<IngredientRow | null>;
   findByName(restaurant_id: string, name: string): Promise<IngredientRow | null>;
   insert(row: IngredientRow): Promise<void>;
@@ -118,7 +145,7 @@ export class IngredientsService {
     this.now = deps.now ?? (() => new Date());
   }
 
-  async list(restaurant_id: string, filters: ListFilters = {}): Promise<IngredientRow[]> {
+  async list(restaurant_id: string, filters: ListFilters = {}): Promise<IngredientListRow[]> {
     return this.deps.repo.list(restaurant_id, filters);
   }
 
@@ -144,6 +171,11 @@ export class IngredientsService {
       shelf_life_days: input.shelf_life_days ?? null,
       allergen_flags: input.allergen_flags ?? [],
       density_g_per_ml: input.density_g_per_ml ?? null,
+      par_qty: input.par_qty ?? null,
+      par_uom: input.par_uom ?? null,
+      culinary_category: input.culinary_category ?? null,
+      photo_required: input.photo_required ?? false,
+      supplier_sku: input.supplier_sku ?? null,
       is_archived: false,
       archived_at: null,
       created_at: now,

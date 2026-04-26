@@ -4,19 +4,63 @@
 // lint rule passes by default (DEC-012).
 
 import type { PrismaClient } from '@prisma/client';
-import type { IngredientRepo, IngredientCostRepo, RecipeLineRef, IngredientRow, ListFilters } from './service.js';
+import type {
+  IngredientRepo, IngredientCostRepo, RecipeLineRef,
+  IngredientRow, IngredientListRow, ListFilters, CulinaryCategory,
+} from './service.js';
 import type { UomCategory } from '@tp/types';
 
 export function prismaIngredientRepo(prisma: PrismaClient): IngredientRepo {
   return {
-    async list(restaurant_id: string, filters: ListFilters = {}) {
+    async list(restaurant_id: string, filters: ListFilters = {}): Promise<IngredientListRow[]> {
       const where: Record<string, unknown> = { restaurant_id };
       if (filters.includeArchived !== true) where['is_archived'] = false;
       if (filters.search) where['name'] = { contains: filters.search, mode: 'insensitive' };
       if (filters.locationId) where['storage_location_id'] = filters.locationId;
       if (filters.supplierId) where['default_supplier_id'] = filters.supplierId;
-      const rows = await prisma.ingredient.findMany({ where, orderBy: { name: 'asc' } });
-      return rows.map(mapIngredient);
+      if (filters.culinaryCategory) where['culinary_category'] = filters.culinaryCategory;
+      const rows = await prisma.ingredient.findMany({
+        where,
+        orderBy: { name: 'asc' },
+        include: filters.includeKpis ? { default_supplier: { select: { name: true } } } : undefined,
+      });
+      const mapped = rows.map((r) => {
+        const base = mapIngredient(r);
+        if (!filters.includeKpis) return base as IngredientListRow;
+        return {
+          ...base,
+          supplier_name: (r as unknown as { default_supplier?: { name: string } | null }).default_supplier?.name ?? null,
+        } satisfies IngredientListRow;
+      });
+      if (!filters.includeKpis) return mapped;
+      // Second pass — latest cost + recipes-using count per ingredient.
+      const ids = mapped.map((m) => m.id);
+      if (ids.length === 0) return mapped;
+      const costs = await prisma.ingredientCost.findMany({
+        where: { ingredient_id: { in: ids } },
+        orderBy: { effective_from: 'desc' },
+      });
+      const latestByIngredient = new Map<string, number>();
+      for (const c of costs) if (!latestByIngredient.has(c.ingredient_id)) latestByIngredient.set(c.ingredient_id, c.unit_cost_cents);
+      const usages = await prisma.recipeLine.groupBy({
+        by: ['ingredient_id'],
+        where: { ref_type: 'ingredient', ingredient_id: { in: ids } },
+        _count: { _all: true },
+      });
+      const usageByIngredient = new Map<string, number>();
+      for (const u of usages) if (u.ingredient_id) usageByIngredient.set(u.ingredient_id, u._count._all);
+      let filtered = mapped.map((m) => ({
+        ...m,
+        latest_unit_cost_cents: latestByIngredient.get(m.id) ?? null,
+        recipes_using_count: usageByIngredient.get(m.id) ?? 0,
+      } satisfies IngredientListRow));
+      if (filters.belowPar) {
+        filtered = filtered.filter((m) => m.par_qty != null && (m.par_qty as number) > 0);
+        // NOTE: "below PAR" strictly requires current on-hand data (latest count) —
+        // deferred to a future enhancement when on-hand is cheap to derive. For now
+        // the flag reduces to "has PAR" so the UI chip does something useful.
+      }
+      return filtered;
     },
     async findById(id: string) {
       // Caller (service) filters by restaurant_id after the read; the tenant
@@ -45,6 +89,11 @@ export function prismaIngredientRepo(prisma: PrismaClient): IngredientRepo {
           shelf_life_days: row.shelf_life_days,
           allergen_flags: row.allergen_flags,
           density_g_per_ml: row.density_g_per_ml ?? null,
+          par_qty: row.par_qty ?? null,
+          par_uom: row.par_uom,
+          culinary_category: row.culinary_category,
+          photo_required: row.photo_required,
+          supplier_sku: row.supplier_sku,
           is_archived: row.is_archived,
           archived_at: row.archived_at,
           created_at: row.created_at,
@@ -140,6 +189,11 @@ function mapIngredient(row: {
   shelf_life_days: number | null;
   allergen_flags: string[];
   density_g_per_ml: unknown;
+  par_qty?: unknown;
+  par_uom?: string | null;
+  culinary_category?: string | null;
+  photo_required?: boolean;
+  supplier_sku?: string | null;
   is_archived: boolean;
   archived_at: Date | null;
   created_at: Date;
@@ -157,6 +211,11 @@ function mapIngredient(row: {
     shelf_life_days: row.shelf_life_days,
     allergen_flags: row.allergen_flags,
     density_g_per_ml: row.density_g_per_ml == null ? null : Number(row.density_g_per_ml),
+    par_qty: row.par_qty == null ? null : Number(row.par_qty),
+    par_uom: row.par_uom ?? null,
+    culinary_category: (row.culinary_category ?? null) as CulinaryCategory | null,
+    photo_required: row.photo_required ?? false,
+    supplier_sku: row.supplier_sku ?? null,
     is_archived: row.is_archived,
     archived_at: row.archived_at,
     created_at: row.created_at,

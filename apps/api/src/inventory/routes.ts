@@ -58,6 +58,33 @@ export async function registerInventoryRoutes(
     },
   );
 
+  // v1.7 §6.5 — always-open today's count. Starts one on demand if none exists.
+  app.get(
+    '/api/v1/inventory/counts/today',
+    { preHandler: [anyAuthed()] },
+    async (req) => {
+      const c = await svc.getOrStartToday(req.auth!.restaurant_id, req.auth!.sub);
+      const lines = await svc.linesFor(c.id);
+      return envelope({ count: c, lines }, null);
+    },
+  );
+
+  // v1.7 §6.5 — persist GPS coords captured on first interaction.
+  app.post<{ Params: { id: string }; Body: { lat: number; lng: number } }>(
+    '/api/v1/inventory/counts/:id/gps',
+    { preHandler: [anyAuthed()] },
+    async (req, reply) => {
+      try {
+        await svc.setGps(req.auth!.restaurant_id, req.params.id, req.body.lat, req.body.lng);
+        return reply.code(204).send();
+      } catch (err) {
+        const mapped = toReplyError(err);
+        if (mapped) return reply.code(mapped.code).send(mapped.body);
+        throw err;
+      }
+    },
+  );
+
   app.get<{ Params: { id: string } }>(
     '/api/v1/inventory/counts/:id',
     { preHandler: [anyAuthed()] },

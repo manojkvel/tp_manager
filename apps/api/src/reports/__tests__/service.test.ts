@@ -35,6 +35,24 @@ describe('ReportsService.avt', () => {
     const out = await svc.avt(RID);
     expect(out[0]!.variance_pct).toBe(20);
     expect(out[0]!.variance_cents).toBe(600);
+    expect(out[0]!.tier).toBe('critical');
+  });
+
+  it('avtSummary aggregates totals and counts items over threshold (v1.7)', async () => {
+    const rows: AvtRow[] = [
+      { menu_recipe_id: 'm1', menu_recipe_name: 'A', qty_sold: 1,
+        theoretical_cost_cents: 1000, actual_cost_cents: 1300, variance_cents: 300, variance_pct: 30 },
+      { menu_recipe_id: 'm2', menu_recipe_name: 'B', qty_sold: 1,
+        theoretical_cost_cents: 1000, actual_cost_cents: 1070, variance_cents: 70, variance_pct: 7 },
+      { menu_recipe_id: 'm3', menu_recipe_name: 'C', qty_sold: 1,
+        theoretical_cost_cents: 1000, actual_cost_cents: 1020, variance_cents: 20, variance_pct: 2 },
+    ];
+    const svc = new ReportsService({ repo: memRepo({ avt: rows }), now: () => NOW });
+    const s = await svc.avtSummary(RID);
+    expect(s.total_theoretical_cents).toBe(3000);
+    expect(s.total_variance_cents).toBe(390);
+    expect(s.items_over_threshold).toBe(2);
+    expect(s.rows.map((r) => r.tier)).toEqual(['critical', 'warning', 'ok']);
   });
 
   it('defaults window to trailing 7 days', async () => {

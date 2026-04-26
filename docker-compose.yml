@@ -61,6 +61,12 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
+    labels:
+      # §6.12b — nightly ML retrain at 02:00 local. Invoked by the `scheduler`
+      # service via ofelia. Logs go to the api container's stdout.
+      ofelia.enabled: "true"
+      ofelia.job-exec.nightly-train.schedule: "0 0 2 * * *"
+      ofelia.job-exec.nightly-train.command: "pnpm --filter @tp/api exec tsx scripts/nightly-train.ts"
 
   ml:
     build:
@@ -117,6 +123,21 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
+
+  # §6.12b — cron sidecar. Reads ofelia labels off sibling containers and
+  # `docker exec`s scheduled commands. The only job today is the nightly ML
+  # retrain on the api container; add more by labelling the target container.
+  scheduler:
+    image: mcuadros/ofelia:v0.3.12
+    restart: unless-stopped
+    command: daemon --docker
+    depends_on:
+      api:
+        condition: service_healthy
+      ml:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 volumes:
   postgres_data:

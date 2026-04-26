@@ -192,12 +192,14 @@ describe('Ingredients CSV (§6.1 AC-5)', () => {
         id: '1', restaurant_id: RID, name: 'Milk', uom: 'mL', uom_category: 'volume',
         pack_size: 1000, storage_location_id: null, default_supplier_id: null,
         shelf_life_days: 7, allergen_flags: ['dairy'], density_g_per_ml: 1.03,
+        par_qty: null, par_uom: null, culinary_category: null, photo_required: false, supplier_sku: null,
         is_archived: false, archived_at: null, created_at: new Date(), updated_at: new Date(),
       },
       {
         id: '2', restaurant_id: RID, name: 'Flour', uom: 'g', uom_category: 'weight',
         pack_size: 25000, storage_location_id: null, default_supplier_id: null,
         shelf_life_days: 365, allergen_flags: ['gluten'], density_g_per_ml: null,
+        par_qty: null, par_uom: null, culinary_category: null, photo_required: false, supplier_sku: null,
         is_archived: false, archived_at: null, created_at: new Date(), updated_at: new Date(),
       },
     ];

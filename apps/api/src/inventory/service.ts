@@ -16,6 +16,10 @@ export interface InventoryCount {
   started_by: string | null;
   completed_by: string | null;
   amends_count_id: string | null;
+  // v1.7 — optional GPS verification captured on the first interaction.
+  gps_lat: number | null;
+  gps_lng: number | null;
+  gps_captured_at: Date | null;
   created_at: Date;
 }
 
@@ -29,6 +33,8 @@ export interface InventoryCountLine {
   expected_qty: number | null;
   actual_qty: number;
   unit_cost_cents: number | null;
+  // v1.7 — optional URL of a captured photo for photo_required ingredients.
+  photo_url: string | null;
 }
 
 export interface AddLineInput {
@@ -39,12 +45,15 @@ export interface AddLineInput {
   expected_qty?: number | null;
   actual_qty: number;
   unit_cost_cents?: number | null;
+  photo_url?: string | null;
 }
 
 export interface InventoryCountRepo {
   findById(id: string): Promise<InventoryCount | null>;
+  findOpenForDay(restaurant_id: string, date: Date): Promise<InventoryCount | null>;
   insert(row: InventoryCount): Promise<void>;
   updateStatus(id: string, status: InventoryCountStatus, completed_by?: string | null): Promise<void>;
+  updateGps(id: string, lat: number, lng: number, at: Date): Promise<void>;
   linesFor(count_id: string): Promise<InventoryCountLine[]>;
   insertLine(line: InventoryCountLine): Promise<void>;
   replaceLine(line: InventoryCountLine): Promise<void>;
@@ -103,10 +112,30 @@ export class InventoryService {
       started_by,
       completed_by: null,
       amends_count_id: null,
+      gps_lat: null,
+      gps_lng: null,
+      gps_captured_at: null,
       created_at: this.now(),
     };
     await this.deps.counts.insert(row);
     return row;
+  }
+
+  /** v1.7 — return today's open/paused count; start one if none exists. */
+  async getOrStartToday(restaurant_id: string, started_by: string | null): Promise<InventoryCount> {
+    const today = stripToDate(this.now());
+    const existing = await this.deps.counts.findOpenForDay(restaurant_id, today);
+    if (existing) return existing;
+    return this.start(restaurant_id, today, started_by);
+  }
+
+  /** v1.7 §6.5 — record the coordinates the counter captured when they began the sweep. */
+  async setGps(restaurant_id: string, id: string, lat: number, lng: number): Promise<void> {
+    const c = await this.ownedOrThrow(restaurant_id, id);
+    if (c.status === 'completed' || c.status === 'amended') {
+      throw new InventoryCountImmutableError(id, c.status);
+    }
+    await this.deps.counts.updateGps(id, lat, lng, this.now());
   }
 
   /** §6.5 AC-4 — pause/resume for offline-safe workflows. */
@@ -137,6 +166,7 @@ export class InventoryService {
       expected_qty: input.expected_qty ?? null,
       actual_qty: input.actual_qty,
       unit_cost_cents: input.unit_cost_cents ?? null,
+      photo_url: input.photo_url ?? null,
     };
     await this.deps.counts.insertLine(line);
     return line;
@@ -165,6 +195,9 @@ export class InventoryService {
       started_by,
       completed_by: null,
       amends_count_id: prior_id,
+      gps_lat: null,
+      gps_lng: null,
+      gps_captured_at: null,
       created_at: this.now(),
     };
     await this.deps.counts.insert(next);

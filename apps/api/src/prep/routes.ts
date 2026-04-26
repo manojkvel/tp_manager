@@ -50,6 +50,51 @@ export async function registerPrepRoutes(app: FastifyInstance, svc: PrepService)
     },
   );
 
+  // v1.7 §6.4 AC-8 — sheet KPI strip.
+  app.get<{ Querystring: { date?: string } }>(
+    '/api/v1/prep/sheet/summary',
+    { preHandler: [anyAuthed()] },
+    async (req) => {
+      const date = req.query.date ? new Date(req.query.date) : new Date();
+      const sheet = await svc.generate(req.auth!.restaurant_id, date);
+      return envelope(svc.summarise(sheet), null);
+    },
+  );
+
+  // v1.7 — partial edit row (assignee, temp, qty).
+  app.patch<{ Params: { row_id: string }; Body: { assigned_to_user_id?: string | null; temp_f?: number | null; needed_qty?: number } }>(
+    '/api/v1/prep/rows/:row_id',
+    { preHandler: [anyAuthed()] },
+    async (req, reply) => {
+      try {
+        await svc.patchRow(req.auth!.restaurant_id, req.params.row_id, req.body ?? {});
+        return reply.code(204).send();
+      } catch (err) {
+        if (err instanceof PrepSheetNotFoundError) {
+          return reply.code(404).send(envelope(null, { code: 'NOT_FOUND', message: err.message }));
+        }
+        throw err;
+      }
+    },
+  );
+
+  // v1.7 §6.4 AC-7 — QC sign-off.
+  app.post<{ Params: { row_id: string }; Body: { temp_f?: number | null } }>(
+    '/api/v1/prep/rows/:row_id/qc-sign',
+    { preHandler: [anyAuthed()] },
+    async (req, reply) => {
+      try {
+        await svc.signQc(req.auth!.restaurant_id, req.params.row_id, req.auth!.sub, req.body?.temp_f ?? null);
+        return reply.code(204).send();
+      } catch (err) {
+        if (err instanceof PrepSheetNotFoundError) {
+          return reply.code(404).send(envelope(null, { code: 'NOT_FOUND', message: err.message }));
+        }
+        throw err;
+      }
+    },
+  );
+
   app.post<{ Params: { row_id: string } }>(
     '/api/v1/prep/rows/:row_id/start',
     { preHandler: [anyAuthed()] },

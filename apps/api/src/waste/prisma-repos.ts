@@ -3,6 +3,7 @@
 import type { PrismaClient } from '@prisma/client';
 import type {
   WasteRepo, CostLookup, ExpiredSource, WasteEntry, ExpiredCandidate, WasteRefType,
+  WasteAttributionBucket,
 } from './service.js';
 
 export function prismaWasteRepo(prisma: PrismaClient): WasteRepo {
@@ -18,6 +19,8 @@ export function prismaWasteRepo(prisma: PrismaClient): WasteRepo {
           qty: e.qty,
           uom: e.uom,
           reason_id: e.reason_id,
+          attribution_bucket: e.attribution_bucket,
+          station_code: e.station_code,
           note: e.note,
           photo_url: e.photo_url,
           unit_cost_cents_pinned: e.unit_cost_cents_pinned,
@@ -40,6 +43,13 @@ export function prismaWasteRepo(prisma: PrismaClient): WasteRepo {
         _sum: { value_cents: true },
       });
       return agg._sum.value_cents ?? 0;
+    },
+    async listRange(restaurant_id, since, until) {
+      const rows = await prisma.wasteEntry.findMany({
+        where: { restaurant_id, at: { gte: since, lt: until } },
+        orderBy: { at: 'desc' },
+      });
+      return rows.map(map);
     },
   };
 }
@@ -121,8 +131,10 @@ export function prismaExpiredSource(prisma: PrismaClient): ExpiredSource {
 function map(r: {
   id: string; restaurant_id: string; ref_type: string;
   ingredient_id: string | null; recipe_version_id: string | null;
-  qty: unknown; uom: string; reason_id: string; note: string | null;
-  photo_url: string | null; unit_cost_cents_pinned: number; value_cents: number;
+  qty: unknown; uom: string; reason_id: string;
+  attribution_bucket: string; station_code: string | null;
+  note: string | null; photo_url: string | null;
+  unit_cost_cents_pinned: number; value_cents: number;
   user_id: string | null; at: Date;
 }): WasteEntry {
   return {
@@ -134,6 +146,8 @@ function map(r: {
     qty: Number(r.qty),
     uom: r.uom,
     reason_id: r.reason_id,
+    attribution_bucket: r.attribution_bucket as WasteAttributionBucket,
+    station_code: r.station_code,
     note: r.note,
     photo_url: r.photo_url,
     unit_cost_cents_pinned: r.unit_cost_cents_pinned,

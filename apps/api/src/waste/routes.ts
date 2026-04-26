@@ -37,4 +37,15 @@ export async function registerWasteRoutes(app: FastifyInstance, svc: WasteServic
   app.get('/api/v1/waste/expired-suggestions', { preHandler: [anyAuthed()] }, async (req) =>
     envelope(await svc.expiredSuggestions(req.auth!.restaurant_id), null),
   );
+
+  // v1.7 §6.8 AC-6 — bucket rollup for the Waste & Loss donut.
+  app.get<{ Querystring: { since?: string; until?: string } }>(
+    '/api/v1/waste/by-bucket',
+    { preHandler: [anyAuthed()] },
+    async (req) => {
+      const until = req.query.until ? new Date(req.query.until) : new Date();
+      const since = req.query.since ? new Date(req.query.since) : new Date(until.getTime() - 30 * 86_400_000);
+      return envelope(await svc.byBucket(req.auth!.restaurant_id, since, until), null);
+    },
+  );
 }
