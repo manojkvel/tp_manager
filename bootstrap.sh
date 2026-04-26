@@ -42,6 +42,9 @@ echo "==> Applying Prisma migrations"
 echo "==> Generating Prisma client"
 ( cd apps/api && DATABASE_URL="$DB_URL_HOST" pnpm db:generate )
 
+echo "==> Creating owner login"
+( cd apps/api && DATABASE_URL="$DB_URL_HOST" pnpm exec tsx scripts/bootstrap-owner.ts )
+
 echo "==> Seeding demo data"
 (
   cd apps/api
@@ -51,9 +54,6 @@ echo "==> Seeding demo data"
   pnpm exec tsx scripts/load-extracted-lines.ts
   pnpm exec tsx scripts/impute-as-needed-quantities.ts
 )
-
-echo "==> Creating owner login"
-( cd apps/api && DATABASE_URL="$DB_URL_HOST" pnpm exec tsx scripts/bootstrap-owner.ts )
 
 cat <<'EOF'
 
