@@ -63,7 +63,7 @@ export interface LineCostDetail {
   line_id: string;
   position: number;
   cents: number;
-  skipped: 'text_qty' | 'missing_cost' | null;
+  skipped: 'text_qty' | 'missing_cost' | 'missing_utensil' | null;
   note?: string;
 }
 
@@ -151,18 +151,28 @@ export async function computePlatedCost(
     }
 
     // Utensil line: qty is in utensil units; resolve to physical qty+uom first.
+    // A missing default+override pair is a recoverable per-line warning (§6.3a
+    // AC-3 "needs fixup banner"), not a fatal — other lines still cost.
     let physQty = line.qty;
     let physUom = line.uom ?? ing.uom;
     if (line.utensil_id) {
       const eqs = await ctx.utensilEquivalences(line.utensil_id);
-      const resolved = resolveUtensilLine({
-        utensilId: line.utensil_id,
-        ingredientId: line.ingredient_id,
-        qty: line.qty,
-        equivalences: eqs as UtensilEquivalence[],
-      });
-      physQty = resolved.qty;
-      physUom = resolved.uom;
+      try {
+        const resolved = resolveUtensilLine({
+          utensilId: line.utensil_id,
+          ingredientId: line.ingredient_id,
+          qty: line.qty,
+          equivalences: eqs as UtensilEquivalence[],
+        });
+        physQty = resolved.qty;
+        physUom = resolved.uom;
+      } catch (err) {
+        if (err instanceof ConversionError) {
+          details.push({ line_id: line.id, position: line.position, cents: 0, skipped: 'missing_utensil', note: err.message });
+          continue;
+        }
+        throw err;
+      }
     }
 
     // Convert to ingredient's stock uom.

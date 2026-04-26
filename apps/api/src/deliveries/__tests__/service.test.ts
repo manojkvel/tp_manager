@@ -21,6 +21,21 @@ function inMemory(opts: { costs?: Map<string, number> } = {}) {
       const d = deliveries.get(id);
       if (d) deliveries.set(id, { ...d, status });
     },
+    async updateDiscrepancyCount(id, count) {
+      const d = deliveries.get(id);
+      if (d) deliveries.set(id, { ...d, discrepancy_count: count });
+    },
+    async attachInvoiceScan(id, url, ocr_status) {
+      const d = deliveries.get(id);
+      if (d) deliveries.set(id, { ...d, invoice_scan_url: url, ocr_status });
+    },
+    async updateOcrStatus(id, status) {
+      const d = deliveries.get(id);
+      if (d) deliveries.set(id, { ...d, ocr_status: status });
+    },
+    async listByRestaurant(rid) {
+      return [...deliveries.values()].filter((d) => d.restaurant_id === rid);
+    },
     async linesFor(id) { return [...(lines.get(id) ?? [])]; },
     async insertLine(line) { lines.get(line.delivery_id)?.push(line); },
   };

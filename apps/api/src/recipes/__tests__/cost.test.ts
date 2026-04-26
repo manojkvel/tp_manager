@@ -250,14 +250,27 @@ describe('computePlatedCost — utensil lines (§6.3a AC-1..4)', () => {
     expect(result.total_cents).toBe(160);
   });
 
-  it('throws ConversionError when utensil has no default and no override', async () => {
+  it('flags the line as missing_utensil when utensil has no default and no override (§6.3a AC-3)', async () => {
     const ctx = ctxBuilder({
-      ingredients: new Map([['x', { id: 'x', uom: 'g', density_g_per_ml: null }]]),
-      costs: new Map([['x', 1]]),
+      ingredients: new Map([
+        ['x', { id: 'x', uom: 'g', density_g_per_ml: null }],
+        ['y', { id: 'y', uom: 'g', density_g_per_ml: null }],
+      ]),
+      costs: new Map([['x', 1], ['y', 10]]),
       equivs: new Map(), // none
     });
     const v = version('R1');
-    const lines = [line({ ingredient_id: 'x', utensil_id: 'utensil-missing', qty: 1, uom: 'each' })];
-    await expect(computePlatedCost(v, lines, ctx)).rejects.toThrow(/has no default/);
+    const lines = [
+      line({ position: 0, ingredient_id: 'x', utensil_id: 'utensil-missing', qty: 1, uom: 'each' }),
+      line({ position: 1, ingredient_id: 'y', qty: 2, uom: 'g' }),
+    ];
+    const result = await computePlatedCost(v, lines, ctx);
+    const bad = result.lines[0]!;
+    const ok = result.lines[1]!;
+    expect(bad.skipped).toBe('missing_utensil');
+    expect(bad.cents).toBe(0);
+    expect(ok.skipped).toBeNull();
+    expect(ok.cents).toBe(20);
+    expect(result.total_cents).toBe(20);
   });
 });

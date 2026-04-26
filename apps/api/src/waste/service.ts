@@ -8,6 +8,14 @@ import { randomBytes } from 'node:crypto';
 
 export type WasteRefType = 'ingredient' | 'prep';
 
+// v1.7 — attribution bucket captures "who ate the cost" (accounting view),
+// distinct from WasteReason which captures the operational "why".
+export type WasteAttributionBucket =
+  | 'spoilage'
+  | 'prep_waste'
+  | 'comped_meals'
+  | 'theft_suspected';
+
 export interface WasteEntry {
   id: string;
   restaurant_id: string;
@@ -17,6 +25,8 @@ export interface WasteEntry {
   qty: number;
   uom: string;
   reason_id: string;
+  attribution_bucket: WasteAttributionBucket;
+  station_code: string | null;
   note: string | null;
   photo_url: string | null;
   unit_cost_cents_pinned: number;
@@ -32,6 +42,8 @@ export interface CreateWasteInput {
   qty: number;
   uom: string;
   reason_id: string;
+  attribution_bucket: WasteAttributionBucket;
+  station_code?: string | null;
   note?: string | null;
   photo_url?: string | null;
   user_id?: string | null;
@@ -41,6 +53,21 @@ export interface WasteRepo {
   insert(e: WasteEntry): Promise<void>;
   list(restaurant_id: string, since: Date): Promise<WasteEntry[]>;
   totalValueCents(restaurant_id: string, since: Date, until: Date): Promise<number>;
+  listRange(restaurant_id: string, since: Date, until: Date): Promise<WasteEntry[]>;
+}
+
+export interface BucketBreakdown {
+  bucket: WasteAttributionBucket;
+  value_cents: number;
+  entry_count: number;
+}
+
+export interface BucketRollup {
+  total_value_cents: number;
+  total_entries: number;
+  by_bucket: BucketBreakdown[];
+  since: Date;
+  until: Date;
 }
 
 export interface CostLookup {
@@ -109,6 +136,8 @@ export class WasteService {
       qty: input.qty,
       uom: input.uom,
       reason_id: input.reason_id,
+      attribution_bucket: input.attribution_bucket,
+      station_code: input.station_code ?? null,
       note: input.note ?? null,
       photo_url: input.photo_url ?? null,
       unit_cost_cents_pinned: unit,
@@ -132,5 +161,27 @@ export class WasteService {
   async expiredSuggestions(restaurant_id: string): Promise<ExpiredCandidate[]> {
     if (!this.deps.expired) return [];
     return this.deps.expired.expired(restaurant_id, this.now());
+  }
+
+  /** v1.7 §6.8 AC-6 — attribution-bucket rollup for the Waste & Loss report donut. */
+  async byBucket(restaurant_id: string, since: Date, until: Date): Promise<BucketRollup> {
+    const rows = await this.deps.repo.listRange(restaurant_id, since, until);
+    const buckets: WasteAttributionBucket[] = ['spoilage', 'prep_waste', 'comped_meals', 'theft_suspected'];
+    const totals = new Map<WasteAttributionBucket, { value_cents: number; entry_count: number }>();
+    for (const b of buckets) totals.set(b, { value_cents: 0, entry_count: 0 });
+    let grandTotal = 0;
+    for (const r of rows) {
+      const cur = totals.get(r.attribution_bucket)!;
+      cur.value_cents += r.value_cents;
+      cur.entry_count += 1;
+      grandTotal += r.value_cents;
+    }
+    return {
+      total_value_cents: grandTotal,
+      total_entries: rows.length,
+      by_bucket: buckets.map((b) => ({ bucket: b, ...totals.get(b)! })),
+      since,
+      until,
+    };
   }
 }

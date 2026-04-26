@@ -37,6 +37,8 @@ interface Version {
     yield_uom: string;
     procedure: string;
     shelf_life_days?: number | null;
+    is_portion_bag_prep?: boolean;
+    portion_bag_content_json?: { description?: string } | null;
   };
   lines: RecipeLine[];
 }
@@ -88,6 +90,8 @@ export default function RecipeDetailPage() {
   const [yieldQty, setYieldQty] = useState('');
   const [yieldUom, setYieldUom] = useState('');
   const [procedure, setProcedure] = useState('');
+  const [isPortionBag, setIsPortionBag] = useState(false);
+  const [bagContents, setBagContents] = useState('');
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -111,6 +115,8 @@ export default function RecipeDetailPage() {
     setYieldQty(String(current.version.yield_qty));
     setYieldUom(current.version.yield_uom);
     setProcedure(current.version.procedure ?? '');
+    setIsPortionBag(current.version.is_portion_bag_prep ?? false);
+    setBagContents(current.version.portion_bag_content_json?.description ?? '');
     setEditing(true);
   }
 
@@ -167,12 +173,15 @@ export default function RecipeDetailPage() {
       if (l.ref_type === 'ingredient' && !l.ingredient_id) { setError('Every ingredient line needs an ingredient.'); return; }
       if (l.ref_type === 'recipe' && !l.ref_recipe_id) { setError('Every sub-recipe line needs a recipe.'); return; }
     }
+    const trimmedBag = bagContents.trim();
     const res = await apiFetch(`/api/v1/recipes/${id}/versions`, {
       method: 'POST',
       body: JSON.stringify({
         yield_qty: yieldQ,
         yield_uom: yieldUom.trim(),
         procedure: procedure.trim() || undefined,
+        is_portion_bag_prep: isPortionBag,
+        portion_bag_content_json: isPortionBag && trimmedBag ? { description: trimmedBag } : null,
         lines,
       }),
     });
@@ -228,6 +237,14 @@ export default function RecipeDetailPage() {
                     <span className="text-slate-500">(${(cost.per_yield_unit_cents / 100).toFixed(2)} per {current.version.yield_uom})</span>
                   </p>
                 )}
+                {current.version.is_portion_bag_prep && (
+                  <p className="mt-1 text-sm text-slate-700">
+                    <Badge tone="brand">portion-bag prep</Badge>{' '}
+                    {current.version.portion_bag_content_json?.description
+                      ? <span className="text-slate-600">each bag: {current.version.portion_bag_content_json.description}</span>
+                      : <span className="text-slate-500">(no bag contents set)</span>}
+                  </p>
+                )}
               </div>
               <Button onClick={beginEdit}>Edit lines → new version</Button>
             </div>
@@ -276,7 +293,26 @@ export default function RecipeDetailPage() {
                       <Td>{l.uom ?? '—'}</Td>
                       <Td>{l.station ?? '—'}</Td>
                       <Td className="text-right tabular-nums">
-                        {lc ? `$${(lc.cents / 100).toFixed(2)}${lc.skipped ? ` (${lc.skipped})` : ''}` : '—'}
+                        {lc ? (
+                          <span className="inline-flex items-center justify-end gap-1">
+                            <span>${(lc.cents / 100).toFixed(2)}</span>
+                            {lc.skipped === 'missing_utensil' && (
+                              <span title="Utensil has no default or per-ingredient equivalence — set one on the utensil or ingredient.">
+                                <Badge tone="warn">needs utensil fixup</Badge>
+                              </span>
+                            )}
+                            {lc.skipped === 'missing_cost' && (
+                              <span title="Ingredient has no cost history yet.">
+                                <Badge tone="warn">no cost</Badge>
+                              </span>
+                            )}
+                            {lc.skipped === 'text_qty' && (
+                              <span title='Line uses text qty (e.g. "to taste") — excluded from total.'>
+                                <Badge tone="neutral">text qty</Badge>
+                              </span>
+                            )}
+                          </span>
+                        ) : '—'}
                       </Td>
                     </TRow>
                   );
@@ -309,6 +345,36 @@ export default function RecipeDetailPage() {
             </Field>
           </div>
 
+          {detail.recipe.type === 'prep' && (
+            <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+              <label className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={isPortionBag}
+                  onChange={(e) => setIsPortionBag(e.target.checked)}
+                />
+                <span>
+                  <span className="font-medium">Portion-bag prep</span>
+                  <span className="block text-xs text-slate-500">
+                    Yield is countable portion units (bags). Line cooks pick bags, not raw weight.
+                  </span>
+                </span>
+              </label>
+              {isPortionBag && (
+                <div className="mt-2 sm:ml-6">
+                  <Field label="Each bag contains">
+                    <Input
+                      value={bagContents}
+                      onChange={(e) => setBagContents(e.target.value)}
+                      placeholder="e.g. 3×1oz slices"
+                    />
+                  </Field>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 space-y-2">
             {draft.map((l, i) => (
               <div key={i} className="grid gap-2 sm:grid-cols-[auto,120px,1fr,100px,100px,140px,1fr,auto] items-end rounded-md border border-slate-200 p-3">
@@ -330,6 +396,25 @@ export default function RecipeDetailPage() {
                 </Field>
                 <Field label="Qty" required>
                   <Input type="number" step="0.01" value={l.qty} onChange={(e) => updateDraft(i, { qty: e.target.value })} />
+                  <div className="mt-1 flex flex-wrap gap-1" aria-label="Fraction quick picks">
+                    {[
+                      { label: '¼', value: '0.25' },
+                      { label: '⅓', value: '0.333' },
+                      { label: '½', value: '0.5' },
+                      { label: '⅔', value: '0.667' },
+                      { label: '¾', value: '0.75' },
+                    ].map((f) => (
+                      <button
+                        key={f.label}
+                        type="button"
+                        className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        onClick={() => updateDraft(i, { qty: f.value })}
+                        title={`Set qty to ${f.value}`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
                 </Field>
                 <Field label="UoM">
                   <Input value={l.uom} onChange={(e) => updateDraft(i, { uom: e.target.value })} />

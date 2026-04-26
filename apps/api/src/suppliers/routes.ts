@@ -10,9 +10,22 @@ import {
   type UpdateSupplierInput,
   type UpsertOfferInput,
 } from './service.js';
+import {
+  computeSupplierKpis,
+  type DeliveryHeader,
+  type DeliveryLineFact,
+  type SupplierKpiAggregate,
+  type SupplierKpiRow,
+} from './kpis.js';
 
 function envelope<T>(data: T | null, error: { code: string; message: string } | null) {
   return { data, error };
+}
+
+export interface SupplierKpiSource {
+  loadDeliveries(restaurant_id: string): Promise<DeliveryHeader[]>;
+  loadDeliveryLines(restaurant_id: string): Promise<DeliveryLineFact[]>;
+  activeSupplierIds(restaurant_id: string): Promise<string[]>;
 }
 
 export interface SupplierRoutesDeps {
@@ -20,6 +33,7 @@ export interface SupplierRoutesDeps {
   historyForIngredient: (ingredient_id: string) => Promise<ReturnType<SuppliersService['rankedOffersForIngredient']> extends Promise<infer R> ? R : never>;
   // windowDays + threshold can be feature-flagged; defaults here for MVP.
   creep?: { windowDays: number; thresholdPct: number };
+  kpiSource?: SupplierKpiSource;
 }
 
 export async function registerSupplierRoutes(app: FastifyInstance, deps: SupplierRoutesDeps): Promise<void> {
@@ -34,6 +48,28 @@ export async function registerSupplierRoutes(app: FastifyInstance, deps: Supplie
         includeInactive: req.query.includeInactive === 'true',
       });
       return envelope(rows, null);
+    },
+  );
+
+  // v1.7 — must be registered BEFORE /:id to avoid param capture.
+  app.get(
+    '/api/v1/suppliers/kpis',
+    { preHandler: [anyAuthed()] },
+    async (req, reply) => {
+      if (!deps.kpiSource) {
+        return reply.code(501).send(envelope(null, { code: 'NOT_IMPLEMENTED', message: 'supplier KPIs source not configured' }));
+      }
+      const rid = req.auth!.restaurant_id;
+      const [deliveries, lines, activeIds] = await Promise.all([
+        deps.kpiSource.loadDeliveries(rid),
+        deps.kpiSource.loadDeliveryLines(rid),
+        deps.kpiSource.activeSupplierIds(rid),
+      ]);
+      const { rows, aggregate } = computeSupplierKpis({
+        deliveries, lines, activeSupplierIds: activeIds,
+      });
+      const result: { rows: SupplierKpiRow[]; aggregate: SupplierKpiAggregate } = { rows, aggregate };
+      return envelope(result, null);
     },
   );
 

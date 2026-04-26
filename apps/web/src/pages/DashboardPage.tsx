@@ -1,57 +1,144 @@
-// TASK-070 — Dashboard (§6.10): inventory value, items tracked, variance alerts,
-// today's prep, weekly waste, quick actions.
+// v1.7 Wave 13 — Dashboard overhaul per PO design.
+// 4-card KPI strip (Inventory value, Items tracked, Variance alerts, Food cost %),
+// two-column chart row (AvT daily bars, weekly inventory cost line), bottom row
+// with recent activity feed + quick action tiles.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Wallet, Package, ClipboardList, Trash2, AlertTriangle, TrendingUp, ArrowRight,
-  ClipboardCheck, PackageCheck, ShoppingCart, BarChart3, type LucideIcon,
+  Wallet, Package, TrendingUp, Percent, ArrowRight, ClipboardList,
+  ClipboardCheck, PackageCheck, ShoppingCart, Trash2, BarChart3,
+  AlertTriangle, Truck, Clock, type LucideIcon,
 } from 'lucide-react';
 import { apiFetch } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
 import { PageHeader } from '../components/ui/PageHeader.js';
-import { Stat } from '../components/ui/Stat.js';
 import { Card, CardHeader } from '../components/ui/Card.js';
 import { Badge } from '../components/ui/Badge.js';
 import { Button } from '../components/ui/Button.js';
+import { KPIStrip } from '../components/charts/KPIStrip.js';
+import { VerticalBarChart } from '../components/charts/VerticalBarChart.js';
+import { LineChart } from '../components/charts/LineChart.js';
 
+interface InventoryKpi { value_cents: number; items_tracked: number }
+interface DashboardChips { needs_supplier: number; disputed_deliveries: number }
 interface AvtRow {
   menu_recipe_id: string; menu_recipe_name: string; variance_cents: number; variance_pct: number;
 }
-interface WasteRow { reason_label: string; total_value_cents: number; entries: number }
-interface InventoryKpi { value_cents: number; items_tracked: number }
-interface PrepToday { pending: number; completed: number }
-interface DashboardChips { needs_supplier: number; disputed_deliveries: number }
+interface FoodCostPct {
+  actual_cost_cents: number; sales_cents: number; food_cost_pct: number | null;
+}
+interface AvtDailyPoint {
+  business_date: string; theoretical_cost_cents: number; actual_cost_cents: number;
+}
+interface InventoryCostWeeklyPoint { week_start: string; total_value_cents: number }
+
+interface ActivityItem {
+  id: string;
+  at: string;
+  kind: 'delivery' | 'waste' | 'count' | 'order' | 'prep';
+  label: string;
+  hint?: string;
+}
+
+interface DeliveryExpected {
+  delivery_id: string; supplier_id: string; supplier_name: string;
+  status: 'pending' | 'verified' | 'disputed';
+  received_on: string; discrepancy_count: number;
+}
+interface Cutoff {
+  supplier_id: string; supplier_name: string; cutoff_time: string;
+  next_delivery_day: string; minutes_until_cutoff: number | null;
+}
+interface DeliverySchedule {
+  deliveries_today: DeliveryExpected[];
+  cutoffs_today: Cutoff[];
+}
+
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function DashboardPage() {
   const session = useAuth();
-  const [avt, setAvt] = useState<AvtRow[]>([]);
-  const [waste, setWaste] = useState<WasteRow[]>([]);
   const [inv, setInv] = useState<InventoryKpi | null>(null);
-  const [prep, setPrep] = useState<PrepToday | null>(null);
+  const [avt, setAvt] = useState<AvtRow[]>([]);
+  const [food, setFood] = useState<FoodCostPct | null>(null);
+  const [daily, setDaily] = useState<AvtDailyPoint[]>([]);
+  const [weekly, setWeekly] = useState<InventoryCostWeeklyPoint[]>([]);
   const [chips, setChips] = useState<DashboardChips | null>(null);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [schedule, setSchedule] = useState<DeliverySchedule | null>(null);
 
   useEffect(() => {
     void (async () => {
-      const [a, w, i, p, c] = await Promise.all([
-        apiFetch<AvtRow[]>('/api/v1/reports/avt'),
-        apiFetch<WasteRow[]>('/api/v1/reports/waste'),
+      const [i, a, f, d, w, c, act, sch] = await Promise.all([
         apiFetch<InventoryKpi>('/api/v1/inventory/kpi'),
-        apiFetch<PrepToday>('/api/v1/prep/sheet/today/kpi'),
+        apiFetch<AvtRow[]>('/api/v1/reports/avt'),
+        apiFetch<FoodCostPct>('/api/v1/reports/food-cost-pct'),
+        apiFetch<AvtDailyPoint[]>('/api/v1/reports/avt-daily'),
+        apiFetch<InventoryCostWeeklyPoint[]>('/api/v1/reports/inventory-cost-weekly'),
         apiFetch<DashboardChips>('/api/v1/dashboard/chips'),
+        apiFetch<ActivityItem[]>('/api/v1/dashboard/activity'),
+        apiFetch<DeliverySchedule>('/api/v1/dashboard/delivery-schedule'),
       ]);
-      if (a.data) setAvt(a.data);
-      if (w.data) setWaste(w.data);
       if (i.data) setInv(i.data);
-      if (p.data) setPrep(p.data);
+      if (a.data) setAvt(a.data);
+      if (f.data) setFood(f.data);
+      if (d.data) setDaily(d.data);
+      if (w.data) setWeekly(w.data);
       if (c.data) setChips(c.data);
+      if (act.data) setActivity(act.data);
+      if (sch.data) setSchedule(sch.data);
     })();
   }, []);
 
-  const variances = avt.filter((r) => Math.abs(r.variance_pct) >= 10);
-  const weeklyWaste = waste.reduce((s, r) => s + r.total_value_cents, 0);
-  const prepTotal = prep ? prep.pending + prep.completed : 0;
-  const prepPct = prepTotal === 0 ? 0 : Math.round(((prep?.completed ?? 0) / prepTotal) * 100);
+  const varianceAlerts = avt.filter((r) => Math.abs(r.variance_pct) >= 10).length;
+
+  const kpiCards = useMemo(() => [
+    {
+      label: 'Total inventory value',
+      value: inv ? formatUsd(inv.value_cents) : '—',
+      hint: 'Stock on hand, current count',
+      icon: Wallet,
+      tone: 'brand' as const,
+    },
+    {
+      label: 'Items tracked',
+      value: inv?.items_tracked ?? '—',
+      hint: 'Active ingredients',
+      icon: Package,
+      tone: 'neutral' as const,
+    },
+    {
+      label: 'Variance alerts',
+      value: varianceAlerts,
+      hint: 'AvT ≥ 10% this week',
+      icon: TrendingUp,
+      tone: varianceAlerts > 0 ? ('warn' as const) : ('success' as const),
+    },
+    {
+      label: 'Food cost %',
+      value: food && food.food_cost_pct != null ? `${food.food_cost_pct.toFixed(1)}%` : '—',
+      hint: 'Trailing 30 days',
+      icon: Percent,
+      tone: food && food.food_cost_pct != null && food.food_cost_pct > 35 ? ('warn' as const) : ('success' as const),
+    },
+  ], [inv, varianceAlerts, food]);
+
+  const dailyChartData = useMemo(() => {
+    return daily.map((d) => {
+      const date = new Date(d.business_date);
+      return {
+        day: WEEKDAY_LABELS[date.getUTCDay()],
+        theoretical: d.theoretical_cost_cents / 100,
+        actual: d.actual_cost_cents / 100,
+      };
+    });
+  }, [daily]);
+
+  const weeklyChartData = useMemo(() => weekly.map((w) => ({
+    week: new Date(w.week_start).toISOString().slice(5, 10),
+    value: w.total_value_cents / 100,
+  })), [weekly]);
 
   const greeting = timeOfDayGreeting();
   const name = session?.user.email?.split('@')[0] ?? 'there';
@@ -61,11 +148,7 @@ export default function DashboardPage() {
       <div data-testid="healthz" className="sr-only">ok</div>
 
       <PageHeader
-        title={
-          <span>
-            {greeting}, <span className="capitalize">{name}</span>
-          </span>
-        }
+        title={<span>{greeting}, <span className="capitalize">{name}</span></span>}
         description="Here's a snapshot of today's kitchen operations."
         actions={
           <Link to="/prep/sheet">
@@ -76,128 +159,200 @@ export default function DashboardPage() {
         }
       />
 
-      {/* KPI grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Stat
-          label="Inventory value"
-          value={inv ? formatUsd(inv.value_cents) : '—'}
-          icon={Wallet}
-          tone="brand"
-          hint="Total stock on hand"
-        />
-        <Stat
-          label="Items tracked"
-          value={inv?.items_tracked ?? '—'}
-          icon={Package}
-          tone="neutral"
-          hint="Active ingredients"
-        />
-        <Stat
-          label="Today's prep"
-          value={prep ? `${prep.completed}/${prepTotal}` : '—'}
-          icon={ClipboardList}
-          tone={prepTotal === 0 || prepPct === 100 ? 'success' : 'warn'}
-          hint={prepTotal > 0 ? `${prepPct}% complete` : 'No tasks yet'}
-        />
-        <Stat
-          label="Weekly waste"
-          value={formatUsd(weeklyWaste)}
-          icon={Trash2}
-          tone={weeklyWaste > 0 ? 'warn' : 'neutral'}
-          hint="Rolling 7-day cost"
-        />
-      </section>
+      <KPIStrip cards={kpiCards} className="mb-6" />
 
-      {/* Attention row */}
-      {(variances.length > 0 || (chips && (chips.needs_supplier > 0 || chips.disputed_deliveries > 0))) && (
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-          {variances.length > 0 && (
-            <Card className="lg:col-span-2">
-              <CardHeader
-                title={
-                  <span className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-amber-600" />
-                    Variance alerts
-                    <Badge tone="warn">≥ 10%</Badge>
-                  </span>
-                }
-                description="Recipes where actual usage drifted meaningfully from theoretical."
-                actions={
-                  <Link to="/reports" className="text-sm font-medium text-brand-600 hover:text-brand-700 flex items-center gap-1">
-                    All reports <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                }
-              />
-              <ul className="divide-y divide-surface-border">
-                {variances.slice(0, 5).map((r) => {
-                  const positive = r.variance_pct > 0;
-                  return (
-                    <li key={r.menu_recipe_id} className="py-2.5 flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-900 truncate">{r.menu_recipe_name}</span>
-                      <span className="flex items-center gap-2 shrink-0 pl-4">
-                        <span className={positive ? 'text-red-600 text-sm font-semibold' : 'text-emerald-600 text-sm font-semibold'}>
-                          {positive ? '+' : ''}{r.variance_pct.toFixed(1)}%
-                        </span>
-                        <span className="text-xs text-slate-500 tabular-nums">
-                          {formatUsd(r.variance_cents)}
-                        </span>
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </Card>
+      {chips && (chips.needs_supplier > 0 || chips.disputed_deliveries > 0) && (
+        <section className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {chips.needs_supplier > 0 && (
+            <AttentionLink
+              to="/ingredients?filter=needs_supplier"
+              tone="warn"
+              title={`${chips.needs_supplier} ingredient${chips.needs_supplier === 1 ? '' : 's'} without a supplier`}
+              hint="Assign a supplier to enable ordering"
+            />
           )}
-
-          {chips && (chips.needs_supplier > 0 || chips.disputed_deliveries > 0) && (
-            <Card>
-              <CardHeader
-                title={
-                  <span className="flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
-                    Needs attention
-                  </span>
-                }
-              />
-              <div className="space-y-2">
-                {chips.needs_supplier > 0 && (
-                  <AttentionLink
-                    to="/ingredients?filter=needs_supplier"
-                    tone="warn"
-                    title={`${chips.needs_supplier} ingredient${chips.needs_supplier === 1 ? '' : 's'} without a supplier`}
-                    hint="Assign a supplier to enable ordering"
-                  />
-                )}
-                {chips.disputed_deliveries > 0 && (
-                  <AttentionLink
-                    to="/deliveries?filter=disputed"
-                    tone="danger"
-                    title={`${chips.disputed_deliveries} disputed deliver${chips.disputed_deliveries === 1 ? 'y' : 'ies'}`}
-                    hint="Review discrepancy and resolve"
-                  />
-                )}
-              </div>
-            </Card>
+          {chips.disputed_deliveries > 0 && (
+            <AttentionLink
+              to="/deliveries?filter=disputed"
+              tone="danger"
+              title={`${chips.disputed_deliveries} disputed deliver${chips.disputed_deliveries === 1 ? 'y' : 'ies'}`}
+              hint="Review discrepancy and resolve"
+            />
           )}
         </section>
       )}
 
-      {/* Quick actions */}
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Quick actions</h2>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <QuickAction to="/prep/sheet"  label="Prep sheet"     icon={ClipboardList}  tone="brand"   />
-          <QuickAction to="/inventory"   label="Count stock"    icon={ClipboardCheck} tone="neutral" />
-          <QuickAction to="/deliveries"  label="Receive"        icon={PackageCheck}   tone="neutral" />
-          <QuickAction to="/orders"      label="Place order"    icon={ShoppingCart}   tone="neutral" />
-          <QuickAction to="/prep/waste"  label="Log waste"      icon={Trash2}         tone="neutral" />
-          <QuickAction to="/reports"     label="Reports"        icon={BarChart3}      tone="neutral" />
-        </div>
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <Card>
+          <CardHeader
+            title="Actual vs Theoretical — by day"
+            description="This week's cost of goods sold, theoretical plate cost vs POS sales."
+            actions={
+              <Link to="/reports/avt" className="text-sm font-medium text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                Full AvT <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            }
+          />
+          {dailyChartData.length === 0 ? (
+            <div className="text-sm text-slate-500 py-12 text-center">No sales recorded this period.</div>
+          ) : (
+            <VerticalBarChart
+              data={dailyChartData}
+              xKey="day"
+              series={[
+                { key: 'theoretical', label: 'Theoretical', color: '#0ea5e9' },
+                { key: 'actual', label: 'Actual', color: '#ea580c' },
+              ]}
+              yFormat={(n) => `$${n.toFixed(0)}`}
+            />
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader
+            title="Weekly inventory cost"
+            description="Total stock value at close of each completed count."
+            actions={
+              <Link to="/inventory" className="text-sm font-medium text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                Counts <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            }
+          />
+          {weeklyChartData.length === 0 ? (
+            <div className="text-sm text-slate-500 py-12 text-center">No completed counts yet.</div>
+          ) : (
+            <LineChart
+              data={weeklyChartData}
+              xKey="week"
+              series={[{ key: 'value', label: 'Inventory value', color: '#10b981' }]}
+              yFormat={(n) => `$${n.toFixed(0)}`}
+            />
+          )}
+        </Card>
+      </section>
+
+      {schedule && (schedule.deliveries_today.length > 0 || schedule.cutoffs_today.length > 0) && (
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <Card>
+            <CardHeader
+              title={<span className="flex items-center gap-2"><Truck className="h-4 w-4 text-slate-500" />Deliveries today</span>}
+              description={schedule.deliveries_today.length === 0 ? 'Nothing expected.' : `${schedule.deliveries_today.length} expected`}
+              actions={
+                <Link to="/deliveries" className="text-sm font-medium text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                  All deliveries <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              }
+            />
+            {schedule.deliveries_today.length === 0 ? (
+              <div className="text-sm text-slate-500 py-6 text-center">No deliveries scheduled for today.</div>
+            ) : (
+              <ul className="divide-y divide-surface-border">
+                {schedule.deliveries_today.map((d) => (
+                  <li key={d.delivery_id} className="py-2.5 flex items-center gap-3">
+                    <Truck className="h-4 w-4 text-slate-400 shrink-0" />
+                    <Link
+                      to={`/deliveries?id=${d.delivery_id}`}
+                      className="flex-1 min-w-0 text-sm font-medium text-slate-900 hover:text-brand-700 truncate"
+                    >
+                      {d.supplier_name}
+                    </Link>
+                    {d.discrepancy_count > 0 && (
+                      <Badge tone="danger">{d.discrepancy_count} disc.</Badge>
+                    )}
+                    <Badge tone={d.status === 'verified' ? 'success' : d.status === 'disputed' ? 'danger' : 'warn'}>
+                      {d.status}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card>
+            <CardHeader
+              title={<span className="flex items-center gap-2"><Clock className="h-4 w-4 text-slate-500" />Order cutoffs today</span>}
+              description={schedule.cutoffs_today.length === 0 ? 'No cutoffs for tomorrow.' : 'Place orders before these deadlines.'}
+              actions={
+                <Link to="/orders" className="text-sm font-medium text-brand-600 hover:text-brand-700 flex items-center gap-1">
+                  New order <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              }
+            />
+            {schedule.cutoffs_today.length === 0 ? (
+              <div className="text-sm text-slate-500 py-6 text-center">No supplier cutoffs today.</div>
+            ) : (
+              <ul className="divide-y divide-surface-border">
+                {schedule.cutoffs_today.map((c) => (
+                  <li key={c.supplier_id} className="py-2.5 flex items-center gap-3">
+                    <Clock className={`h-4 w-4 shrink-0 ${cutoffColor(c.minutes_until_cutoff)}`} />
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-sm font-medium text-slate-900 truncate">{c.supplier_name}</span>
+                      <span className="block text-xs text-slate-500">
+                        Cutoff {c.cutoff_time} → delivery {c.next_delivery_day}
+                      </span>
+                    </span>
+                    <span className={`text-xs font-semibold tabular-nums ${cutoffColor(c.minutes_until_cutoff)}`}>
+                      {formatCountdown(c.minutes_until_cutoff)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </section>
+      )}
+
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card className="lg:col-span-2">
+          <CardHeader
+            title="Recent activity"
+            description="Newest deliveries, waste entries, counts, orders, and prep."
+          />
+          {activity.length === 0 ? (
+            <div className="text-sm text-slate-500 py-8 text-center">Nothing recent to show.</div>
+          ) : (
+            <ul className="divide-y divide-surface-border">
+              {activity.slice(0, 8).map((a) => (
+                <li key={a.id} className="py-2.5 flex items-center gap-3">
+                  <ActivityDot kind={a.kind} />
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-medium text-slate-900 truncate">{a.label}</span>
+                    {a.hint && <span className="block text-xs text-slate-500">{a.hint}</span>}
+                  </span>
+                  <span className="text-xs text-slate-400 shrink-0 tabular-nums">
+                    {formatRelativeTime(a.at)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card>
+          <CardHeader title="Quick actions" />
+          <div className="grid grid-cols-2 gap-3">
+            <QuickAction to="/inventory"   label="New count"    icon={ClipboardCheck} tone="brand"   />
+            <QuickAction to="/prep/waste"  label="Log waste"    icon={Trash2}         tone="neutral" />
+            <QuickAction to="/deliveries"  label="Scan invoice" icon={PackageCheck}   tone="neutral" />
+            <QuickAction to="/orders"      label="New order"    icon={ShoppingCart}   tone="neutral" />
+            <QuickAction to="/prep/sheet"  label="Prep sheet"   icon={ClipboardList}  tone="neutral" />
+            <QuickAction to="/reports"     label="Reports"      icon={BarChart3}      tone="neutral" />
+          </div>
+        </Card>
       </section>
     </>
   );
+}
+
+function ActivityDot({ kind }: { kind: ActivityItem['kind'] }) {
+  const cls: Record<ActivityItem['kind'], string> = {
+    delivery: 'bg-sky-500',
+    waste:    'bg-red-500',
+    count:    'bg-brand-500',
+    order:    'bg-violet-500',
+    prep:     'bg-emerald-500',
+  };
+  return <span className={`h-2 w-2 rounded-full shrink-0 ${cls[kind]}`} />;
 }
 
 function QuickAction({
@@ -209,18 +364,15 @@ function QuickAction({
       to={to}
       className={
         brand
-          ? 'group rounded-lg p-4 bg-gradient-to-br from-brand-600 to-brand-700 text-white shadow-card hover:shadow-card-hover transition-shadow'
-          : 'group rounded-lg p-4 bg-white border border-surface-border shadow-card hover:shadow-card-hover hover:border-brand-300 transition-all'
+          ? 'group rounded-lg p-3 bg-gradient-to-br from-brand-600 to-brand-700 text-white shadow-card hover:shadow-card-hover transition-shadow'
+          : 'group rounded-lg p-3 bg-white border border-surface-border shadow-card hover:shadow-card-hover hover:border-brand-300 transition-all'
       }
     >
-      <div className={brand ? 'h-9 w-9 rounded-md bg-white/15 flex items-center justify-center' : 'h-9 w-9 rounded-md bg-brand-50 text-brand-600 flex items-center justify-center'}>
-        <Icon className="h-5 w-5" />
+      <div className={brand ? 'h-8 w-8 rounded-md bg-white/15 flex items-center justify-center' : 'h-8 w-8 rounded-md bg-brand-50 text-brand-600 flex items-center justify-center'}>
+        <Icon className="h-4 w-4" />
       </div>
-      <div className={brand ? 'mt-3 text-sm font-semibold' : 'mt-3 text-sm font-medium text-slate-900'}>
+      <div className={brand ? 'mt-2 text-xs font-semibold' : 'mt-2 text-xs font-medium text-slate-900'}>
         {label}
-      </div>
-      <div className={brand ? 'text-xs opacity-80 mt-0.5' : 'text-xs text-slate-500 mt-0.5'}>
-        Open <ArrowRight className="inline h-3 w-3 -mt-px ml-0.5 opacity-70" />
       </div>
     </Link>
   );
@@ -237,12 +389,13 @@ function AttentionLink({
       to={to}
       className={`group flex items-start gap-3 rounded-md border px-3 py-2.5 transition-colors ${styles.wrap}`}
     >
-      <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${styles.dot}`} />
+      <AlertTriangle className={`h-4 w-4 mt-0.5 ${tone === 'danger' ? 'text-red-600' : 'text-amber-600'}`} />
       <span className="flex-1 min-w-0">
         <span className={`block text-sm font-medium ${styles.fg}`}>{title}</span>
         <span className="block text-xs text-slate-600">{hint}</span>
       </span>
       <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 mt-1" />
+      <span aria-hidden className={`hidden ${styles.dot}`} />
     </Link>
   );
 }
@@ -257,8 +410,37 @@ function timeOfDayGreeting(): string {
 
 function formatUsd(cents: number): string {
   const dollars = cents / 100;
-  if (Math.abs(dollars) >= 1000) {
-    return `$${(dollars / 1000).toFixed(1)}k`;
-  }
+  if (Math.abs(dollars) >= 1000) return `$${(dollars / 1000).toFixed(1)}k`;
   return `$${dollars.toFixed(0)}`;
+}
+
+function cutoffColor(minutes: number | null): string {
+  if (minutes == null) return 'text-slate-500';
+  if (minutes < 0) return 'text-slate-400';
+  if (minutes < 60) return 'text-red-600';
+  if (minutes < 180) return 'text-amber-600';
+  return 'text-emerald-600';
+}
+
+function formatCountdown(minutes: number | null): string {
+  if (minutes == null) return '—';
+  if (minutes < 0) return 'passed';
+  if (minutes < 60) return `${minutes}m left`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `${h}h left` : `${h}h ${m}m`;
+}
+
+function formatRelativeTime(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (isNaN(then)) return '';
+  const diff = Date.now() - then;
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1)  return 'just now';
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)  return `${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7)  return `${days}d`;
+  return new Date(iso).toISOString().slice(5, 10);
 }

@@ -128,6 +128,49 @@ describe('PrepService.markComplete (§6.4 AC-4)', () => {
   });
 });
 
+describe('PrepService.patchRow + signQc (v1.7 §6.4 AC-6/7)', () => {
+  it('patchRow updates assignee + temp', async () => {
+    const mem = inMemory({ pars: [{ recipe_id: 'r1', recipe_version_id: 'v1', recipe_name: 'A', qty: 1, shelf_life_days: null }] });
+    const svc = new PrepService({ sheets: mem.sheetRepo, runs: mem.runRepo, pars: mem.parRepo });
+    const sheet = await svc.generate(RID, new Date('2026-04-20T08:00:00Z'));
+    await svc.patchRow(RID, sheet.rows[0]!.id, { assigned_to_user_id: 'u1', temp_f: 38.5 });
+    const refreshed = await mem.sheetRepo.getRow(sheet.rows[0]!.id);
+    expect(refreshed?.row.assigned_to_user_id).toBe('u1');
+    expect(refreshed?.row.temp_f).toBe(38.5);
+  });
+
+  it('signQc stamps qc_signed_* and keeps temp', async () => {
+    const mem = inMemory({ pars: [{ recipe_id: 'r1', recipe_version_id: 'v1', recipe_name: 'A', qty: 1, shelf_life_days: null }] });
+    const now = new Date('2026-04-20T15:00:00Z');
+    const svc = new PrepService({ sheets: mem.sheetRepo, runs: mem.runRepo, pars: mem.parRepo, now: () => now });
+    const sheet = await svc.generate(RID, now);
+    await svc.signQc(RID, sheet.rows[0]!.id, 'chef-1', 40);
+    const refreshed = await mem.sheetRepo.getRow(sheet.rows[0]!.id);
+    expect(refreshed?.row.qc_signed_by_user_id).toBe('chef-1');
+    expect(refreshed?.row.qc_signed_at).toEqual(now);
+    expect(refreshed?.row.temp_f).toBe(40);
+  });
+
+  it('summarise returns completion % and pending/below-PAR counts', async () => {
+    const mem = inMemory({
+      pars: [
+        { recipe_id: 'r1', recipe_version_id: 'v1', recipe_name: 'A', qty: 1, shelf_life_days: null },
+        { recipe_id: 'r2', recipe_version_id: 'v2', recipe_name: 'B', qty: 1, shelf_life_days: null },
+      ],
+    });
+    const svc = new PrepService({ sheets: mem.sheetRepo, runs: mem.runRepo, pars: mem.parRepo });
+    const sheet = await svc.generate(RID, new Date('2026-04-20T08:00:00Z'));
+    await svc.markComplete(RID, sheet.rows[0]!.id, 'u1', null);
+    // Re-read the sheet so the completed row is reflected in summary.
+    const refreshed = (await mem.sheetRepo.findByDate(RID, sheet.date))!;
+    const summary = svc.summarise(refreshed);
+    expect(summary.total_rows).toBe(2);
+    expect(summary.completed_rows).toBe(1);
+    expect(summary.completion_pct).toBe(50);
+    expect(summary.below_par).toBe(1);
+  });
+});
+
 describe('PrepService.markSkipped (§6.4 AC-5)', () => {
   it('requires a reason', async () => {
     const mem = inMemory({ pars: [{ recipe_id: 'r1', recipe_version_id: 'v1', recipe_name: 'A', qty: 1, shelf_life_days: null }] });

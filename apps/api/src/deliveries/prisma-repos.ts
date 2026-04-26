@@ -2,7 +2,7 @@
 
 import type { PrismaClient } from '@prisma/client';
 import type {
-  DeliveryRepo, IngredientCostRepo, Delivery, DeliveryLine, DeliveryStatus,
+  DeliveryRepo, IngredientCostRepo, Delivery, DeliveryLine, DeliveryStatus, OcrStatus,
 } from './service.js';
 
 export function prismaDeliveryRepo(prisma: PrismaClient): DeliveryRepo {
@@ -22,6 +22,9 @@ export function prismaDeliveryRepo(prisma: PrismaClient): DeliveryRepo {
           received_on: row.received_on,
           status: row.status,
           received_by: row.received_by,
+          invoice_scan_url: row.invoice_scan_url,
+          ocr_status: row.ocr_status,
+          discrepancy_count: row.discrepancy_count,
           created_at: row.created_at,
         },
       });
@@ -29,6 +32,31 @@ export function prismaDeliveryRepo(prisma: PrismaClient): DeliveryRepo {
     async updateStatus(id, status) {
       // eslint-disable-next-line @tp/tp/require-restaurant-id -- PK update after tenant check
       await prisma.delivery.update({ where: { id }, data: { status } });
+    },
+    async updateDiscrepancyCount(id, count) {
+      // eslint-disable-next-line @tp/tp/require-restaurant-id -- PK update after tenant check
+      await prisma.delivery.update({ where: { id }, data: { discrepancy_count: count } });
+    },
+    async attachInvoiceScan(id, url, ocr_status) {
+      // eslint-disable-next-line @tp/tp/require-restaurant-id -- PK update after tenant check
+      await prisma.delivery.update({ where: { id }, data: { invoice_scan_url: url, ocr_status } });
+    },
+    async updateOcrStatus(id, status, extracted) {
+      // eslint-disable-next-line @tp/tp/require-restaurant-id -- PK update after tenant check
+      await prisma.delivery.update({
+        where: { id },
+        data: {
+          ocr_status: status,
+          ocr_extracted_lines_json: extracted === undefined ? undefined : (extracted as object),
+        },
+      });
+    },
+    async listByRestaurant(restaurant_id) {
+      const rows = await prisma.delivery.findMany({
+        where: { restaurant_id },
+        orderBy: { received_on: 'desc' },
+      });
+      return rows.map(map);
     },
     async linesFor(delivery_id) {
       // eslint-disable-next-line @tp/tp/require-restaurant-id -- scoped via delivery_id FK
@@ -78,7 +106,10 @@ export function prismaDeliveryCostRepo(prisma: PrismaClient): IngredientCostRepo
 
 function map(r: {
   id: string; restaurant_id: string; supplier_id: string; po_id: string | null;
-  received_on: Date; status: string; received_by: string | null; created_at: Date;
+  received_on: Date; status: string; received_by: string | null;
+  invoice_scan_url?: string | null; ocr_status?: string | null;
+  discrepancy_count?: number;
+  created_at: Date;
 }): Delivery {
   return {
     id: r.id,
@@ -88,6 +119,9 @@ function map(r: {
     received_on: r.received_on,
     status: r.status as DeliveryStatus,
     received_by: r.received_by,
+    invoice_scan_url: r.invoice_scan_url ?? null,
+    ocr_status: (r.ocr_status ?? 'none') as OcrStatus,
+    discrepancy_count: r.discrepancy_count ?? 0,
     created_at: r.created_at,
   };
 }

@@ -8,6 +8,7 @@
 import Fastify from 'fastify';
 import { readdirSync, readFileSync, renameSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { makeOcrState, ocrTick, resolveOcrDepsFromEnv, type OcrWorkerState } from './ocr-consumer.js';
 
 interface Heartbeat { last_tick_at: string; files_processed: number; failures: number }
 
@@ -23,6 +24,9 @@ app.get('/healthz', async () => ({
 }));
 
 app.get('/heartbeat', async () => state);
+
+const ocrState: OcrWorkerState = makeOcrState();
+app.get('/ocr-heartbeat', async () => ocrState);
 
 async function forwardToApi(rows: readonly (readonly string[])[]): Promise<void> {
   const apiUrl = process.env.API_URL;
@@ -77,4 +81,15 @@ const TICK_MS = Number(process.env.TICK_MS ?? 60_000);
 if (process.env.NODE_ENV !== 'test') {
   setInterval(() => { void tick(); }, TICK_MS);
   app.log.info({ every_ms: TICK_MS }, 'aloha-worker tick scheduler started');
+
+  const ocrDeps = resolveOcrDepsFromEnv();
+  if (ocrDeps) {
+    const OCR_TICK_MS = Number(process.env.OCR_TICK_MS ?? 30_000);
+    setInterval(() => {
+      ocrTick(ocrDeps, ocrState).catch((err) => app.log.error({ err }, 'ocr tick failed'));
+    }, OCR_TICK_MS);
+    app.log.info({ every_ms: OCR_TICK_MS }, 'ocr consumer scheduler started');
+  } else {
+    app.log.info('ocr consumer disabled — set API_URL + ML_URL + WORKER_API_TOKEN to enable');
+  }
 }

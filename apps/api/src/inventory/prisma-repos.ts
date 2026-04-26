@@ -12,6 +12,13 @@ export function prismaInventoryCountRepo(prisma: PrismaClient): InventoryCountRe
       const row = await prisma.inventoryCount.findUnique({ where: { id } });
       return row ? map(row) : null;
     },
+    async findOpenForDay(restaurant_id, date) {
+      const row = await prisma.inventoryCount.findFirst({
+        where: { restaurant_id, date, status: { in: ['open', 'paused'] } },
+        orderBy: { created_at: 'desc' },
+      });
+      return row ? map(row) : null;
+    },
     async insert(row) {
       await prisma.inventoryCount.create({
         data: {
@@ -22,6 +29,9 @@ export function prismaInventoryCountRepo(prisma: PrismaClient): InventoryCountRe
           started_by: row.started_by,
           completed_by: row.completed_by,
           amends_count_id: row.amends_count_id,
+          gps_lat: row.gps_lat ?? null,
+          gps_lng: row.gps_lng ?? null,
+          gps_captured_at: row.gps_captured_at,
           created_at: row.created_at,
         },
       });
@@ -31,6 +41,13 @@ export function prismaInventoryCountRepo(prisma: PrismaClient): InventoryCountRe
       await prisma.inventoryCount.update({
         where: { id },
         data: { status, ...(completed_by !== undefined ? { completed_by } : {}) },
+      });
+    },
+    async updateGps(id, lat, lng, at) {
+      // eslint-disable-next-line @tp/tp/require-restaurant-id -- PK update after tenant check
+      await prisma.inventoryCount.update({
+        where: { id },
+        data: { gps_lat: lat, gps_lng: lng, gps_captured_at: at },
       });
     },
     async linesFor(count_id) {
@@ -50,6 +67,7 @@ export function prismaInventoryCountRepo(prisma: PrismaClient): InventoryCountRe
           expected_qty: line.expected_qty,
           actual_qty: line.actual_qty,
           unit_cost_cents: line.unit_cost_cents,
+          photo_url: line.photo_url,
         },
       });
     },
@@ -62,6 +80,7 @@ export function prismaInventoryCountRepo(prisma: PrismaClient): InventoryCountRe
           expected_qty: line.expected_qty,
           unit_cost_cents: line.unit_cost_cents,
           location_id: line.location_id,
+          photo_url: line.photo_url,
         },
       });
     },
@@ -72,6 +91,7 @@ function map(r: {
   id: string; restaurant_id: string; date: Date; status: string;
   started_by: string | null; completed_by: string | null;
   amends_count_id: string | null; created_at: Date;
+  gps_lat?: unknown; gps_lng?: unknown; gps_captured_at?: Date | null;
 }): InventoryCount {
   return {
     id: r.id,
@@ -81,6 +101,9 @@ function map(r: {
     started_by: r.started_by,
     completed_by: r.completed_by,
     amends_count_id: r.amends_count_id,
+    gps_lat: r.gps_lat == null ? null : Number(r.gps_lat),
+    gps_lng: r.gps_lng == null ? null : Number(r.gps_lng),
+    gps_captured_at: r.gps_captured_at ?? null,
     created_at: r.created_at,
   };
 }
@@ -89,6 +112,7 @@ function mapLine(l: {
   id: string; count_id: string; ref_type: string;
   ingredient_id: string | null; recipe_version_id: string | null; location_id: string | null;
   expected_qty: unknown; actual_qty: unknown; unit_cost_cents: number | null;
+  photo_url?: string | null;
 }): InventoryCountLine {
   return {
     id: l.id,
@@ -100,5 +124,6 @@ function mapLine(l: {
     expected_qty: l.expected_qty == null ? null : Number(l.expected_qty),
     actual_qty: Number(l.actual_qty),
     unit_cost_cents: l.unit_cost_cents,
+    photo_url: l.photo_url ?? null,
   };
 }

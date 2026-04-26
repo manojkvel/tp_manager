@@ -10,6 +10,8 @@ import { randomBytes } from 'node:crypto';
 
 export type DeliveryStatus = 'pending' | 'verified' | 'disputed';
 
+export type OcrStatus = 'none' | 'processing' | 'parsed' | 'failed';
+
 export interface Delivery {
   id: string;
   restaurant_id: string;
@@ -18,6 +20,9 @@ export interface Delivery {
   received_on: Date;
   status: DeliveryStatus;
   received_by: string | null;
+  invoice_scan_url: string | null;
+  ocr_status: OcrStatus;
+  discrepancy_count: number;
   created_at: Date;
 }
 
@@ -54,8 +59,12 @@ export interface DeliveryRepo {
   findById(id: string): Promise<Delivery | null>;
   insert(row: Delivery): Promise<void>;
   updateStatus(id: string, status: DeliveryStatus): Promise<void>;
+  updateDiscrepancyCount(id: string, count: number): Promise<void>;
+  attachInvoiceScan(id: string, url: string, ocr_status: OcrStatus): Promise<void>;
+  updateOcrStatus(id: string, status: OcrStatus, extracted?: unknown): Promise<void>;
   linesFor(delivery_id: string): Promise<DeliveryLine[]>;
   insertLine(line: DeliveryLine): Promise<void>;
+  listByRestaurant(restaurant_id: string): Promise<Delivery[]>;
 }
 
 export interface IngredientCostRepo {
@@ -116,6 +125,9 @@ export class DeliveriesService {
       received_on: stripToDate(input.received_on),
       status: 'pending',
       received_by: input.received_by ?? null,
+      invoice_scan_url: null,
+      ocr_status: 'none',
+      discrepancy_count: 0,
       created_at: this.now(),
     };
     await this.deps.deliveries.insert(row);
@@ -152,6 +164,8 @@ export class DeliveriesService {
 
     const nextStatus: DeliveryStatus = disputes.length > 0 ? 'disputed' : 'verified';
     await this.deps.deliveries.updateStatus(id, nextStatus);
+    // v1.7 — denormalise discrepancy count so dashboard/list don't need joins.
+    await this.deps.deliveries.updateDiscrepancyCount(id, disputes.length);
 
     const cost_updates: VerifyResult['cost_updates'] = [];
     if (nextStatus === 'verified') {
@@ -180,5 +194,24 @@ export class DeliveriesService {
 
   linesFor(delivery_id: string): Promise<DeliveryLine[]> {
     return this.deps.deliveries.linesFor(delivery_id);
+  }
+
+  list(restaurant_id: string): Promise<Delivery[]> {
+    return this.deps.deliveries.listByRestaurant(restaurant_id);
+  }
+
+  /** v1.7 §6.6 AC-5 — attach invoice scan URL and mark OCR as queued. */
+  async attachInvoiceScan(restaurant_id: string, id: string, url: string): Promise<Delivery> {
+    const d = await this.ownedOrThrow(restaurant_id, id);
+    await this.deps.deliveries.attachInvoiceScan(id, url, 'processing');
+    return { ...d, invoice_scan_url: url, ocr_status: 'processing' };
+  }
+
+  /** v1.7 — called by worker after OCR completes to persist extracted lines. */
+  async recordOcrResult(
+    restaurant_id: string, id: string, status: OcrStatus, extracted?: unknown,
+  ): Promise<void> {
+    await this.ownedOrThrow(restaurant_id, id);
+    await this.deps.deliveries.updateOcrStatus(id, status, extracted);
   }
 }

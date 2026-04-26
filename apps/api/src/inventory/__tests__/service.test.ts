@@ -14,10 +14,22 @@ function inMemory() {
   const lines = new Map<string, InventoryCountLine[]>();
   const repo: InventoryCountRepo = {
     async findById(id) { return counts.get(id) ?? null; },
+    async findOpenForDay(restaurant_id, date) {
+      for (const c of counts.values()) {
+        if (c.restaurant_id === restaurant_id
+          && c.date.getTime() === date.getTime()
+          && (c.status === 'open' || c.status === 'paused')) return c;
+      }
+      return null;
+    },
     async insert(row) { counts.set(row.id, row); lines.set(row.id, []); },
     async updateStatus(id, status, completed_by) {
       const c = counts.get(id);
       if (c) counts.set(id, { ...c, status, completed_by: completed_by ?? c.completed_by });
+    },
+    async updateGps(id, lat, lng, at) {
+      const c = counts.get(id);
+      if (c) counts.set(id, { ...c, gps_lat: lat, gps_lng: lng, gps_captured_at: at });
     },
     async linesFor(count_id) { return [...(lines.get(count_id) ?? [])]; },
     async insertLine(line) { lines.get(line.count_id)?.push(line); },
@@ -70,6 +82,27 @@ describe('InventoryService.addLine', () => {
     await svc.complete(RID, c.id, null);
     await expect(svc.addLine(RID, c.id, { ref_type: 'ingredient', ingredient_id: 'x', actual_qty: 1 }))
       .rejects.toThrow(InventoryCountImmutableError);
+  });
+});
+
+describe('InventoryService.getOrStartToday (v1.7)', () => {
+  it('returns the existing open count for today, does not create a duplicate', async () => {
+    const mem = inMemory();
+    const svc = new InventoryService({ counts: mem.repo, now: () => new Date('2026-04-21T10:00:00Z') });
+    const first = await svc.getOrStartToday(RID, 'u1');
+    const second = await svc.getOrStartToday(RID, 'u2');
+    expect(second.id).toBe(first.id);
+    expect(mem._state.counts.size).toBe(1);
+  });
+
+  it('records GPS and blocks GPS on completed counts', async () => {
+    const mem = inMemory();
+    const svc = new InventoryService({ counts: mem.repo });
+    const c = await svc.start(RID, new Date(), 'u1');
+    await svc.setGps(RID, c.id, 37.77, -122.42);
+    expect(mem._state.counts.get(c.id)?.gps_lat).toBe(37.77);
+    await svc.complete(RID, c.id, 'u1');
+    await expect(svc.setGps(RID, c.id, 1, 1)).rejects.toThrow(InventoryCountImmutableError);
   });
 });
 

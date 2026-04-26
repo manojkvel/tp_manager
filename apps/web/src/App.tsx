@@ -21,6 +21,13 @@ import OrdersPage from './pages/OrdersPage.js';
 import WastePage from './pages/WastePage.js';
 import MigrationReviewPage from './pages/MigrationReviewPage.js';
 import ReportsPage from './pages/ReportsPage.js';
+import AvTVariancePage from './pages/AvTVariancePage.js';
+import PriceCreepPage from './pages/PriceCreepPage.js';
+import WasteAttributionPage from './pages/WasteAttributionPage.js';
+import DeadStockPage from './pages/DeadStockPage.js';
+import MenuContributionPage from './pages/MenuContributionPage.js';
+import PrepThroughputPage from './pages/PrepThroughputPage.js';
+import PrepItemsPage from './pages/PrepItemsPage.js';
 import AlohaMappingPage from './pages/AlohaMappingPage.js';
 import DashboardPage from './pages/DashboardPage.js';
 import ForecastAccuracyPage from './pages/ForecastAccuracyPage.js';
@@ -49,6 +56,12 @@ export default function App() {
 
         <Route path="/" element={<Shell><DashboardPage /></Shell>} />
         <Route path="/reports" element={<Shell><ReportsPage /></Shell>} />
+        <Route path="/reports/avt" element={<Shell><AvTVariancePage /></Shell>} />
+        <Route path="/reports/price-creep" element={<Shell><PriceCreepPage /></Shell>} />
+        <Route path="/reports/waste-loss" element={<Shell><WasteAttributionPage /></Shell>} />
+        <Route path="/reports/dead-stock" element={<Shell><DeadStockPage /></Shell>} />
+        <Route path="/reports/menu-contribution" element={<Shell><MenuContributionPage /></Shell>} />
+        <Route path="/reports/prep-throughput" element={<Shell><PrepThroughputPage /></Shell>} />
         <Route path="/reports/forecast-accuracy" element={<Shell><ForecastAccuracyPage /></Shell>} />
         <Route path="/reports/forecast-overrides" element={<Shell><ForecastOverridesPage /></Shell>} />
         <Route path="/settings/aloha-mapping" element={<Shell><AlohaMappingPage /></Shell>} />
@@ -65,6 +78,7 @@ export default function App() {
         <Route path="/settings/stations" element={<Shell><StationsSettingsPage /></Shell>} />
         <Route path="/settings/users" element={<Shell><UsersSettingsPage /></Shell>} />
         <Route path="/prep/sheet" element={<Shell><PrepSheetPage /></Shell>} />
+        <Route path="/prep/items" element={<Shell><PrepItemsPage /></Shell>} />
         <Route path="/prep/waste" element={<Shell><WastePage /></Shell>} />
         <Route path="/inventory" element={<Shell><InventoryPage /></Shell>} />
         <Route path="/deliveries" element={<Shell><DeliveriesPage /></Shell>} />

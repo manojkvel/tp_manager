@@ -1,15 +1,16 @@
 // AppShell — shared layout for every authenticated route.
 //
-// Dark sidebar on the left groups navigation by purpose (Daily Ops, Library,
-// Insights, Admin) so a kitchen manager can find the tool they need without
-// scanning a flat button strip. Top bar shows restaurant context + user menu.
-// Mobile: sidebar collapses behind a hamburger; content area becomes full-width.
+// v1.7 — sidebar collapsed to three primary groups (Operations, Kitchen,
+// Reports) mirroring the PO design, plus a standalone Settings link at the
+// bottom. Top bar shows restaurant context + user menu. Mobile: sidebar
+// collapses behind a hamburger; content area becomes full-width.
 
 import { useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, ClipboardList, ClipboardCheck, PackageCheck, ShoppingCart, Trash2,
-  ChefHat, Carrot, Truck, BarChart3, Settings as SettingsIcon, LogOut, Menu, X, ChevronDown, UserCircle2,
+  LayoutDashboard, ClipboardList, ClipboardCheck, PackageCheck, PackageX, ShoppingCart, Trash2,
+  ChefHat, Carrot, Truck, BarChart3, TrendingUp, Target, Edit3, Activity, Percent, Flame, Trophy,
+  Settings as SettingsIcon, LogOut, Menu, X, ChevronDown, UserCircle2,
   type LucideIcon,
 } from 'lucide-react';
 import { logout } from '../auth/api.js';
@@ -21,30 +22,37 @@ interface NavGroup { label: string; items: NavItem[] }
 
 const GROUPS: NavGroup[] = [
   {
-    label: 'Overview',
-    items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard }],
-  },
-  {
-    label: 'Daily Ops',
+    label: 'Operations',
     items: [
-      { to: '/prep/sheet',  label: 'Prep sheet',     icon: ClipboardList },
-      { to: '/inventory',   label: 'Inventory',      icon: ClipboardCheck },
-      { to: '/deliveries',  label: 'Deliveries',     icon: PackageCheck },
-      { to: '/orders',      label: 'Orders',         icon: ShoppingCart },
-      { to: '/prep/waste',  label: 'Waste log',      icon: Trash2 },
+      { to: '/',            label: 'Dashboard',       icon: LayoutDashboard },
+      { to: '/inventory',   label: 'Inventory Count', icon: ClipboardCheck },
+      { to: '/ingredients', label: 'Ingredients',     icon: Carrot },
+      { to: '/deliveries',  label: 'Deliveries',      icon: PackageCheck },
+      { to: '/orders',      label: 'Order Forms',     icon: ShoppingCart },
+      { to: '/suppliers',   label: 'Suppliers',       icon: Truck },
     ],
   },
   {
-    label: 'Library',
+    label: 'Kitchen',
     items: [
-      { to: '/recipes',     label: 'Recipes',        icon: ChefHat },
-      { to: '/ingredients', label: 'Ingredients',    icon: Carrot },
-      { to: '/suppliers',   label: 'Suppliers',      icon: Truck },
+      { to: '/prep/items',  label: 'Prep Items',       icon: ClipboardList },
+      { to: '/prep/sheet',  label: 'Daily Prep Sheet', icon: Activity },
+      { to: '/prep/waste',  label: 'Waste Log',        icon: Trash2 },
+      { to: '/recipes',     label: 'Recipes',          icon: ChefHat },
     ],
   },
   {
-    label: 'Insights',
-    items: [{ to: '/reports', label: 'Reports', icon: BarChart3 }],
+    label: 'Reports',
+    items: [
+      { to: '/reports/avt',                 label: 'AvT Variance',        icon: BarChart3 },
+      { to: '/reports/price-creep',         label: 'Price Creep',         icon: TrendingUp },
+      { to: '/reports/waste-loss',          label: 'Waste & Loss',        icon: Percent },
+      { to: '/reports/dead-stock',          label: 'Dead Stock',          icon: PackageX },
+      { to: '/reports/menu-contribution',   label: 'Menu Contribution',   icon: Flame },
+      { to: '/reports/prep-throughput',     label: 'Prep Throughput',     icon: Trophy },
+      { to: '/reports/forecast-accuracy',   label: 'Forecast Accuracy',   icon: Target },
+      { to: '/reports/forecast-overrides',  label: 'Forecast Overrides',  icon: Edit3 },
+    ],
   },
   {
     label: 'Admin',

@@ -61,22 +61,28 @@ export function prismaPrepSheetRepo(prisma: PrismaClient): PrepSheetRepo {
           completed_at: row.completed_at,
           user_id: row.user_id,
           skip_reason: row.skip_reason,
+          assigned_to_user_id: row.assigned_to_user_id ?? null,
+          qc_signed_by_user_id: row.qc_signed_by_user_id ?? null,
+          qc_signed_at: row.qc_signed_at ?? null,
+          temp_f: row.temp_f == null ? null : Number(row.temp_f),
         },
         restaurant_id: row.prep_sheet.restaurant_id,
       };
     },
     async updateRow(id, patch) {
+      const data: Record<string, unknown> = {};
+      if (patch.status !== undefined) data['status'] = patch.status;
+      if (patch.started_at !== undefined) data['started_at'] = patch.started_at;
+      if (patch.completed_at !== undefined) data['completed_at'] = patch.completed_at;
+      if (patch.user_id !== undefined) data['user_id'] = patch.user_id;
+      if (patch.skip_reason !== undefined) data['skip_reason'] = patch.skip_reason;
+      if (patch.assigned_to_user_id !== undefined) data['assigned_to_user_id'] = patch.assigned_to_user_id;
+      if (patch.qc_signed_by_user_id !== undefined) data['qc_signed_by_user_id'] = patch.qc_signed_by_user_id;
+      if (patch.qc_signed_at !== undefined) data['qc_signed_at'] = patch.qc_signed_at;
+      if (patch.temp_f !== undefined) data['temp_f'] = patch.temp_f;
+      if (patch.needed_qty !== undefined) data['needed_qty'] = patch.needed_qty;
       // eslint-disable-next-line @tp/tp/require-restaurant-id -- PK update after tenant check
-      await prisma.prepSheetRow.update({
-        where: { id },
-        data: {
-          status: patch.status,
-          started_at: patch.started_at,
-          completed_at: patch.completed_at,
-          user_id: patch.user_id,
-          skip_reason: patch.skip_reason,
-        },
-      });
+      await prisma.prepSheetRow.update({ where: { id }, data });
     },
   };
 }
@@ -146,6 +152,8 @@ function mapSheet(s: {
     needed_qty: unknown; status: string;
     started_at: Date | null; completed_at: Date | null;
     user_id: string | null; skip_reason: string | null;
+    assigned_to_user_id?: string | null; qc_signed_by_user_id?: string | null;
+    qc_signed_at?: Date | null; temp_f?: unknown;
     recipe_version: { recipe_id: string; recipe: { name: string } };
   }>;
 }): PrepSheet {
@@ -166,6 +174,10 @@ function mapSheet(s: {
       completed_at: r.completed_at,
       user_id: r.user_id,
       skip_reason: r.skip_reason,
+      assigned_to_user_id: r.assigned_to_user_id ?? null,
+      qc_signed_by_user_id: r.qc_signed_by_user_id ?? null,
+      qc_signed_at: r.qc_signed_at ?? null,
+      temp_f: r.temp_f == null ? null : Number(r.temp_f),
     })),
   };
 }

@@ -11,7 +11,7 @@
 
 import type { FastifyInstance } from 'fastify';
 import { ownerOnly, ownerOrManager, anyAuthed } from '../rbac/guard.js';
-import { IngredientsService, DuplicateIngredientError, IngredientInUseError, type CreateIngredientInput, type UpdateIngredientInput } from './service.js';
+import { IngredientsService, DuplicateIngredientError, IngredientInUseError, type CreateIngredientInput, type UpdateIngredientInput, type CulinaryCategory } from './service.js';
 import { ingredientsToCsv, csvToIngredients } from './csv.js';
 
 interface CreateBody extends CreateIngredientInput {}
@@ -24,13 +24,24 @@ function envelope<T>(data: T | null, error: { code: string; message: string } | 
 }
 
 export async function registerIngredientRoutes(app: FastifyInstance, svc: IngredientsService): Promise<void> {
-  app.get<{ Querystring: { search?: string; locationId?: string; supplierId?: string; includeArchived?: string } }>(
+  app.get<{ Querystring: {
+    search?: string; locationId?: string; supplierId?: string; includeArchived?: string;
+    culinary_category?: string; below_par?: string; include_kpis?: string;
+  } }>(
     '/api/v1/ingredients',
     { preHandler: [anyAuthed()] },
     async (req) => {
       const rid = req.auth!.restaurant_id;
-      const { search, locationId, supplierId, includeArchived } = req.query;
-      const rows = await svc.list(rid, { search, locationId, supplierId, includeArchived: includeArchived === 'true' });
+      const { search, locationId, supplierId, includeArchived, culinary_category, below_par, include_kpis } = req.query;
+      const rows = await svc.list(rid, {
+        search,
+        locationId,
+        supplierId,
+        includeArchived: includeArchived === 'true',
+        culinaryCategory: (culinary_category as CulinaryCategory | undefined) || undefined,
+        belowPar: below_par === 'true',
+        includeKpis: include_kpis === 'true',
+      });
       return envelope(rows, null);
     },
   );

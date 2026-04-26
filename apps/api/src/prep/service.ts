@@ -21,6 +21,23 @@ export interface PrepSheetRow {
   completed_at: Date | null;
   user_id: string | null;
   skip_reason: string | null;
+  // v1.7 — prep sheet QC + assignment fields
+  assigned_to_user_id: string | null;
+  qc_signed_by_user_id: string | null;
+  qc_signed_at: Date | null;
+  temp_f: number | null;
+}
+
+export interface PrepSheetSummary {
+  total_rows: number;
+  completed_rows: number;
+  completion_pct: number;
+  qc_passed: number;
+  pending: number;
+  in_progress: number;
+  skipped: number;
+  below_par: number;
+  total_needed_qty: number;
 }
 
 export interface PrepSheet {
@@ -126,6 +143,10 @@ export class PrepService {
         completed_at: null,
         user_id: null,
         skip_reason: null,
+        assigned_to_user_id: null,
+        qc_signed_by_user_id: null,
+        qc_signed_at: null,
+        temp_f: null,
       });
     }
     const sheet: PrepSheet = { id: sheet_id, restaurant_id, date: day, generated_at: this.now(), rows };
@@ -173,5 +194,51 @@ export class PrepService {
     const ctx = await this.deps.sheets.getRow(row_id);
     if (!ctx || ctx.restaurant_id !== restaurant_id) throw new PrepSheetNotFoundError(row_id);
     await this.deps.sheets.updateRow(row_id, { status: 'skipped', skip_reason: reason });
+  }
+
+  /** v1.7 §6.4 AC-6 — partial edit: assignee, temp_f, status tweaks. */
+  async patchRow(
+    restaurant_id: string,
+    row_id: string,
+    patch: Partial<Pick<PrepSheetRow, 'assigned_to_user_id' | 'temp_f' | 'needed_qty'>>,
+  ): Promise<void> {
+    const ctx = await this.deps.sheets.getRow(row_id);
+    if (!ctx || ctx.restaurant_id !== restaurant_id) throw new PrepSheetNotFoundError(row_id);
+    await this.deps.sheets.updateRow(row_id, patch);
+  }
+
+  /** v1.7 §6.4 AC-7 — sign off QC after completion. */
+  async signQc(
+    restaurant_id: string, row_id: string, qc_user_id: string, temp_f: number | null,
+  ): Promise<void> {
+    const ctx = await this.deps.sheets.getRow(row_id);
+    if (!ctx || ctx.restaurant_id !== restaurant_id) throw new PrepSheetNotFoundError(row_id);
+    await this.deps.sheets.updateRow(row_id, {
+      qc_signed_by_user_id: qc_user_id,
+      qc_signed_at: this.now(),
+      temp_f: temp_f ?? ctx.row.temp_f,
+    });
+  }
+
+  /** v1.7 §6.4 AC-8 — sheet KPIs (completion %, QC count, below-PAR). */
+  summarise(sheet: PrepSheet): PrepSheetSummary {
+    const total = sheet.rows.length;
+    const completed = sheet.rows.filter((r) => r.status === 'complete').length;
+    const pending = sheet.rows.filter((r) => r.status === 'pending').length;
+    const in_progress = sheet.rows.filter((r) => r.status === 'in_progress').length;
+    const skipped = sheet.rows.filter((r) => r.status === 'skipped').length;
+    const qc = sheet.rows.filter((r) => r.qc_signed_at != null).length;
+    const below = sheet.rows.filter((r) => r.needed_qty > 0 && r.status !== 'complete').length;
+    return {
+      total_rows: total,
+      completed_rows: completed,
+      completion_pct: total === 0 ? 0 : Math.round((completed / total) * 1000) / 10,
+      qc_passed: qc,
+      pending,
+      in_progress,
+      skipped,
+      below_par: below,
+      total_needed_qty: sheet.rows.reduce((s, r) => s + r.needed_qty, 0),
+    };
   }
 }

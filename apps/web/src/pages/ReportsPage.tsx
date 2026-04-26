@@ -1,218 +1,110 @@
-// TASK-069 — Reports screens: AvT, Price Creep, Waste (§6.9).
+// v1.7 Wave 7 — Reports hub. Sub-pages live at /reports/avt, /reports/price-creep, /reports/waste-loss.
 
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart3, TrendingUp, Trash2, ArrowRight, Target, Edit3 } from 'lucide-react';
-import { apiFetch } from '../auth/api.js';
+import { BarChart3, TrendingUp, Trash2, ArrowRight, Target, Edit3, PackageX, Flame, Trophy } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader.js';
-import { Card, CardHeader } from '../components/ui/Card.js';
-import { Badge } from '../components/ui/Badge.js';
-import { Table, Th, Td, TRow, EmptyState } from '../components/ui/Table.js';
 
-interface AvtRow {
-  menu_recipe_id: string; menu_recipe_name: string; qty_sold: number;
-  theoretical_cost_cents: number; actual_cost_cents: number;
-  variance_cents: number; variance_pct: number;
+interface Tile {
+  to: string;
+  title: string;
+  description: string;
+  icon: typeof BarChart3;
+  iconBg: string;
+  iconFg: string;
 }
 
-interface PriceCreepRow {
-  ingredient_id: string; ingredient_name: string;
-  previous_cents: number; latest_cents: number;
-  delta_pct: number; observed_at: string;
-}
-
-interface WasteRow {
-  reason_id: string; reason_label: string; total_value_cents: number; entries: number;
-}
+const TILES: Tile[] = [
+  {
+    to: '/reports/avt',
+    title: 'Actual vs Theoretical',
+    description: 'Variance by menu item — where actual cost drifts from recipe cost.',
+    icon: BarChart3,
+    iconBg: 'bg-red-50',
+    iconFg: 'text-red-600',
+  },
+  {
+    to: '/reports/price-creep',
+    title: 'Price Creep',
+    description: 'Ingredients whose cost is rising faster than menu pricing.',
+    icon: TrendingUp,
+    iconBg: 'bg-amber-50',
+    iconFg: 'text-amber-600',
+  },
+  {
+    to: '/reports/waste-loss',
+    title: 'Waste & Loss',
+    description: 'Bucketed loss attribution: spoilage, prep waste, comps, and theft.',
+    icon: Trash2,
+    iconBg: 'bg-orange-50',
+    iconFg: 'text-orange-600',
+  },
+  {
+    to: '/reports/menu-contribution',
+    title: 'Menu Contribution',
+    description: 'Ranked by gross margin — which dishes pay the rent vs slow movers.',
+    icon: Flame,
+    iconBg: 'bg-emerald-50',
+    iconFg: 'text-emerald-600',
+  },
+  {
+    to: '/reports/prep-throughput',
+    title: 'Prep Throughput',
+    description: 'Cook leaderboard — rows completed, pace, QC sign rate, on-time %.',
+    icon: Trophy,
+    iconBg: 'bg-amber-50',
+    iconFg: 'text-amber-600',
+  },
+  {
+    to: '/reports/dead-stock',
+    title: 'Dead Stock',
+    description: 'Idle inventory that has not moved in 30 days — cash tied up on the shelf.',
+    icon: PackageX,
+    iconBg: 'bg-slate-100',
+    iconFg: 'text-slate-600',
+  },
+  {
+    to: '/reports/forecast-accuracy',
+    title: 'Forecast Accuracy',
+    description: 'MAPE and p10/p90 coverage for the demand forecast.',
+    icon: Target,
+    iconBg: 'bg-sky-50',
+    iconFg: 'text-sky-600',
+  },
+  {
+    to: '/reports/forecast-overrides',
+    title: 'Forecast Overrides',
+    description: 'Audit of operator adjustments applied to the forecast.',
+    icon: Edit3,
+    iconBg: 'bg-brand-50',
+    iconFg: 'text-brand-600',
+  },
+];
 
 export default function ReportsPage() {
-  const [avt, setAvt] = useState<AvtRow[]>([]);
-  const [creep, setCreep] = useState<PriceCreepRow[]>([]);
-  const [waste, setWaste] = useState<WasteRow[]>([]);
-  const [err, setErr] = useState<string | null>(null);
-
-  useEffect(() => {
-    void (async () => {
-      const [a, c, w] = await Promise.all([
-        apiFetch<AvtRow[]>('/api/v1/reports/avt'),
-        apiFetch<PriceCreepRow[]>('/api/v1/reports/price-creep'),
-        apiFetch<WasteRow[]>('/api/v1/reports/waste'),
-      ]);
-      if (a.error) setErr(a.error.message);
-      else setAvt(a.data ?? []);
-      if (c.data) setCreep(c.data);
-      if (w.data) setWaste(w.data);
-    })();
-  }, []);
-
   return (
     <>
       <PageHeader
         title="Reports"
-        description="Track cost variance, price drift, and waste across the last rolling windows."
+        description="Track cost variance, price drift, waste attribution, and forecast quality."
       />
-
-      {err && (
-        <div role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {err}
-        </div>
-      )}
-
-      {/* Sub-report links */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-        <Link
-          to="/reports/forecast-accuracy"
-          className="group rounded-lg border border-surface-border bg-white p-4 flex items-center gap-3 hover:border-brand-300 hover:shadow-card transition-all"
-        >
-          <div className="h-9 w-9 rounded-md bg-sky-50 text-sky-600 flex items-center justify-center">
-            <Target className="h-5 w-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-slate-900">Forecast accuracy</div>
-            <div className="text-xs text-slate-500">MAPE, p10/p90 coverage</div>
-          </div>
-          <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-brand-600" />
-        </Link>
-        <Link
-          to="/reports/forecast-overrides"
-          className="group rounded-lg border border-surface-border bg-white p-4 flex items-center gap-3 hover:border-brand-300 hover:shadow-card transition-all"
-        >
-          <div className="h-9 w-9 rounded-md bg-brand-50 text-brand-600 flex items-center justify-center">
-            <Edit3 className="h-5 w-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-slate-900">Forecast overrides</div>
-            <div className="text-xs text-slate-500">Audit operator adjustments</div>
-          </div>
-          <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-brand-600" />
-        </Link>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {TILES.map(({ to, title, description, icon: Icon, iconBg, iconFg }) => (
+          <Link
+            key={to}
+            to={to}
+            className="group rounded-lg border border-surface-border bg-white p-4 flex items-start gap-3 hover:border-brand-300 hover:shadow-card transition-all"
+          >
+            <div className={`h-10 w-10 rounded-md flex items-center justify-center shrink-0 ${iconBg} ${iconFg}`}>
+              <Icon className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-slate-900">{title}</div>
+              <div className="text-xs text-slate-500 mt-1 leading-relaxed">{description}</div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-brand-600 mt-0.5" />
+          </Link>
+        ))}
       </div>
-
-      <Card padded={false} className="mb-6">
-        <CardHeader
-          className="px-5 pt-5"
-          title={
-            <span className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-slate-500" />
-              Actual vs Theoretical
-            </span>
-          }
-          description="Last 7 days — where actual cost drifted from recipe cost."
-        />
-        <Table>
-          <thead>
-            <tr>
-              <Th>Menu item</Th>
-              <Th className="text-right">Qty</Th>
-              <Th className="text-right">Theoretical</Th>
-              <Th className="text-right">Actual</Th>
-              <Th className="text-right">Variance</Th>
-              <Th className="text-right">%</Th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-surface-border">
-            {avt.map((r) => {
-              const positive = r.variance_cents > 0;
-              return (
-                <TRow key={r.menu_recipe_id}>
-                  <Td className="font-medium">{r.menu_recipe_name}</Td>
-                  <Td className="text-right tabular-nums">{r.qty_sold}</Td>
-                  <Td className="text-right tabular-nums text-slate-600">${(r.theoretical_cost_cents / 100).toFixed(2)}</Td>
-                  <Td className="text-right tabular-nums text-slate-600">${(r.actual_cost_cents / 100).toFixed(2)}</Td>
-                  <Td className={`text-right tabular-nums font-semibold ${positive ? 'text-red-600' : 'text-emerald-600'}`}>
-                    {positive ? '+' : ''}${(r.variance_cents / 100).toFixed(2)}
-                  </Td>
-                  <Td className="text-right">
-                    <Badge tone={Math.abs(r.variance_pct) >= 10 ? (positive ? 'danger' : 'success') : 'neutral'}>
-                      {positive ? '+' : ''}{r.variance_pct.toFixed(1)}%
-                    </Badge>
-                  </Td>
-                </TRow>
-              );
-            })}
-          </tbody>
-        </Table>
-        {avt.length === 0 && (
-          <div className="px-5 py-6"><EmptyState title="No variance data" hint="Log POS sales and prep to populate this report." /></div>
-        )}
-      </Card>
-
-      <Card padded={false} className="mb-6">
-        <CardHeader
-          className="px-5 pt-5"
-          title={
-            <span className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-slate-500" />
-              Price creep
-              <Badge tone="warn">≥ 5%</Badge>
-            </span>
-          }
-          description="Ingredient cost increases over the last 30 days."
-        />
-        <Table>
-          <thead>
-            <tr>
-              <Th>Ingredient</Th>
-              <Th className="text-right">Previous</Th>
-              <Th className="text-right">Latest</Th>
-              <Th className="text-right">Δ%</Th>
-              <Th>Observed</Th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-surface-border">
-            {creep.map((r) => (
-              <TRow key={r.ingredient_id}>
-                <Td className="font-medium">{r.ingredient_name}</Td>
-                <Td className="text-right tabular-nums text-slate-600">${(r.previous_cents / 100).toFixed(2)}</Td>
-                <Td className="text-right tabular-nums text-slate-600">${(r.latest_cents / 100).toFixed(2)}</Td>
-                <Td className="text-right">
-                  <Badge tone="danger">+{r.delta_pct.toFixed(1)}%</Badge>
-                </Td>
-                <Td className="text-slate-500">{r.observed_at.slice(0, 10)}</Td>
-              </TRow>
-            ))}
-          </tbody>
-        </Table>
-        {creep.length === 0 && (
-          <div className="px-5 py-6"><EmptyState title="No price creep detected" hint="Prices are stable across tracked ingredients." /></div>
-        )}
-      </Card>
-
-      <Card padded={false}>
-        <CardHeader
-          className="px-5 pt-5"
-          title={
-            <span className="flex items-center gap-2">
-              <Trash2 className="h-4 w-4 text-slate-500" />
-              Waste by reason
-            </span>
-          }
-          description="Last 7 days — aggregated cost of discarded product."
-        />
-        <Table>
-          <thead>
-            <tr>
-              <Th>Reason</Th>
-              <Th className="text-right">Entries</Th>
-              <Th className="text-right">Total value</Th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-surface-border">
-            {waste.map((r) => (
-              <TRow key={r.reason_id}>
-                <Td className="font-medium">{r.reason_label}</Td>
-                <Td className="text-right tabular-nums">{r.entries}</Td>
-                <Td className="text-right tabular-nums font-semibold text-slate-800">
-                  ${(r.total_value_cents / 100).toFixed(2)}
-                </Td>
-              </TRow>
-            ))}
-          </tbody>
-        </Table>
-        {waste.length === 0 && (
-          <div className="px-5 py-6"><EmptyState title="No waste logged" hint="Log kitchen waste from /prep/waste to populate this report." /></div>
-        )}
-      </Card>
     </>
   );
 }

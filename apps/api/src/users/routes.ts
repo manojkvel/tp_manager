@@ -2,7 +2,7 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { Role } from '@tp/types';
-import { ownerOnly } from '../rbac/guard.js';
+import { ownerOnly, anyAuthed } from '../rbac/guard.js';
 import {
   UserAdminService,
   DuplicateEmailError, UserNotFoundError, CannotDemoteLastOwnerError,
@@ -35,6 +35,17 @@ export async function registerUserAdminRoutes(app: FastifyInstance, svc: UserAdm
         includeInactive: req.query.includeInactive === 'true',
       });
       return envelope(rows.map(redact), null);
+    },
+  );
+
+  // v1.7 — directory endpoint for in-app pickers (prep assignee, QC sign-off,
+  // waste logger). Returns only id + name + role, no PII beyond display name.
+  app.get(
+    '/api/v1/users/directory',
+    { preHandler: [anyAuthed()] },
+    async (req) => {
+      const rows = await svc.list(req.auth!.restaurant_id, { includeInactive: false });
+      return envelope(rows.map((u) => ({ id: u.id, name: u.name ?? u.email, role: u.role })), null);
     },
   );
 

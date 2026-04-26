@@ -64,6 +64,7 @@ export function prismaSuggestionSource(prisma: PrismaClient): SuggestionSource {
         where: { restaurant_id, is_archived: false, default_supplier_id: { not: null } },
         select: {
           id: true, name: true, pack_size: true, default_supplier_id: true,
+          par_qty: true,
           costs: { orderBy: { effective_from: 'desc' }, take: 1, select: { unit_cost_cents: true } },
         },
       });
@@ -71,7 +72,12 @@ export function prismaSuggestionSource(prisma: PrismaClient): SuggestionSource {
       for (const ing of ingredients) {
         const onHand = await onHandFor(prisma, ing.id);
         const inTransit = await inTransitFor(prisma, ing.id);
-        const par = await derivedParFor(prisma, restaurant_id, ing.id);
+        // v1.7 §6.7 AC-7 — prefer ingredient.par_qty when set; fall back to
+        // recipe-derived calc when null so existing workflows keep working.
+        const ingredientPar = ing.par_qty == null ? null : Number(ing.par_qty);
+        const par = ingredientPar != null && ingredientPar > 0
+          ? ingredientPar
+          : await derivedParFor(prisma, restaurant_id, ing.id);
         if (par <= 0) continue;
         out.push({
           ingredient_id: ing.id,
