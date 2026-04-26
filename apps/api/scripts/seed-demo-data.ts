@@ -562,6 +562,7 @@ async function seedWasteEntries(
         qty: new Prisma.Decimal(0.5 + Math.random()),
         uom: 'oz',
         reason_id: reason.id,
+        attribution_bucket: 'spoilage',
         unit_cost_cents_pinned: 250,
         value_cents: 250,
       },
